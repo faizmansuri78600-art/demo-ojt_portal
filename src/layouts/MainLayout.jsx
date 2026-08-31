@@ -1,16 +1,16 @@
-import Navbar from "../../components/common/Navbar/Navbar";
-import Footer from "../../components/common/Footer/Footer";
+// import Navbar from "../../components/common/Navbar/Navbar";
+// import Footer from "../../components/common/Footer/Footer";
 
-function MainLayout({ children }) {
-  return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
+// function MainLayout({ children }) {
+//   return (
+//     <div className="min-h-screen bg-white">
+//       <Navbar />
 
-      <main>{children}</main>
+//       <main>{children}</main>
 
-      <Footer />
-    </div>
-  );
-}
+//       <Footer />
+//     </div>
+//   );
+// }
 
-export default MainLayout;
+// export default MainLayout;
