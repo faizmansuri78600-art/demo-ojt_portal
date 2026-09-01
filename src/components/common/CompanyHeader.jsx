@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import companyLogo from "../../assets/logohe.jpeg";
 
-export default function Header() {
+export default function CompanyHeader() {
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
 
@@ -27,6 +27,9 @@ export default function Header() {
         items-center
         justify-between
         px-6
+        sticky
+        top-0
+        z-20
       "
     >
 
