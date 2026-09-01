@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 import {
   Pencil,
@@ -29,9 +29,289 @@ import FormField from "../../components/common/FormField";
 
 export default function CompanyProfile() {
 
+  /* ================= BASIC INFORMATION ================= */
+
+  const [companyName, setCompanyName] = useState(
+    "ABC Technologies Pvt. Ltd."
+  );
+
+  const [yearOfEstablishment, setYearOfEstablishment] = useState(
+    "2018"
+  );
+
+  const [registrationNumber, setRegistrationNumber] = useState(
+    "ABC/Tech/2018/558"
+  );
+
+  const [companySize, setCompanySize] = useState(
+    "51 - 200 Employees"
+  );
+
+  const [industry, setIndustry] = useState(
+    "Information Technology"
+  );
+
+  const [headOffice, setHeadOffice] = useState(
+    "Pune, Maharashtra, India"
+  );
+
+  const [website, setWebsite] = useState(
+    "www.abctechnologies.com"
+  );
+
+
+  /* ================= CONTACT INFORMATION ================= */
+
+  const [contactPerson, setContactPerson] = useState(
+    "Rahul Sharma"
+  );
+
+  const [alternateEmail, setAlternateEmail] = useState(
+    "recruitment@abctechnologies.com"
+  );
+
+  const [email, setEmail] = useState(
+    "hr@abctechnologies.com"
+  );
+
+  const [mobileNumber, setMobileNumber] = useState(
+    "+91 87654 32109"
+  );
+
+  const [phoneNumber, setPhoneNumber] = useState(
+    "+91 98765 43210"
+  );
+
+
+  /* ================= ADDRESS INFORMATION ================= */
+
+  const [streetAddress, setStreetAddress] = useState(
+    "ABC Tower, 2nd Floor, Baner Road"
+  );
+
+  const [city, setCity] = useState(
+    "Pune"
+  );
+
+  const [state, setState] = useState(
+    "Maharashtra"
+  );
+
+  const [pincode, setPincode] = useState(
+    "411045"
+  );
+
+  const [country, setCountry] = useState(
+    "India"
+  );
+
+
+  /* ================= DESCRIPTION ================= */
+
   const [description, setDescription] = useState(
     "ABC Technologies Pvt. Ltd. is a leading IT solutions and services company delivering innovative digital solutions to clients worldwide. We specialize in web development, mobile applications, cloud solutions, and IT consulting. Our mission is to empower businesses through technology and innovation. We believe in building strong relationships with communities through internship and training opportunities."
   );
+
+
+  /* ================= LOGO ================= */
+
+  const [companyLogo, setCompanyLogo] = useState(abcLogo);
+
+  const fileInputRef = useRef(null);
+
+
+  /* ================= POPUP ================= */
+
+  const [popup, setPopup] = useState({
+    show: false,
+    message: "",
+    type: "success"
+  });
+
+
+  /* ================= SHOW POPUP ================= */
+
+  const showPopup = (message, type = "success") => {
+
+    setPopup({
+      show: true,
+      message,
+      type
+    });
+
+    setTimeout(() => {
+      setPopup({
+        show: false,
+        message: "",
+        type: "success"
+      });
+    }, 2500);
+
+  };
+
+
+  /* ================= CHANGE LOGO ================= */
+
+  const handleChangeLogo = () => {
+
+    fileInputRef.current?.click();
+
+  };
+
+
+  /* ================= SELECT NEW LOGO ================= */
+
+  const handleLogoChange = (event) => {
+
+    const file = event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+
+      showPopup(
+        "Please select a valid image file.",
+        "error"
+      );
+
+      return;
+    }
+
+    const imageURL = URL.createObjectURL(file);
+
+    setCompanyLogo(imageURL);
+
+    showPopup(
+      "Logo changed successfully!"
+    );
+
+  };
+
+
+  /* ================= REMOVE LOGO ================= */
+
+  const handleRemoveLogo = () => {
+
+    setCompanyLogo(null);
+
+    showPopup(
+      "Company logo removed.",
+      "success"
+    );
+
+  };
+
+
+  /* ================= EDIT PROFILE ================= */
+
+  const handleEditProfile = () => {
+
+    showPopup(
+      "You can now edit your company profile."
+    );
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+
+  };
+
+
+  /* ================= SAVE CHANGES ================= */
+
+  const handleSaveChanges = () => {
+
+    console.log("Company Profile Saved:", {
+      companyName,
+      yearOfEstablishment,
+      registrationNumber,
+      companySize,
+      industry,
+      headOffice,
+      website,
+      contactPerson,
+      alternateEmail,
+      email,
+      mobileNumber,
+      phoneNumber,
+      streetAddress,
+      city,
+      state,
+      pincode,
+      country,
+      description,
+      companyLogo
+    });
+
+    showPopup(
+      "Company profile saved successfully!"
+    );
+
+  };
+
+
+  /* ================= CANCEL CHANGES ================= */
+
+  const handleCancelChanges = () => {
+
+    setCompanyName("ABC Technologies Pvt. Ltd.");
+
+    setYearOfEstablishment("2018");
+
+    setRegistrationNumber("ABC/Tech/2018/558");
+
+    setCompanySize("51 - 200 Employees");
+
+    setIndustry("Information Technology");
+
+    setHeadOffice("Pune, Maharashtra, India");
+
+    setWebsite("www.abctechnologies.com");
+
+    setContactPerson("Rahul Sharma");
+
+    setAlternateEmail(
+      "recruitment@abctechnologies.com"
+    );
+
+    setEmail(
+      "hr@abctechnologies.com"
+    );
+
+    setMobileNumber(
+      "+91 87654 32109"
+    );
+
+    setPhoneNumber(
+      "+91 98765 43210"
+    );
+
+    setStreetAddress(
+      "ABC Tower, 2nd Floor, Baner Road"
+    );
+
+    setCity("Pune");
+
+    setState("Maharashtra");
+
+    setPincode("411045");
+
+    setCountry("India");
+
+    setDescription(
+      "ABC Technologies Pvt. Ltd. is a leading IT solutions and services company delivering innovative digital solutions to clients worldwide. We specialize in web development, mobile applications, cloud solutions, and IT consulting. Our mission is to empower businesses through technology and innovation. We believe in building strong relationships with communities through internship and training opportunities."
+    );
+
+    setCompanyLogo(abcLogo);
+
+    showPopup(
+      "Changes cancelled."
+    );
+
+  };
 
 
   /* ================= SOCIAL LINKS ================= */
@@ -57,20 +337,93 @@ export default function CompanyProfile() {
 
 
   return (
+
     <div className="flex min-h-screen w-full bg-[#F8FAFC]">
 
-      {/* SIDEBAR */}
+
+      {/* ================= POPUP ================= */}
+
+      {popup.show && (
+
+        <div
+          className="
+            fixed
+            top-6
+            right-6
+            z-[9999]
+            min-w-[320px]
+            max-w-[420px]
+            bg-white
+            rounded-[12px]
+            shadow-[0_8px_30px_rgba(15,23,42,0.18)]
+            border
+            border-[#E5E7EB]
+            px-5
+            py-4
+            flex
+            items-center
+            gap-3
+          "
+        >
+
+          <div
+            className={`
+              w-9
+              h-9
+              rounded-full
+              flex
+              items-center
+              justify-center
+              shrink-0
+              ${
+                popup.type === "error"
+                  ? "bg-red-50 text-red-600"
+                  : "bg-green-50 text-green-600"
+              }
+            `}
+          >
+
+            <CheckCircle2 size={20} />
+
+          </div>
+
+
+          <div>
+
+            <p className="text-[13px] font-semibold text-[#111827]">
+              {popup.type === "error"
+                ? "Error"
+                : "Success"}
+            </p>
+
+            <p className="text-[12px] text-[#6B7280] mt-0.5">
+              {popup.message}
+            </p>
+
+          </div>
+
+        </div>
+
+      )}
+
+
+      {/* ================= SIDEBAR ================= */}
+
       <CompanySidebar />
 
 
-      {/* RIGHT SIDE */}
+      {/* ================= RIGHT SIDE ================= */}
+
       <div className="flex-1 min-w-0 flex flex-col">
 
+
         {/* HEADER */}
+
         <CompanyHeader />
 
 
-        {/* MAIN */}
+        {/* ================= MAIN ================= */}
+
         <main className="flex-1 px-8 py-8">
 
 
@@ -103,9 +456,10 @@ export default function CompanyProfile() {
             </div>
 
 
-            {/* EDIT PROFILE */}
+            {/* ================= EDIT PROFILE ================= */}
 
             <button
+              onClick={handleEditProfile}
               className="
                 w-[140px]
                 h-[48px]
@@ -173,27 +527,34 @@ export default function CompanyProfile() {
 
                 <div className="grid grid-cols-2 gap-x-5 gap-y-5">
 
+
                   <FormField
                     label="Company Name"
-                    value="ABC Technologies Pvt. Ltd."
+                    value={companyName}
+                    onChange={setCompanyName}
                   />
+
 
                   <FormField
                     label="Year of Establishment"
-                    value="2018"
+                    value={yearOfEstablishment}
+                    onChange={setYearOfEstablishment}
                   />
+
 
                   <FormField
                     label="Registration Number"
-                    value="ABC/Tech/2018/558"
+                    value={registrationNumber}
+                    onChange={setRegistrationNumber}
                   />
 
 
-                  {/* COMPANY SIZE + CHEVRON */}
+                  {/* DO NOT TOUCH THIS DROPDOWN */}
 
                   <FormField
                     label="Company Size"
-                    value="51 - 200 Employees"
+                    value={companySize}
+                    onChange={setCompanySize}
                     options={[
                       "1 - 10 Employees",
                       "11 - 50 Employees",
@@ -204,11 +565,12 @@ export default function CompanyProfile() {
                   />
 
 
-                  {/* INDUSTRY TYPE + CHEVRON */}
+                  {/* DO NOT TOUCH THIS DROPDOWN */}
 
                   <FormField
                     label="Industry Type"
-                    value="Information Technology"
+                    value={industry}
+                    onChange={setIndustry}
                     options={[
                       "Information Technology",
                       "Software Development",
@@ -221,12 +583,15 @@ export default function CompanyProfile() {
 
                   <FormField
                     label="Head Office Location"
-                    value="Pune, Maharashtra, India"
+                    value={headOffice}
+                    onChange={setHeadOffice}
                   />
+
 
                   <FormField
                     label="Company Website"
-                    value="www.abctechnologies.com"
+                    value={website}
+                    onChange={setWebsite}
                     full
                   />
 
@@ -265,27 +630,35 @@ export default function CompanyProfile() {
 
                   <FormField
                     label="HR / Contact Person"
-                    value="Rahul Sharma"
+                    value={contactPerson}
+                    onChange={setContactPerson}
                   />
 
                   <FormField
                     label="Alternate Email (Optional)"
-                    value="recruitment@abctechnologies.com"
+                    value={alternateEmail}
+                    onChange={setAlternateEmail}
                   />
 
                   <FormField
                     label="Email Address"
-                    value="hr@abctechnologies.com"
+                    value={email}
+                    onChange={setEmail}
+                    type="email"
                   />
 
                   <FormField
                     label="Mobile Number"
-                    value="+91 87654 32109"
+                    value={mobileNumber}
+                    onChange={setMobileNumber}
+                    type="tel"
                   />
 
                   <FormField
                     label="Phone Number"
-                    value="+91 98765 43210"
+                    value={phoneNumber}
+                    onChange={setPhoneNumber}
+                    type="tel"
                     full
                   />
 
@@ -325,16 +698,18 @@ export default function CompanyProfile() {
 
                   <FormField
                     label="Street Address"
-                    value="ABC Tower, 2nd Floor, Baner Road"
+                    value={streetAddress}
+                    onChange={setStreetAddress}
                     full
                   />
 
 
-                  {/* CITY + CHEVRON */}
+                  {/* DO NOT TOUCH THIS DROPDOWN */}
 
                   <FormField
                     label="City"
-                    value="Pune"
+                    value={city}
+                    onChange={setCity}
                     options={[
                       "Pune",
                       "Mumbai",
@@ -345,11 +720,12 @@ export default function CompanyProfile() {
                   />
 
 
-                  {/* STATE + CHEVRON */}
+                  {/* DO NOT TOUCH THIS DROPDOWN */}
 
                   <FormField
                     label="State"
-                    value="Maharashtra"
+                    value={state}
+                    onChange={setState}
                     options={[
                       "Maharashtra",
                       "Gujarat",
@@ -362,15 +738,17 @@ export default function CompanyProfile() {
 
                   <FormField
                     label="Pincode"
-                    value="411045"
+                    value={pincode}
+                    onChange={setPincode}
                   />
 
 
-                  {/* COUNTRY + CHEVRON */}
+                  {/* DO NOT TOUCH THIS DROPDOWN */}
 
                   <FormField
                     label="Country"
-                    value="India"
+                    value={country}
+                    onChange={setCountry}
                     options={[
                       "India",
                       "United States",
@@ -420,6 +798,9 @@ export default function CompanyProfile() {
 
                 <div className="flex items-center gap-5">
 
+
+                  {/* LOGO PREVIEW */}
+
                   <div
                     className="
                       w-[125px]
@@ -436,22 +817,58 @@ export default function CompanyProfile() {
                     "
                   >
 
-                    <img
-                      src={abcLogo}
-                      alt="ABC Technologies Logo"
-                      className="
-                        w-[105px]
-                        h-[105px]
-                        object-contain
-                      "
-                    />
+                    {companyLogo ? (
+
+                      <img
+                        src={companyLogo}
+                        alt="ABC Technologies Logo"
+                        className="
+                          w-[105px]
+                          h-[105px]
+                          object-contain
+                        "
+                      />
+
+                    ) : (
+
+                      <div className="text-center">
+
+                        <Building2
+                          size={35}
+                          className="mx-auto text-[#CBD5E1]"
+                        />
+
+                        <p className="text-[11px] text-[#9CA3AF] mt-2">
+                          No Logo
+                        </p>
+
+                      </div>
+
+                    )}
 
                   </div>
 
 
+                  {/* LOGO BUTTONS */}
+
                   <div className="flex flex-col gap-3 flex-1">
 
+
+                    {/* HIDDEN FILE INPUT */}
+
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleLogoChange}
+                      className="hidden"
+                    />
+
+
+                    {/* CHANGE LOGO */}
+
                     <button
+                      onClick={handleChangeLogo}
                       className="
                         w-full
                         h-[42px]
@@ -477,7 +894,10 @@ export default function CompanyProfile() {
                     </button>
 
 
+                    {/* REMOVE LOGO */}
+
                     <button
+                      onClick={handleRemoveLogo}
                       className="
                         w-full
                         h-[42px]
@@ -670,14 +1090,18 @@ export default function CompanyProfile() {
 
           <div className="mt-6">
 
-            <ProfileActions />
+            <ProfileActions
+              onCancel={handleCancelChanges}
+              onSave={handleSaveChanges}
+            />
 
           </div>
 
         </main>
 
 
-        {/* FOOTER */}
+        {/* ================= FOOTER ================= */}
+
         <CompanyFooter />
 
       </div>

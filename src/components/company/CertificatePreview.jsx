@@ -1,31 +1,73 @@
 import { Download, Send } from "lucide-react";
 import logohe from "../../assets/logohe.jpeg";
 
-const details = [
-  { label: "Student Name", value: "Rahul Sharma" },
-  { label: "Internship", value: "Web Development Intern" },
-  { label: "Department", value: "Computer Science" },
-  { label: "Duration", value: "15 Apr 2025 - 15 Jul 2025" },
-  { label: "Issued On", value: "16 Jul 2025" },
-  { label: "Certificate ID", value: "CERT-2025-0001" },
-  { label: "Issued By", value: "Mentor - ABC Technologies" },
-];
+export default function CertificatePreview({ student }) {
 
-export default function CertificatePreview() {
+  const currentStudent = student || {
+    name: "Rahul Sharma",
+    role: "Web Development Intern",
+    dept: "Computer Science",
+    date: "15 Jul 2025",
+    id: "CERT-2025-0001",
+    status: "Issued",
+  };
+
+  const handleDownload = () => {
+    alert(
+      `Certificate for ${currentStudent.name} downloaded successfully.`
+    );
+  };
+
+  const handleSend = () => {
+    alert(
+      `Certificate sent to ${currentStudent.name} successfully.`
+    );
+  };
+
+  const details = [
+    {
+      label: "Student Name",
+      value: currentStudent.name,
+    },
+    {
+      label: "Internship",
+      value: currentStudent.role,
+    },
+    {
+      label: "Department",
+      value: currentStudent.dept,
+    },
+    {
+      label: "Duration",
+      value: "15 Apr 2025 - 15 Jul 2025",
+    },
+    {
+      label: "Completion Date",
+      value: currentStudent.date,
+    },
+    {
+      label: "Certificate ID",
+      value: currentStudent.id,
+    },
+  ];
+
   return (
     <div className="w-[320px] shrink-0 flex flex-col gap-4">
 
       {/* TITLE */}
+
       <h2 className="text-[15px] font-semibold text-[#111827]">
         Certificate Preview
       </h2>
 
+
       {/* ================= CERTIFICATE ================= */}
+
       <div
         className="
           relative
           w-full
-          h-[320px]
+          h-[342px]
           bg-white
           border
           border-[#D9D9D9]
@@ -38,7 +80,8 @@ export default function CertificatePreview() {
         "
       >
 
-        {/* TOP LEFT GOLD CORNER */}
+        {/* TOP LEFT GOLD */}
+
         <div
           className="
             absolute
@@ -53,7 +96,9 @@ export default function CertificatePreview() {
           }}
         />
 
-        {/* TOP LEFT BLUE STRIPE */}
+
+        {/* TOP LEFT BLUE */}
+
         <div
           className="
             absolute
@@ -64,12 +109,14 @@ export default function CertificatePreview() {
             bg-[#0B3091]
           "
           style={{
-            clipPath: "polygon(38% 0, 100% 0, 0 100%, 0 62%)",
+            clipPath:
+              "polygon(38% 0, 100% 0, 0 100%, 0 62%)",
           }}
         />
 
 
-        {/* BOTTOM RIGHT BLUE CORNER */}
+        {/* BOTTOM RIGHT BLUE */}
+
         <div
           className="
             absolute
@@ -80,11 +127,14 @@ export default function CertificatePreview() {
             bg-[#0B3091]
           "
           style={{
-            clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
+            clipPath:
+              "polygon(100% 0, 100% 100%, 0 100%)",
           }}
         />
 
-        {/* BOTTOM RIGHT GOLD STRIPE */}
+
+        {/* BOTTOM RIGHT GOLD */}
+
         <div
           className="
             absolute
@@ -95,14 +145,14 @@ export default function CertificatePreview() {
             bg-[#F5B93E]
           "
           style={{
-            clipPath: "polygon(100% 0, 100% 100%, 0 100%)",
+            clipPath:
+              "polygon(100% 0, 100% 100%, 0 100%)",
           }}
         />
 
 
-        {/* ================= CONTENT ================= */}
-
         {/* LOGO */}
+
         <img
           src={logohe}
           alt="ABC Technologies"
@@ -116,7 +166,9 @@ export default function CertificatePreview() {
           "
         />
 
+
         {/* COMPANY */}
+
         <p
           className="
             text-[#0B3091]
@@ -131,10 +183,11 @@ export default function CertificatePreview() {
 
 
         {/* CERTIFICATE */}
+
         <h3
           className="
             text-[#17346D]
-            text-[21px]
+            text-[22px]
             font-serif
             font-bold
             tracking-wide
@@ -143,6 +196,7 @@ export default function CertificatePreview() {
         >
           CERTIFICATE
         </h3>
+
 
         <p
           className="
@@ -157,45 +211,74 @@ export default function CertificatePreview() {
 
 
         {/* GOLD LINE */}
-        <div className="w-[72px] h-[1px] bg-[#D9B24C] mx-auto mt-2 mb-2" />
+
+        <div
+          className="
+            w-[72px]
+            h-[1px]
+            bg-[#D9B24C]
+            mx-auto
+            mt-2
+            mb-2
+          "
+        />
 
 
         {/* CERTIFY */}
+
         <p className="text-[#6B7280] text-[8px]">
           This is to certify that
         </p>
 
 
-        {/* NAME */}
+        {/* STUDENT NAME */}
+
         <p
           className="
             text-[#17346D]
-            text-[20px]
+            text-[21px]
             font-serif
             italic
             font-bold
             mt-1
           "
         >
-          Rahul Sharma
+          {currentStudent.name}
         </p>
 
 
         {/* COMPLETION */}
+
         <p className="text-[#6B7280] text-[8px] mt-1">
           has successfully completed the
         </p>
 
-        <p className="text-[#17346D] text-[9px] font-bold mt-0.5">
-          Web Development Internship
+
+        <p
+          className="
+            text-[#17346D]
+            text-[9px]
+            font-bold
+            mt-0.5
+          "
+        >
+          {currentStudent.role}
         </p>
 
-        <p className="text-[#6B7280] text-[8px] mt-0.5">
-          from 15 April 2025 to 15 July 2025.
+
+        <p
+          className="
+            text-[#6B7280]
+            text-[8px]
+            mt-0.5
+          "
+        >
+          from 15 April 2025 to {currentStudent.date}.
         </p>
 
 
         {/* DESCRIPTION */}
+
         <p
           className="
             text-[#7B8494]
@@ -205,12 +288,13 @@ export default function CertificatePreview() {
             px-2
           "
         >
-          During this internship, he/she has demonstrated dedication,
+          During this internship, the student has demonstrated dedication,
           hard work and excellent performance.
         </p>
 
 
-        {/* ================= BOTTOM SIGNATURE AREA ================= */}
+        {/* ================= BOTTOM ================= */}
+
         <div
           className="
             absolute
@@ -225,6 +309,7 @@ export default function CertificatePreview() {
         >
 
           {/* DATE */}
+
           <div className="w-[68px] text-center">
 
             <p
@@ -236,12 +321,18 @@ export default function CertificatePreview() {
                 mb-[3px]
               "
             >
-              16 July 2025
+              {currentStudent.date}
             </p>
 
             <div className="w-full h-px bg-[#A7A7A7]" />
 
-            <p className="text-[#9CA3AF] text-[6px] mt-[3px]">
+            <p
+              className="
+                text-[#9CA3AF]
+                text-[6px]
+                mt-[3px]
+              "
+            >
               Date
             </p>
 
@@ -249,6 +340,7 @@ export default function CertificatePreview() {
 
 
           {/* SEAL */}
+
           <div
             className="
               w-[35px]
@@ -264,6 +356,7 @@ export default function CertificatePreview() {
               mb-[2px]
             "
           >
+
             <div
               className="
                 w-[24px]
@@ -280,10 +373,12 @@ export default function CertificatePreview() {
             >
               ★
             </div>
+
           </div>
 
 
-          {/* JORDAN */}
+          {/* MENTOR */}
+
           <div className="w-[90px] text-center">
 
             <p
@@ -319,7 +414,8 @@ export default function CertificatePreview() {
       </div>
 
 
-      {/* ================= CERTIFICATE DETAILS ================= */}
+      {/* ================= DETAILS ================= */}
+
       <div
         className="
           bg-white
@@ -331,13 +427,22 @@ export default function CertificatePreview() {
         "
       >
 
-        <h3 className="text-[13px] font-semibold text-[#111827] mb-4">
+        <h3
+          className="
+            text-[13px]
+            font-semibold
+            text-[#111827]
+            mb-4
+          "
+        >
           Certificate Details
         </h3>
+
 
         <div className="flex flex-col gap-2.5">
 
           {details.map((d) => (
+
             <div
               key={d.label}
               className="
@@ -353,14 +458,31 @@ export default function CertificatePreview() {
                 {d.label}
               </span>
 
-              <span className="text-[#111827] font-medium text-right">
+              <span
+                className="
+                  text-[#111827]
+                  font-medium
+                  text-right
+                "
+              >
                 {d.value}
               </span>
 
             </div>
+
           ))}
 
-          <div className="flex items-center justify-between text-[11px]">
+
+          {/* STATUS */}
+
+          <div
+            className="
+              flex
+              items-center
+              justify-between
+              text-[11px]
+            "
+          >
 
             <span className="text-[#6B7280]">
               Status
@@ -377,7 +499,7 @@ export default function CertificatePreview() {
                 rounded-full
               "
             >
-              Issued
+              {currentStudent.status}
             </span>
 
           </div>
@@ -388,9 +510,12 @@ export default function CertificatePreview() {
 
 
       {/* ================= BUTTONS ================= */}
+
       <div className="flex gap-3">
 
         <button
+          type="button"
+          onClick={handleDownload}
           className="
             flex-1
             h-[38px]
@@ -405,14 +530,19 @@ export default function CertificatePreview() {
             justify-center
             gap-1.5
             transition-colors
-            duration-200
           "
         >
+
           <Download size={13} />
+
           Download Certificate
+
         </button>
 
+
         <button
+          type="button"
+          onClick={handleSend}
           className="
             flex-1
             h-[38px]
@@ -429,11 +559,13 @@ export default function CertificatePreview() {
             gap-1.5
             hover:bg-slate-50
             transition-colors
-            duration-200
           "
         >
+
           <Send size={13} />
+
           Send to Student
+
         </button>
 
       </div>

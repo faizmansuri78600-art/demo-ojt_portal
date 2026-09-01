@@ -1,10 +1,134 @@
-import { X, Calendar, ChevronDown } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import ProfileActions from "../common/ProfileActions";
+import {
+  X,
+  Calendar,
+  ChevronDown,
+  Save,
+} from "lucide-react";
 
 
-export default function OpportunityForm() {
+export default function OpportunityForm({
+  opportunity,
+  onSave,
+  onCancel,
+}) {
+
+  /* ================= FORM STATE ================= */
+
+  const [formData, setFormData] = useState({
+    id: null,
+    title: "",
+    department: "Computer Science",
+    vacancies: "",
+    duration: "2 Months",
+    stipend: "",
+    location: "Pune (Hybrid)",
+    lastDate: "",
+    skills: ["HTML", "CSS"],
+    description: "",
+    eligibility: "",
+    status: "Active",
+  });
+
+
+  /* ================= LOAD OPPORTUNITY ================= */
+
+  useEffect(() => {
+
+    if (opportunity) {
+
+      setFormData({
+        id: opportunity.id || null,
+        title: opportunity.title || "",
+        department:
+          opportunity.department ||
+          "Computer Science",
+        vacancies:
+          opportunity.vacancies || "",
+        duration:
+          opportunity.duration ||
+          "2 Months",
+        stipend:
+          opportunity.stipend
+            ? opportunity.stipend
+                .replace("₹", "")
+                .replace("/ month", "")
+                .trim()
+            : "",
+        location:
+          opportunity.location ||
+          "Pune (Hybrid)",
+        lastDate:
+          opportunity.lastDate || "",
+        skills:
+          opportunity.skills || ["HTML", "CSS"],
+        description:
+          opportunity.description || "",
+        eligibility:
+          opportunity.eligibility || "",
+        status:
+          opportunity.status || "Active",
+      });
+
+    }
+
+  }, [opportunity]);
+
+
+  /* ================= CHANGE VALUE ================= */
+
+  const updateField = (field, value) => {
+
+    setFormData((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
+
+  };
+
+
+  /* ================= SAVE ================= */
+
+  const handleSave = () => {
+
+    const finalData = {
+      ...formData,
+
+      stipend: formData.stipend
+        ? `₹${formData.stipend} / month`
+        : "",
+    };
+
+    onSave(finalData);
+
+  };
+
+
+  /* ================= CLEAR ================= */
+
+  const handleClear = () => {
+
+    setFormData({
+      id: null,
+      title: "",
+      department: "Computer Science",
+      vacancies: "",
+      duration: "2 Months",
+      stipend: "",
+      location: "Pune (Hybrid)",
+      lastDate: "",
+      skills: ["HTML", "CSS"],
+      description: "",
+      eligibility: "",
+      status: "Draft",
+    });
+
+  };
+
+
   return (
+
     <div
       className="
         w-[380px]
@@ -18,6 +142,7 @@ export default function OpportunityForm() {
       "
     >
 
+
       {/* ================= HEADER ================= */}
 
       <div className="px-5 py-4 border-b border-[#E5E7EB]">
@@ -25,17 +150,30 @@ export default function OpportunityForm() {
         <div className="flex items-start justify-between">
 
           <div>
+
             <h2 className="text-[15px] font-semibold text-[#0B3091]">
-              Add / Edit Opportunity
+
+              {opportunity?.id
+                ? "Edit Opportunity"
+                : "Add / Edit Opportunity"}
+
             </h2>
 
             <p className="text-[10px] text-[#64748B] mt-1">
               Create a new opportunity or update existing one.
             </p>
+
           </div>
 
-          <button className="text-[#94A3B8] hover:text-[#475569]">
+
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-[#94A3B8] hover:text-[#475569]"
+          >
+
             <X size={16} />
+
           </button>
 
         </div>
@@ -47,16 +185,25 @@ export default function OpportunityForm() {
 
       <div className="p-5 space-y-4">
 
-        {/* OPPORTUNITY TITLE */}
+
+        {/* TITLE */}
 
         <div>
+
           <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
-            Opportunity Title <span className="text-red-500">*</span>
+            Opportunity Title{" "}
+            <span className="text-red-500">*</span>
           </label>
 
           <input
             type="text"
-            defaultValue="Web Development Intern"
+            value={formData.title}
+            onChange={(e) =>
+              updateField(
+                "title",
+                e.target.value
+              )
+            }
             className="
               w-full
               h-[38px]
@@ -70,6 +217,7 @@ export default function OpportunityForm() {
               focus:border-[#1E5EFF]
             "
           />
+
         </div>
 
 
@@ -79,20 +227,34 @@ export default function OpportunityForm() {
 
           <SelectField
             label="Department"
-            value="Computer Science"
+            value={formData.department}
+            onChange={(value) =>
+              updateField(
+                "department",
+                value
+              )
+            }
             options={[
               "Computer Science",
               "Data Science",
               "Marketing",
               "Management",
-              "Information Tech."
+              "Information Tech.",
+              "IT / Design",
             ]}
             required
           />
 
+
           <InputField
             label="Vacancies"
-            value="5"
+            value={formData.vacancies}
+            onChange={(value) =>
+              updateField(
+                "vacancies",
+                value
+              )
+            }
             required
           />
 
@@ -105,18 +267,31 @@ export default function OpportunityForm() {
 
           <SelectField
             label="Duration"
-            value="2 Months"
+            value={formData.duration}
+            onChange={(value) =>
+              updateField(
+                "duration",
+                value
+              )
+            }
             options={[
               "2 Months",
               "3 Months",
-              "6 Months"
+              "6 Months",
             ]}
             required
           />
 
+
           <InputField
             label="Stipend (per month)"
-            value="8000"
+            value={formData.stipend}
+            onChange={(value) =>
+              updateField(
+                "stipend",
+                value
+              )
+            }
           />
 
         </div>
@@ -128,26 +303,41 @@ export default function OpportunityForm() {
 
           <SelectField
             label="Location"
-            value="Pune (Hybrid)"
+            value={formData.location}
+            onChange={(value) =>
+              updateField(
+                "location",
+                value
+              )
+            }
             options={[
               "Pune (Hybrid)",
               "Pune (On-site)",
-              "Remote"
+              "Remote",
             ]}
             required
           />
 
+
           <div>
 
             <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
-              Last Date to Apply <span className="text-red-500">*</span>
+              Last Date to Apply{" "}
+              <span className="text-red-500">*</span>
             </label>
 
             <div className="relative">
 
               <input
                 type="text"
-                defaultValue="31/07/2025"
+                value={formData.lastDate}
+                onChange={(e) =>
+                  updateField(
+                    "lastDate",
+                    e.target.value
+                  )
+                }
+                placeholder="31/07/2025"
                 className="
                   w-full
                   h-[38px]
@@ -162,6 +352,7 @@ export default function OpportunityForm() {
                   focus:border-[#1E5EFF]
                 "
               />
+
 
               <Calendar
                 size={13}
@@ -186,7 +377,8 @@ export default function OpportunityForm() {
         <div>
 
           <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
-            Required Skills <span className="text-red-500">*</span>
+            Required Skills{" "}
+            <span className="text-red-500">*</span>
           </label>
 
           <div
@@ -205,10 +397,19 @@ export default function OpportunityForm() {
             "
           >
 
-            <Skill text="HTML" />
-            <Skill text="CSS" />
-            <Skill text="JavaScript" />
-            <Skill text="React.js" />
+            {formData.skills.map(
+              (skill, index) => (
+
+                <Skill
+                  key={index}
+                  text={skill}
+                />
+
+              )
+            )}
+
+
+            {/* SAME CHEVRON */}
 
             <ChevronDown
               size={13}
@@ -225,11 +426,21 @@ export default function OpportunityForm() {
         <div>
 
           <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
-            Description <span className="text-red-500">*</span>
+            Description{" "}
+            <span className="text-red-500">*</span>
           </label>
 
           <textarea
-            defaultValue="We are looking for a motivated web development intern to work on real-time projects. You will collaborate with our development team and gain hands-on experience."
+            value={formData.description}
+            onChange={(e) =>
+              updateField(
+                "description",
+                e.target.value.slice(
+                  0,
+                  500
+                )
+              )
+            }
             className="
               w-full
               h-[88px]
@@ -247,15 +458,17 @@ export default function OpportunityForm() {
           />
 
           <div className="flex justify-end mt-1">
+
             <span className="text-[9px] text-[#94A3B8]">
-              142/500
+              {formData.description.length}/500
             </span>
+
           </div>
 
         </div>
 
 
-        {/* ELIGIBILITY CRITERIA */}
+        {/* ELIGIBILITY */}
 
         <div>
 
@@ -264,7 +477,14 @@ export default function OpportunityForm() {
           </label>
 
           <textarea
-            defaultValue="e.g. BCA, MCA, B.Tech, Any Graduate"
+            value={formData.eligibility}
+            onChange={(e) =>
+              updateField(
+                "eligibility",
+                e.target.value
+              )
+            }
+            placeholder="e.g. BCA, MCA, B.Tech, Any Graduate"
             className="
               w-full
               h-[58px]
@@ -287,11 +507,17 @@ export default function OpportunityForm() {
 
         <SelectField
           label="Status"
-          value="Active"
+          value={formData.status}
+          onChange={(value) =>
+            updateField(
+              "status",
+              value
+            )
+          }
           options={[
             "Active",
             "Draft",
-            "Closed"
+            "Closed",
           ]}
           required
         />
@@ -299,11 +525,75 @@ export default function OpportunityForm() {
       </div>
 
 
-      {/* ================= ACTION BUTTONS ================= */}
+      {/* ================= BUTTONS ================= */}
 
       <div className="px-5 pb-5">
 
-        <ProfileActions />
+        <div className="flex gap-3">
+
+          <button
+            type="button"
+            onClick={onCancel}
+            className="
+              flex-1
+              h-[40px]
+              rounded-[8px]
+              border
+              border-[#E5E7EB]
+              bg-white
+              text-[#111827]
+              text-[11px]
+              font-medium
+              hover:bg-[#F8FAFC]
+            "
+          >
+            Cancel
+          </button>
+
+
+          <button
+            type="button"
+            onClick={handleSave}
+            className="
+              flex-1
+              h-[40px]
+              rounded-[8px]
+              bg-[#1E5EFF]
+              text-white
+              text-[11px]
+              font-medium
+              flex
+              items-center
+              justify-center
+              gap-2
+              hover:bg-[#174dcc]
+            "
+          >
+
+            <Save size={14} />
+
+            Save Changes
+
+          </button>
+
+        </div>
+
+
+        {/* CLEAR FORM */}
+
+        <button
+          type="button"
+          onClick={handleClear}
+          className="
+            w-full
+            mt-2
+            text-[9px]
+            text-[#64748B]
+            hover:text-[#1E5EFF]
+          "
+        >
+          Clear form
+        </button>
 
       </div>
 
@@ -317,9 +607,12 @@ export default function OpportunityForm() {
 function InputField({
   label,
   value,
-  required = false
+  onChange,
+  required = false,
 }) {
+
   return (
+
     <div>
 
       <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
@@ -327,14 +620,20 @@ function InputField({
         {label}
 
         {required && (
-          <span className="text-red-500"> *</span>
+          <span className="text-red-500">
+            {" "}*
+          </span>
         )}
 
       </label>
 
+
       <input
         type="text"
-        defaultValue={value}
+        value={value}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
         className="
           w-full
           h-[38px]
@@ -359,10 +658,13 @@ function InputField({
 function SelectField({
   label,
   value,
+  onChange,
   options,
-  required = false
+  required = false,
 }) {
+
   return (
+
     <div>
 
       <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
@@ -370,15 +672,21 @@ function SelectField({
         {label}
 
         {required && (
-          <span className="text-red-500"> *</span>
+          <span className="text-red-500">
+            {" "}*
+          </span>
         )}
 
       </label>
 
+
       <div className="relative">
 
         <select
-          defaultValue={value}
+          value={value}
+          onChange={(e) =>
+            onChange(e.target.value)
+          }
           className="
             appearance-none
             w-full
@@ -397,13 +705,23 @@ function SelectField({
           "
         >
 
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
+          {options.map(
+            (option) => (
+
+              <option
+                key={option}
+                value={option}
+              >
+                {option}
+              </option>
+
+            )
+          )}
 
         </select>
+
+
+        {/* CHEVRON UNTOUCHED */}
 
         <ChevronDown
           size={13}
@@ -427,7 +745,9 @@ function SelectField({
 /* ================= SKILL ================= */
 
 function Skill({ text }) {
+
   return (
+
     <span
       className="
         px-2
@@ -441,5 +761,6 @@ function Skill({ text }) {
     >
       {text}
     </span>
+
   );
 }
