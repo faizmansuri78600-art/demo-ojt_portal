@@ -22,6 +22,18 @@ import ManageUsers from "../pages/admin/ManageUsers";
 import Analytics from "../pages/admin/Analytics";
 import Settings from "../pages/admin/Settings";
 
+// student
+
+import StudentDashboard from "../pages/Student/StudentDashboard";
+import BrowseOJT from "../pages/Student/BrowseOjt";
+import MyProfile from "../pages/Student/MyProfile";
+import WeeklyDiary from "../pages/Student/WeeklyDiary";
+import MyApplication from "../pages/Student/MyApplications";
+import Reports from "../pages/Student/Reports";
+import Feedback from "../pages/Student/Feedback";
+import SSettings from "../pages/Student/Settings";
+
+
 function AppRoutes() {
   return (
     <Routes>
@@ -96,6 +108,18 @@ function AppRoutes() {
         path="*"
         element={<Navigate to="/admin/dashboard" replace />}
       />
+
+    // student
+        <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route path="/student/browse-ojt" element={<BrowseOJT />} />
+        <Route path="/student/profile" element={<MyProfile />} />
+        <Route path="/student/weekly-diary" element={<WeeklyDiary />} />
+        <Route path="/student/Myapplication" element={<MyApplication/>}/>
+        <Route path="/student/Reports" element={<Reports/>}/>
+        <Route path="/student/Feedback" element={<Feedback/>}/>
+        <Route path="/student/Settings" element={<SSettings/>}/>
+
     </Routes>
   );
 }
