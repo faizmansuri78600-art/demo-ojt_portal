@@ -33,6 +33,15 @@ import Reports from "../pages/Student/Reports";
 import Feedback from "../pages/Student/Feedback";
 import SSettings from "../pages/Student/Settings";
 
+// Coordinator
+
+import CoordinatorDashboard from "../pages/collegeCoordinator/CoordinatorDashboard";
+import StudentManagement from "../pages/collegeCoordinator/StudentManagement";
+import CompanyManagement from "../pages/collegeCoordinator/CompanyManagement";
+import MentorAssignment from "../pages/collegeCoordinator/MentorAssignment";
+import OJTTracking from "../pages/collegeCoordinator/OJTTracking";
+import Announcements from "../pages/collegeCoordinator/Announcements";
+import OJTReports from "../pages/collegeCoordinator/OJTReports";
 
 function AppRoutes() {
   return (
@@ -119,7 +128,52 @@ function AppRoutes() {
         <Route path="/student/Reports" element={<Reports/>}/>
         <Route path="/student/Feedback" element={<Feedback/>}/>
         <Route path="/student/Settings" element={<SSettings/>}/>
+          
+          //coordinator
+          <Route
+          path="/coordinator/dashboard"
+          element={<CoordinatorDashboard />}
+        />
 
+        <Route
+          path="/coordinator/students"
+          element={<StudentManagement />}
+        />
+
+        <Route
+          path="/coordinator/companies"
+          element={<CompanyManagement />}
+        />
+
+        <Route
+          path="/coordinator/mentors"
+          element={<MentorAssignment />}
+        />
+
+        <Route
+          path="/coordinator/tracking"
+          element={<OJTTracking />}
+        />
+
+        <Route
+          path="/coordinator/announcements"
+          element={<Announcements />}
+        />
+
+        <Route
+          path="/coordinator/reports"
+          element={<OJTReports />}
+        />
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to="/coordinator/dashboard"
+              replace
+            />
+          }
+        />
     </Routes>
   );
 }
