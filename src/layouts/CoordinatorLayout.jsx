@@ -1,22 +1,30 @@
 import { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
 
 import CoSidebar from "../components/common/CoSidebar";
 import CoTopNavbar from "../components/common/CoTopNavbar";
+import Footer from "../components/common/Footer";
 
-export default function CoordinatorLayout({ children }) {
+export default function CoordinatorLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] =
     useState(false);
 
   const [mobileSidebarOpen, setMobileSidebarOpen] =
     useState(false);
 
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] =
+    useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
 
-  const sidebarWidth = sidebarCollapsed ? 76 : 260;
+  const sidebarWidth = sidebarCollapsed
+    ? 76
+    : 260;
 
   const handleNavigation = (path) => {
     navigate(path);
@@ -34,23 +42,29 @@ export default function CoordinatorLayout({ children }) {
           color: "#0f172a",
         }}
       >
+
         {/* =====================================================
             DESKTOP SIDEBAR
         ====================================================== */}
+
         <div className="hidden lg:block">
-          <Sidebar
+          <CoSidebar
             collapsed={sidebarCollapsed}
             activePath={location.pathname}
             onCollapse={() =>
-              setSidebarCollapsed((value) => !value)
+              setSidebarCollapsed(
+                (value) => !value
+              )
             }
             onNavigate={handleNavigation}
           />
         </div>
 
+
         {/* =====================================================
             MOBILE OVERLAY
         ====================================================== */}
+
         {mobileSidebarOpen && (
           <div
             className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden"
@@ -60,9 +74,11 @@ export default function CoordinatorLayout({ children }) {
           />
         )}
 
+
         {/* =====================================================
             MOBILE SIDEBAR
         ====================================================== */}
+
         <div
           className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 lg:hidden ${
             mobileSidebarOpen
@@ -70,7 +86,7 @@ export default function CoordinatorLayout({ children }) {
               : "-translate-x-full"
           }`}
         >
-          <Sidebar
+          <CoSidebar
             collapsed={false}
             activePath={location.pathname}
             onCollapse={() =>
@@ -80,9 +96,11 @@ export default function CoordinatorLayout({ children }) {
           />
         </div>
 
+
         {/* =====================================================
-            MAIN APPLICATION
+            MAIN APPLICATION AREA
         ====================================================== */}
+
         <div
           style={{
             width: `calc(100% - ${sidebarWidth}px)`,
@@ -92,29 +110,46 @@ export default function CoordinatorLayout({ children }) {
               "margin-left 250ms ease, width 250ms ease",
             boxSizing: "border-box",
             overflowX: "hidden",
+
+            display: "flex",
+            flexDirection: "column",
           }}
         >
-          <TopNavbar
+
+
+          {/* =================================================
+              TOP NAVBAR
+          ================================================== */}
+
+          <CoTopNavbar
             onMenuClick={() =>
               setMobileSidebarOpen(true)
             }
             darkMode={darkMode}
             onThemeToggle={() =>
-              setDarkMode((value) => !value)
+              setDarkMode(
+                (value) => !value
+              )
             }
           />
 
+
           {/* =================================================
-              CONTENT
+              PAGE CONTENT
           ================================================== */}
+
           <main
             style={{
               width: "100%",
               maxWidth: "100%",
               minWidth: 0,
+
               padding: "24px",
+
               boxSizing: "border-box",
               overflowX: "hidden",
+
+              flex: 1,
             }}
           >
             <div
@@ -122,13 +157,29 @@ export default function CoordinatorLayout({ children }) {
                 width: "100%",
                 maxWidth: "1600px",
                 minWidth: 0,
+
                 margin: "0 auto",
+
                 boxSizing: "border-box",
               }}
             >
-              {children}
+
+              {/* React Router renders coordinator pages here */}
+              <Outlet />
+
             </div>
           </main>
+
+
+          {/* =================================================
+              COORDINATOR FOOTER
+              
+              Footer is INSIDE the main coordinator area.
+              Therefore it will not go behind the sidebar.
+          ================================================== */}
+
+          <Footer />
+
         </div>
       </div>
     </div>
