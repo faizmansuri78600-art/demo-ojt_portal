@@ -19,114 +19,85 @@ import {
   FileText,
 } from "lucide-react";
 
+/* =========================================================
+   MOCK ANNOUNCEMENT DATA
+========================================================= */
+
 const initialAnnouncements = [
   {
     id: 1,
-    title: "OJT Weekly Progress Report Submission",
+    title: "OJT Orientation Program",
     description:
-      "All students are required to submit their weekly OJT progress report before the scheduled deadline.",
-    category: "OJT",
-    priority: "High",
-    status: "Published",
+      "All selected students are required to attend the OJT orientation program.",
     audience: "All Students",
-    date: "14 August 2026",
-    author: "College Coordinator",
+    date: "2026-09-05",
+    status: "Published",
+    priority: "High",
+    createdBy: "College Coordinator",
   },
   {
     id: 2,
-    title: "Mentor Review Meeting",
+    title: "Company Registration Deadline",
     description:
-      "Mentors are requested to review the current progress of assigned students and provide feedback.",
-    category: "Mentor",
-    priority: "Medium",
+      "Companies interested in offering OJT opportunities must complete registration before the deadline.",
+    audience: "Companies",
+    date: "2026-09-08",
     status: "Published",
-    audience: "Mentors",
-    date: "13 August 2026",
-    author: "College Coordinator",
+    priority: "Medium",
+    createdBy: "College Coordinator",
   },
   {
     id: 3,
-    title: "OJT Attendance Reminder",
+    title: "Weekly Diary Submission",
     description:
-      "Students are reminded to maintain the required attendance percentage throughout their OJT period.",
-    category: "Attendance",
-    priority: "High",
+      "Students must submit their weekly OJT diary before the end of every week.",
+    audience: "Active OJT Students",
+    date: "2026-09-10",
     status: "Published",
-    audience: "All Students",
-    date: "11 August 2026",
-    author: "College Coordinator",
+    priority: "Medium",
+    createdBy: "College Coordinator",
   },
   {
     id: 4,
-    title: "Company Visit Schedule",
+    title: "Mentor Meeting Schedule",
     description:
-      "The upcoming company visit schedule has been prepared. Selected students should remain available.",
-    category: "Company",
-    priority: "Medium",
-    status: "Published",
-    audience: "Selected Students",
-    date: "09 August 2026",
-    author: "College Coordinator",
+      "Mentors are requested to review their assigned students and schedule the first progress meeting.",
+    audience: "Mentors",
+    date: "2026-09-12",
+    status: "Draft",
+    priority: "Low",
+    createdBy: "College Coordinator",
   },
   {
     id: 5,
-    title: "OJT Completion Documentation",
+    title: "OJT Report Submission",
     description:
-      "Students completing their OJT should prepare their completion certificate and required documentation.",
-    category: "Documentation",
-    priority: "Low",
-    status: "Draft",
-    audience: "All Students",
-    date: "08 August 2026",
-    author: "College Coordinator",
+      "Final OJT reports must be submitted according to the academic schedule.",
+    audience: "Active OJT Students",
+    date: "2026-09-20",
+    status: "Published",
+    priority: "High",
+    createdBy: "College Coordinator",
   },
   {
     id: 6,
-    title: "Monthly OJT Review",
+    title: "Placement Verification",
     description:
-      "The monthly OJT review will cover student performance, attendance and mentor feedback.",
-    category: "Review",
+      "Students must verify their company and mentor details in the portal.",
+    audience: "Selected Students",
+    date: "2026-09-22",
+    status: "Draft",
     priority: "Medium",
-    status: "Published",
-    audience: "Students & Mentors",
-    date: "05 August 2026",
-    author: "College Coordinator",
+    createdBy: "College Coordinator",
   },
 ];
 
-const categories = [
-  "All Categories",
-  "OJT",
-  "Mentor",
-  "Attendance",
-  "Company",
-  "Documentation",
-  "Review",
-  "General",
-];
-
-const statuses = [
-  "All Status",
-  "Published",
-  "Draft",
-];
-
-const priorities = [
-  "All Priority",
-  "High",
-  "Medium",
-  "Low",
-];
-
-const audiences = [
-  "All Students",
-  "Mentors",
-  "Students & Mentors",
-  "Selected Students",
-];
+/* =========================================================
+   STATUS BADGE
+========================================================= */
 
 function StatusBadge({ status }) {
-  const styles = {
+  const statusStyles = {
     Published: {
       background: "#ecfdf5",
       color: "#059669",
@@ -137,34 +108,32 @@ function StatusBadge({ status }) {
     },
   };
 
-  const style =
-    styles[status] || styles.Draft;
+  const current =
+    statusStyles[status] || statusStyles.Draft;
 
   return (
     <span
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: "5px",
         padding: "5px 9px",
         borderRadius: "999px",
-        backgroundColor: style.background,
-        color: style.color,
-        fontSize: "9px",
+        backgroundColor: current.background,
+        color: current.color,
+        fontSize: "10px",
+        lineHeight: "1",
         fontWeight: 700,
         whiteSpace: "nowrap",
       }}
     >
-      {status === "Published" ? (
-        <CheckCircle2 size={11} />
-      ) : (
-        <FileText size={11} />
-      )}
-
       {status}
     </span>
   );
 }
+
+/* =========================================================
+   PRIORITY BADGE
+========================================================= */
 
 function PriorityBadge({ priority }) {
   const styles = {
@@ -177,12 +146,12 @@ function PriorityBadge({ priority }) {
       color: "#d97706",
     },
     Low: {
-      background: "#f0fdf4",
-      color: "#16a34a",
+      background: "#eff6ff",
+      color: "#2563eb",
     },
   };
 
-  const style =
+  const current =
     styles[priority] || styles.Low;
 
   return (
@@ -192,10 +161,11 @@ function PriorityBadge({ priority }) {
         alignItems: "center",
         padding: "5px 9px",
         borderRadius: "999px",
-        backgroundColor: style.background,
-        color: style.color,
-        fontSize: "9px",
+        backgroundColor: current.background,
+        color: current.color,
+        fontSize: "10px",
         fontWeight: 700,
+        whiteSpace: "nowrap",
       }}
     >
       {priority}
@@ -203,149 +173,354 @@ function PriorityBadge({ priority }) {
   );
 }
 
-function Modal({
-  children,
-  onClose,
-  width = "620px",
+/* =========================================================
+   FORM INPUT
+========================================================= */
+
+function FormInput({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  required = false,
 }) {
   return (
-    <div
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
+    <div>
+      <label
+        style={{
+          display: "block",
+          marginBottom: "6px",
+          color: "#475569",
+          fontSize: "11px",
+          fontWeight: 700,
+        }}
+      >
+        {label}
+        {required ? " *" : ""}
+      </label>
+
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        style={{
+          width: "100%",
+          height: "40px",
+          padding: "0 11px",
+          border: "1px solid #dbe4ee",
+          borderRadius: "8px",
+          outline: "none",
+          color: "#334155",
+          fontSize: "11px",
+          boxSizing: "border-box",
+        }}
+      />
+    </div>
+  );
+}
+
+/* =========================================================
+   FORM SELECT
+========================================================= */
+
+function FormSelect({
+  label,
+  name,
+  value,
+  onChange,
+  options,
+}) {
+  return (
+    <div>
+      <label
+        style={{
+          display: "block",
+          marginBottom: "6px",
+          color: "#475569",
+          fontSize: "11px",
+          fontWeight: 700,
+        }}
+      >
+        {label}
+      </label>
+
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        style={{
+          width: "100%",
+          height: "40px",
+          padding: "0 11px",
+          border: "1px solid #dbe4ee",
+          borderRadius: "8px",
+          outline: "none",
+          color: "#334155",
+          backgroundColor: "#ffffff",
+          fontSize: "11px",
+          boxSizing: "border-box",
+        }}
+      >
+        {options.map((option) => (
+          <option
+            key={option}
+            value={option}
+          >
+            {option}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+/* =========================================================
+   ANNOUNCEMENT FORM
+========================================================= */
+
+function AnnouncementForm({
+  formData,
+  onChange,
+  onSubmit,
+  onCancel,
+  submitText,
+}) {
+  return (
+    <form
+      onSubmit={onSubmit}
       style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
         padding: "20px",
-        backgroundColor:
-          "rgba(15, 23, 42, 0.45)",
-        backdropFilter: "blur(2px)",
       }}
     >
       <div
         style={{
-          width: "100%",
-          maxWidth: width,
-          maxHeight: "90vh",
-          overflowY: "auto",
-          borderRadius: "16px",
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 20px 50px rgba(15, 23, 42, 0.18)",
+          display: "grid",
+          gridTemplateColumns:
+            "repeat(2, minmax(0, 1fr))",
+          gap: "14px",
         }}
       >
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function ModalHeader({
-  title,
-  subtitle,
-  onClose,
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: "15px",
-        padding: "18px 20px",
-        borderBottom:
-          "1px solid #eef2f7",
-      }}
-    >
-      <div>
-        <h2
+        <div
           style={{
-            margin: 0,
-            color: "#1e293b",
-            fontSize: "17px",
-            fontWeight: 750,
+            gridColumn: "1 / -1",
           }}
         >
-          {title}
-        </h2>
+          <FormInput
+            label="Announcement Title"
+            name="title"
+            value={formData.title}
+            onChange={onChange}
+            placeholder="Enter announcement title"
+            required
+          />
+        </div>
 
-        <p
+        <FormSelect
+          label="Audience"
+          name="audience"
+          value={formData.audience}
+          onChange={onChange}
+          options={[
+            "All Students",
+            "Selected Students",
+            "Active OJT Students",
+            "Companies",
+            "Mentors",
+          ]}
+        />
+
+        <FormInput
+          label="Date"
+          name="date"
+          value={formData.date}
+          onChange={onChange}
+          type="date"
+          required
+        />
+
+        <FormSelect
+          label="Priority"
+          name="priority"
+          value={formData.priority}
+          onChange={onChange}
+          options={[
+            "High",
+            "Medium",
+            "Low",
+          ]}
+        />
+
+        <FormSelect
+          label="Status"
+          name="status"
+          value={formData.status}
+          onChange={onChange}
+          options={[
+            "Published",
+            "Draft",
+          ]}
+        />
+
+        <div
           style={{
-            margin: "5px 0 0",
-            color: "#94a3b8",
-            fontSize: "11px",
+            gridColumn: "1 / -1",
           }}
         >
-          {subtitle}
-        </p>
+          <label
+            style={{
+              display: "block",
+              marginBottom: "6px",
+              color: "#475569",
+              fontSize: "11px",
+              fontWeight: 700,
+            }}
+          >
+            Description *
+          </label>
+
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={onChange}
+            placeholder="Write announcement details..."
+            required
+            rows={5}
+            style={{
+              width: "100%",
+              padding: "11px",
+              border: "1px solid #dbe4ee",
+              borderRadius: "8px",
+              outline: "none",
+              resize: "vertical",
+              color: "#334155",
+              fontSize: "11px",
+              lineHeight: "1.5",
+              fontFamily: "inherit",
+              boxSizing: "border-box",
+            }}
+          />
+        </div>
       </div>
 
-      <button
-        type="button"
-        onClick={onClose}
+      <div
         style={{
-          width: "32px",
-          height: "32px",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "none",
-          borderRadius: "8px",
-          backgroundColor: "#f8fafc",
-          color: "#64748b",
-          cursor: "pointer",
+          justifyContent: "flex-end",
+          gap: "9px",
+          marginTop: "20px",
+          paddingTop: "15px",
+          borderTop: "1px solid #eef2f7",
         }}
       >
-        <X size={16} />
-      </button>
-    </div>
+        <button
+          type="button"
+          onClick={onCancel}
+          style={{
+            height: "38px",
+            padding: "0 14px",
+            border: "1px solid #dbe4ee",
+            borderRadius: "8px",
+            backgroundColor: "#ffffff",
+            color: "#64748b",
+            fontSize: "11px",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          style={{
+            height: "38px",
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "7px",
+            padding: "0 15px",
+            border: "none",
+            borderRadius: "8px",
+            backgroundColor: "#2563eb",
+            color: "#ffffff",
+            fontSize: "11px",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          {formData.status === "Published" ? (
+            <Send size={15} />
+          ) : (
+            <FileText size={15} />
+          )}
+
+          {submitText}
+        </button>
+      </div>
+    </form>
   );
 }
+
+/* =========================================================
+   MAIN COMPONENT
+========================================================= */
 
 export default function Announcements() {
-  const [announcements, setAnnouncements] =
+  const [announcementList, setAnnouncementList] =
     useState(initialAnnouncements);
 
   const [searchTerm, setSearchTerm] =
     useState("");
 
-  const [selectedCategory, setSelectedCategory] =
-    useState("All Categories");
+  const [selectedAudience, setSelectedAudience] =
+    useState("All Audiences");
 
   const [selectedStatus, setSelectedStatus] =
     useState("All Status");
 
   const [selectedPriority, setSelectedPriority] =
-    useState("All Priority");
+    useState("All Priorities");
 
   const [currentPage, setCurrentPage] =
     useState(1);
 
-  const [actionId, setActionId] =
-    useState(null);
+  const announcementsPerPage = 5;
 
-  const [viewAnnouncement, setViewAnnouncement] =
+  const [showAddModal, setShowAddModal] =
+    useState(false);
+
+  const [selectedAnnouncement, setSelectedAnnouncement] =
     useState(null);
 
   const [editingAnnouncement, setEditingAnnouncement] =
     useState(null);
 
-  const [showCreate, setShowCreate] =
-    useState(false);
+  const [actionAnnouncement, setActionAnnouncement] =
+    useState(null);
 
-  const announcementsPerPage = 5;
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    audience: "All Students",
+    date: "",
+    status: "Published",
+    priority: "Medium",
+  });
+
+  /* =======================================================
+     FILTER
+  ====================================================== */
 
   const filteredAnnouncements = useMemo(() => {
     const search =
       searchTerm.trim().toLowerCase();
 
-    return announcements.filter(
+    return announcementList.filter(
       (announcement) => {
         const matchesSearch =
           !search ||
@@ -355,46 +530,46 @@ export default function Announcements() {
           announcement.description
             .toLowerCase()
             .includes(search) ||
-          announcement.category
-            .toLowerCase()
-            .includes(search) ||
           announcement.audience
             .toLowerCase()
             .includes(search);
 
-        const matchesCategory =
-          selectedCategory ===
-            "All Categories" ||
-          announcement.category ===
-            selectedCategory;
+        const matchesAudience =
+          selectedAudience ===
+            "All Audiences" ||
+          announcement.audience ===
+            selectedAudience;
 
         const matchesStatus =
-          selectedStatus ===
-            "All Status" ||
+          selectedStatus === "All Status" ||
           announcement.status ===
             selectedStatus;
 
         const matchesPriority =
           selectedPriority ===
-            "All Priority" ||
+            "All Priorities" ||
           announcement.priority ===
             selectedPriority;
 
         return (
           matchesSearch &&
-          matchesCategory &&
+          matchesAudience &&
           matchesStatus &&
           matchesPriority
         );
       }
     );
   }, [
-    announcements,
+    announcementList,
     searchTerm,
-    selectedCategory,
+    selectedAudience,
     selectedStatus,
     selectedPriority,
   ]);
+
+  /* =======================================================
+     PAGINATION
+  ====================================================== */
 
   const totalPages = Math.max(
     1,
@@ -416,91 +591,241 @@ export default function Announcements() {
   const paginatedAnnouncements =
     filteredAnnouncements.slice(
       startIndex,
-      startIndex +
-        announcementsPerPage
+      startIndex + announcementsPerPage
     );
 
-  const totalAnnouncements =
-    announcements.length;
+  /* =======================================================
+     STATS
+  ====================================================== */
 
-  const publishedCount =
-    announcements.filter(
+  const totalAnnouncements =
+    announcementList.length;
+
+  const publishedAnnouncements =
+    announcementList.filter(
       (item) =>
         item.status === "Published"
     ).length;
 
-  const draftCount =
-    announcements.filter(
+  const draftAnnouncements =
+    announcementList.filter(
       (item) =>
         item.status === "Draft"
     ).length;
 
-  const highPriorityCount =
-    announcements.filter(
+  const highPriorityAnnouncements =
+    announcementList.filter(
       (item) =>
         item.priority === "High"
     ).length;
 
-  const clearFilters = () => {
-    setSearchTerm("");
-    setSelectedCategory(
-      "All Categories"
+  /* =======================================================
+     FORM
+  ====================================================== */
+
+  const handleFormChange = (event) => {
+    const { name, value } =
+      event.target;
+
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      audience: "All Students",
+      date: "",
+      status: "Published",
+      priority: "Medium",
+    });
+  };
+
+  /* =======================================================
+     ADD
+  ====================================================== */
+
+  const handleAddAnnouncement = (event) => {
+    event.preventDefault();
+
+    if (
+      !formData.title.trim() ||
+      !formData.description.trim() ||
+      !formData.date
+    ) {
+      return;
+    }
+
+    const newAnnouncement = {
+      id:
+        announcementList.length > 0
+          ? Math.max(
+              ...announcementList.map(
+                (item) => item.id
+              )
+            ) + 1
+          : 1,
+
+      title: formData.title.trim(),
+
+      description:
+        formData.description.trim(),
+
+      audience: formData.audience,
+
+      date: formData.date,
+
+      status: formData.status,
+
+      priority: formData.priority,
+
+      createdBy:
+        "College Coordinator",
+    };
+
+    setAnnouncementList(
+      (current) => [
+        newAnnouncement,
+        ...current,
+      ]
     );
-    setSelectedStatus("All Status");
-    setSelectedPriority(
-      "All Priority"
-    );
+
     setCurrentPage(1);
+    resetForm();
+    setShowAddModal(false);
   };
 
-  const deleteAnnouncement = (id) => {
-    setAnnouncements((current) =>
-      current.filter(
-        (item) => item.id !== id
-      )
+  /* =======================================================
+     EDIT
+  ====================================================== */
+
+  const openEditAnnouncement = (
+    announcement
+  ) => {
+    setEditingAnnouncement(
+      announcement
     );
 
-    setActionId(null);
-    setViewAnnouncement(null);
+    setFormData({
+      title: announcement.title,
+      description:
+        announcement.description,
+      audience: announcement.audience,
+      date: announcement.date,
+      status: announcement.status,
+      priority: announcement.priority,
+    });
+
+    setActionAnnouncement(null);
   };
 
-  const saveAnnouncement = (data) => {
-    if (editingAnnouncement) {
-      setAnnouncements((current) =>
+  const handleEditAnnouncement = (
+    event
+  ) => {
+    event.preventDefault();
+
+    if (
+      !editingAnnouncement ||
+      !formData.title.trim() ||
+      !formData.description.trim() ||
+      !formData.date
+    ) {
+      return;
+    }
+
+    setAnnouncementList(
+      (current) =>
         current.map((item) =>
           item.id ===
           editingAnnouncement.id
             ? {
                 ...item,
-                ...data,
+                title:
+                  formData.title.trim(),
+                description:
+                  formData.description.trim(),
+                audience:
+                  formData.audience,
+                date:
+                  formData.date,
+                status:
+                  formData.status,
+                priority:
+                  formData.priority,
               }
             : item
         )
+    );
+
+    setEditingAnnouncement(null);
+    resetForm();
+  };
+
+  /* =======================================================
+     DELETE
+  ====================================================== */
+
+  const handleDeleteAnnouncement = (
+    announcement
+  ) => {
+    const confirmed =
+      window.confirm(
+        `Delete "${announcement.title}"?`
       );
 
-      setEditingAnnouncement(null);
+    if (!confirmed) {
       return;
     }
 
-    setAnnouncements((current) => [
-      {
-        id:
-          Math.max(
-            0,
-            ...current.map(
-              (item) => item.id
-            )
-          ) + 1,
-        ...data,
-        author: "College Coordinator",
-        date: "15 August 2026",
-      },
-      ...current,
-    ]);
+    setAnnouncementList(
+      (current) =>
+        current.filter(
+          (item) =>
+            item.id !==
+            announcement.id
+        )
+    );
 
-    setShowCreate(false);
-    setCurrentPage(1);
+    setSelectedAnnouncement(null);
+    setActionAnnouncement(null);
   };
+
+  /* =======================================================
+     DATE FORMAT
+  ====================================================== */
+
+  const formatDate = (date) => {
+    if (!date) {
+      return "Not Available";
+    }
+
+    const parsedDate =
+      new Date(`${date}T00:00:00`);
+
+    if (
+      Number.isNaN(
+        parsedDate.getTime()
+      )
+    ) {
+      return date;
+    }
+
+    return parsedDate.toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }
+    );
+  };
+
+  /* =======================================================
+     RETURN
+  ====================================================== */
 
   return (
     <div
@@ -513,6 +838,7 @@ export default function Announcements() {
       {/* =====================================================
           BREADCRUMB
       ====================================================== */}
+
       <div
         style={{
           display: "flex",
@@ -546,8 +872,9 @@ export default function Announcements() {
       </div>
 
       {/* =====================================================
-          HEADER
+          PAGE HEADER
       ====================================================== */}
+
       <section
         style={{
           display: "flex",
@@ -570,15 +897,14 @@ export default function Announcements() {
                 "uppercase",
             }}
           >
-            Communication
+            OJT Management
           </div>
 
           <h1
             style={{
               margin: 0,
               color: "#0f172a",
-              fontSize:
-                "clamp(26px, 3vw, 32px)",
+              fontSize: "32px",
               lineHeight: "1.1",
               fontWeight: 800,
               letterSpacing:
@@ -590,23 +916,24 @@ export default function Announcements() {
 
           <p
             style={{
-              margin:
-                "7px 0 0",
+              margin: "7px 0 0",
               color: "#64748b",
               fontSize: "13px",
+              lineHeight: "1.5",
             }}
           >
             Create and manage important
-            OJT announcements for students
-            and mentors.
+            OJT announcements for students,
+            companies and mentors.
           </p>
         </div>
 
         <button
           type="button"
-          onClick={() =>
-            setShowCreate(true)
-          }
+          onClick={() => {
+            resetForm();
+            setShowAddModal(true);
+          }}
           style={{
             height: "42px",
             display: "inline-flex",
@@ -625,6 +952,8 @@ export default function Announcements() {
             cursor: "pointer",
             boxShadow:
               "0 4px 10px rgba(37, 99, 235, 0.18)",
+            whiteSpace:
+              "nowrap",
           }}
         >
           <Plus size={17} />
@@ -635,8 +964,9 @@ export default function Announcements() {
       {/* =====================================================
           STATISTICS
       ====================================================== */}
+
       <section
-        className="announcement-stat-grid"
+        className="announcement-stats"
         style={{
           display: "grid",
           gridTemplateColumns:
@@ -645,145 +975,275 @@ export default function Announcements() {
           marginBottom: "18px",
         }}
       >
-        {[
-          {
-            title:
-              "Total Announcements",
-            value:
-              totalAnnouncements,
-            subtitle:
-              "All announcements",
-            icon: Megaphone,
-            background:
-              "#eff6ff",
-            color: "#2563eb",
-          },
-          {
-            title: "Published",
-            value:
-              publishedCount,
-            subtitle:
-              "Currently visible",
-            icon: CheckCircle2,
-            background:
-              "#ecfdf5",
-            color: "#059669",
-          },
-          {
-            title: "Drafts",
-            value:
-              draftCount,
-            subtitle:
-              "Not published yet",
-            icon: FileText,
-            background:
-              "#f8fafc",
-            color: "#64748b",
-          },
-          {
-            title:
-              "High Priority",
-            value:
-              highPriorityCount,
-            subtitle:
-              "Requires attention",
-            icon: AlertTriangle,
-            background:
-              "#fef2f2",
-            color: "#dc2626",
-          },
-        ].map((stat) => {
-          const Icon = stat.icon;
+        {/* Total */}
 
-          return (
-            <div
-              key={stat.title}
-              style={{
-                minWidth: 0,
-                padding: "16px",
-                border:
-                  "1px solid #e2e8f0",
-                borderRadius:
-                  "13px",
-                backgroundColor:
-                  "#ffffff",
-                boxShadow:
-                  "0 2px 8px rgba(15, 23, 42, 0.035)",
-              }}
-            >
-              <div
-                style={{
-                  width: "39px",
-                  height: "39px",
-                  display:
-                    "flex",
-                  alignItems:
-                    "center",
-                  justifyContent:
-                    "center",
-                  borderRadius:
-                    "10px",
-                  backgroundColor:
-                    stat.background,
-                  color:
-                    stat.color,
-                }}
-              >
-                <Icon size={19} />
-              </div>
+        <div
+          style={{
+            padding: "16px",
+            border:
+              "1px solid #e2e8f0",
+            borderRadius: "13px",
+            backgroundColor:
+              "#ffffff",
+            boxShadow:
+              "0 2px 8px rgba(15, 23, 42, 0.035)",
+          }}
+        >
+          <div
+            style={{
+              width: "39px",
+              height: "39px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent:
+                "center",
+              borderRadius: "10px",
+              backgroundColor:
+                "#eff6ff",
+              color: "#2563eb",
+            }}
+          >
+            <Megaphone size={19} />
+          </div>
 
-              <div
-                style={{
-                  marginTop:
-                    "10px",
-                  color:
-                    "#64748b",
-                  fontSize:
-                    "11px",
-                  fontWeight:
-                    600,
-                }}
-              >
-                {stat.title}
-              </div>
+          <div
+            style={{
+              marginTop: "10px",
+              color: "#64748b",
+              fontSize: "11px",
+              fontWeight: 600,
+            }}
+          >
+            Total Announcements
+          </div>
 
-              <div
-                style={{
-                  marginTop:
-                    "4px",
-                  color:
-                    "#0f172a",
-                  fontSize:
-                    "25px",
-                  lineHeight:
-                    "1",
-                  fontWeight:
-                    800,
-                }}
-              >
-                {stat.value}
-              </div>
+          <div
+            style={{
+              marginTop: "4px",
+              color: "#0f172a",
+              fontSize: "25px",
+              lineHeight: "1",
+              fontWeight: 800,
+            }}
+          >
+            {totalAnnouncements}
+          </div>
 
-              <div
-                style={{
-                  marginTop:
-                    "5px",
-                  color:
-                    "#94a3b8",
-                  fontSize:
-                    "9px",
-                }}
-              >
-                {stat.subtitle}
-              </div>
-            </div>
-          );
-        })}
+          <div
+            style={{
+              marginTop: "5px",
+              color: "#94a3b8",
+              fontSize: "9px",
+            }}
+          >
+            All created announcements
+          </div>
+        </div>
+
+        {/* Published */}
+
+        <div
+          style={{
+            padding: "16px",
+            border:
+              "1px solid #e2e8f0",
+            borderRadius: "13px",
+            backgroundColor:
+              "#ffffff",
+            boxShadow:
+              "0 2px 8px rgba(15, 23, 42, 0.035)",
+          }}
+        >
+          <div
+            style={{
+              width: "39px",
+              height: "39px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent:
+                "center",
+              borderRadius: "10px",
+              backgroundColor:
+                "#ecfdf5",
+              color: "#059669",
+            }}
+          >
+            <CheckCircle2
+              size={19}
+            />
+          </div>
+
+          <div
+            style={{
+              marginTop: "10px",
+              color: "#64748b",
+              fontSize: "11px",
+              fontWeight: 600,
+            }}
+          >
+            Published
+          </div>
+
+          <div
+            style={{
+              marginTop: "4px",
+              color: "#0f172a",
+              fontSize: "25px",
+              lineHeight: "1",
+              fontWeight: 800,
+            }}
+          >
+            {publishedAnnouncements}
+          </div>
+
+          <div
+            style={{
+              marginTop: "5px",
+              color: "#94a3b8",
+              fontSize: "9px",
+            }}
+          >
+            Currently visible
+          </div>
+        </div>
+
+        {/* Draft */}
+
+        <div
+          style={{
+            padding: "16px",
+            border:
+              "1px solid #e2e8f0",
+            borderRadius: "13px",
+            backgroundColor:
+              "#ffffff",
+            boxShadow:
+              "0 2px 8px rgba(15, 23, 42, 0.035)",
+          }}
+        >
+          <div
+            style={{
+              width: "39px",
+              height: "39px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent:
+                "center",
+              borderRadius: "10px",
+              backgroundColor:
+                "#f8fafc",
+              color: "#64748b",
+            }}
+          >
+            <Clock3 size={19} />
+          </div>
+
+          <div
+            style={{
+              marginTop: "10px",
+              color: "#64748b",
+              fontSize: "11px",
+              fontWeight: 600,
+            }}
+          >
+            Drafts
+          </div>
+
+          <div
+            style={{
+              marginTop: "4px",
+              color: "#0f172a",
+              fontSize: "25px",
+              lineHeight: "1",
+              fontWeight: 800,
+            }}
+          >
+            {draftAnnouncements}
+          </div>
+
+          <div
+            style={{
+              marginTop: "5px",
+              color: "#94a3b8",
+              fontSize: "9px",
+            }}
+          >
+            Not published yet
+          </div>
+        </div>
+
+        {/* High Priority */}
+
+        <div
+          style={{
+            padding: "16px",
+            border:
+              "1px solid #e2e8f0",
+            borderRadius: "13px",
+            backgroundColor:
+              "#ffffff",
+            boxShadow:
+              "0 2px 8px rgba(15, 23, 42, 0.035)",
+          }}
+        >
+          <div
+            style={{
+              width: "39px",
+              height: "39px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent:
+                "center",
+              borderRadius: "10px",
+              backgroundColor:
+                "#fef2f2",
+              color: "#dc2626",
+            }}
+          >
+            <AlertTriangle
+              size={19}
+            />
+          </div>
+
+          <div
+            style={{
+              marginTop: "10px",
+              color: "#64748b",
+              fontSize: "11px",
+              fontWeight: 600,
+            }}
+          >
+            High Priority
+          </div>
+
+          <div
+            style={{
+              marginTop: "4px",
+              color: "#0f172a",
+              fontSize: "25px",
+              lineHeight: "1",
+              fontWeight: 800,
+            }}
+          >
+            {highPriorityAnnouncements}
+          </div>
+
+          <div
+            style={{
+              marginTop: "5px",
+              color: "#94a3b8",
+              fontSize: "9px",
+            }}
+          >
+            Requires attention
+          </div>
+        </div>
       </section>
 
       {/* =====================================================
-          TABLE
+          ANNOUNCEMENT LIST
       ====================================================== */}
+
       <section
         style={{
           width: "100%",
@@ -798,18 +1258,201 @@ export default function Announcements() {
             "0 2px 8px rgba(15, 23, 42, 0.035)",
         }}
       >
+        {/* Filters */}
+
         <div
           style={{
-            padding:
-              "15px 18px",
+            padding: "15px 18px",
+            borderBottom:
+              "1px solid #eef2f7",
+          }}
+        >
+          <div
+            className="announcement-filters"
+            style={{
+              display: "grid",
+              gridTemplateColumns:
+                "minmax(200px, 1.6fr) repeat(3, minmax(130px, 1fr))",
+              gap: "10px",
+            }}
+          >
+            {/* Search */}
+
+            <div
+              style={{
+                position:
+                  "relative",
+              }}
+            >
+              <Search
+                size={16}
+                style={{
+                  position:
+                    "absolute",
+                  left: "11px",
+                  top: "50%",
+                  transform:
+                    "translateY(-50%)",
+                  color:
+                    "#94a3b8",
+                }}
+              />
+
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(event) => {
+                  setSearchTerm(
+                    event.target.value
+                  );
+                  setCurrentPage(1);
+                }}
+                placeholder="Search announcements..."
+                style={{
+                  width: "100%",
+                  height: "38px",
+                  padding:
+                    "0 11px 0 34px",
+                  border:
+                    "1px solid #dbe4ee",
+                  borderRadius: "8px",
+                  outline: "none",
+                  color: "#334155",
+                  fontSize: "11px",
+                  boxSizing:
+                    "border-box",
+                }}
+              />
+            </div>
+
+            {/* Audience */}
+
+            <select
+              value={selectedAudience}
+              onChange={(event) => {
+                setSelectedAudience(
+                  event.target.value
+                );
+                setCurrentPage(1);
+              }}
+              style={{
+                height: "38px",
+                padding: "0 10px",
+                border:
+                  "1px solid #dbe4ee",
+                borderRadius: "8px",
+                outline: "none",
+                color: "#475569",
+                backgroundColor:
+                  "#ffffff",
+                fontSize: "11px",
+              }}
+            >
+              <option>
+                All Audiences
+              </option>
+              <option>
+                All Students
+              </option>
+              <option>
+                Selected Students
+              </option>
+              <option>
+                Active OJT Students
+              </option>
+              <option>
+                Companies
+              </option>
+              <option>
+                Mentors
+              </option>
+            </select>
+
+            {/* Status */}
+
+            <select
+              value={selectedStatus}
+              onChange={(event) => {
+                setSelectedStatus(
+                  event.target.value
+                );
+                setCurrentPage(1);
+              }}
+              style={{
+                height: "38px",
+                padding: "0 10px",
+                border:
+                  "1px solid #dbe4ee",
+                borderRadius: "8px",
+                outline: "none",
+                color: "#475569",
+                backgroundColor:
+                  "#ffffff",
+                fontSize: "11px",
+              }}
+            >
+              <option>
+                All Status
+              </option>
+              <option>
+                Published
+              </option>
+              <option>
+                Draft
+              </option>
+            </select>
+
+            {/* Priority */}
+
+            <select
+              value={selectedPriority}
+              onChange={(event) => {
+                setSelectedPriority(
+                  event.target.value
+                );
+                setCurrentPage(1);
+              }}
+              style={{
+                height: "38px",
+                padding: "0 10px",
+                border:
+                  "1px solid #dbe4ee",
+                borderRadius: "8px",
+                outline: "none",
+                color: "#475569",
+                backgroundColor:
+                  "#ffffff",
+                fontSize: "11px",
+              }}
+            >
+              <option>
+                All Priorities
+              </option>
+              <option>
+                High
+              </option>
+              <option>
+                Medium
+              </option>
+              <option>
+                Low
+              </option>
+            </select>
+          </div>
+        </div>
+
+        {/* Table Header */}
+
+        <div
+          style={{
+            padding: "15px 18px",
             borderBottom:
               "1px solid #eef2f7",
           }}
         >
           <div
             style={{
-              display:
-                "flex",
+              display: "flex",
               alignItems:
                 "center",
               justifyContent:
@@ -821,392 +1464,55 @@ export default function Announcements() {
               <h2
                 style={{
                   margin: 0,
-                  color:
-                    "#1e293b",
-                  fontSize:
-                    "15px",
-                  fontWeight:
-                    750,
+                  color: "#1e293b",
+                  fontSize: "15px",
+                  fontWeight: 750,
                 }}
               >
-                Announcement List
+                All Announcements
               </h2>
 
               <p
                 style={{
                   margin:
                     "4px 0 0",
-                  color:
-                    "#94a3b8",
-                  fontSize:
-                    "10px",
+                  color: "#94a3b8",
+                  fontSize: "10px",
                 }}
               >
-                Manage announcements
-                and their publication
-                status.
+                View and manage OJT
+                announcements
               </p>
             </div>
 
             <div
               style={{
-                display:
-                  "flex",
-                alignItems:
-                  "center",
-                gap: "5px",
-                color:
-                  "#64748b",
-                fontSize:
-                  "10px",
+                color: "#94a3b8",
+                fontSize: "10px",
               }}
             >
-              <Clock3
-                size={13}
-              />
-              Communication
+              {filteredAnnouncements.length}{" "}
+              result
+              {filteredAnnouncements.length !==
+              1
+                ? "s"
+                : ""}
             </div>
-          </div>
-
-          {/* FILTERS */}
-          <div
-            className="announcement-filter-grid"
-            style={{
-              display:
-                "grid",
-              gridTemplateColumns:
-                "minmax(230px, 1fr) auto auto auto auto",
-              gap: "9px",
-              marginTop:
-                "14px",
-            }}
-          >
-            <div
-              style={{
-                height: "38px",
-                display:
-                  "flex",
-                alignItems:
-                  "center",
-                gap: "8px",
-                padding:
-                  "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius:
-                  "8px",
-                backgroundColor:
-                  "#ffffff",
-                boxSizing:
-                  "border-box",
-              }}
-            >
-              <Search
-                size={16}
-                color="#94a3b8"
-              />
-
-              <input
-                type="text"
-                value={
-                  searchTerm
-                }
-                onChange={(
-                  event
-                ) => {
-                  setSearchTerm(
-                    event
-                      .target
-                      .value
-                  );
-                  setCurrentPage(
-                    1
-                  );
-                }}
-                placeholder="Search announcements..."
-                style={{
-                  width:
-                    "100%",
-                  minWidth: 0,
-                  border:
-                    "none",
-                  outline:
-                    "none",
-                  background:
-                    "transparent",
-                  color:
-                    "#334155",
-                  fontSize:
-                    "11px",
-                }}
-              />
-            </div>
-
-            <select
-              value={
-                selectedCategory
-              }
-              onChange={(
-                event
-              ) => {
-                setSelectedCategory(
-                  event
-                    .target
-                    .value
-                );
-                setCurrentPage(
-                  1
-                );
-              }}
-              style={{
-                height:
-                  "38px",
-                padding:
-                  "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius:
-                  "8px",
-                backgroundColor:
-                  "#ffffff",
-                color:
-                  "#64748b",
-                fontSize:
-                  "10px",
-                fontWeight:
-                  600,
-                cursor:
-                  "pointer",
-                outline:
-                  "none",
-              }}
-            >
-              {categories.map(
-                (
-                  category
-                ) => (
-                  <option
-                    key={
-                      category
-                    }
-                    value={
-                      category
-                    }
-                  >
-                    {category}
-                  </option>
-                )
-              )}
-            </select>
-
-            <select
-              value={
-                selectedStatus
-              }
-              onChange={(
-                event
-              ) => {
-                setSelectedStatus(
-                  event
-                    .target
-                    .value
-                );
-                setCurrentPage(
-                  1
-                );
-              }}
-              style={{
-                height:
-                  "38px",
-                padding:
-                  "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius:
-                  "8px",
-                backgroundColor:
-                  "#ffffff",
-                color:
-                  "#64748b",
-                fontSize:
-                  "10px",
-                fontWeight:
-                  600,
-                cursor:
-                  "pointer",
-                outline:
-                  "none",
-              }}
-            >
-              {statuses.map(
-                (
-                  status
-                ) => (
-                  <option
-                    key={
-                      status
-                    }
-                    value={
-                      status
-                    }
-                  >
-                    {status}
-                  </option>
-                )
-              )}
-            </select>
-
-            <select
-              value={
-                selectedPriority
-              }
-              onChange={(
-                event
-              ) => {
-                setSelectedPriority(
-                  event
-                    .target
-                    .value
-                );
-                setCurrentPage(
-                  1
-                );
-              }}
-              style={{
-                height:
-                  "38px",
-                padding:
-                  "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius:
-                  "8px",
-                backgroundColor:
-                  "#ffffff",
-                color:
-                  "#64748b",
-                fontSize:
-                  "10px",
-                fontWeight:
-                  600,
-                cursor:
-                  "pointer",
-                outline:
-                  "none",
-              }}
-            >
-              {priorities.map(
-                (
-                  priority
-                ) => (
-                  <option
-                    key={
-                      priority
-                    }
-                    value={
-                      priority
-                    }
-                  >
-                    {priority}
-                  </option>
-                )
-              )}
-            </select>
-
-            <button
-              type="button"
-              onClick={
-                clearFilters
-              }
-              style={{
-                height:
-                  "38px",
-                padding:
-                  "0 12px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius:
-                  "8px",
-                backgroundColor:
-                  "#ffffff",
-                color:
-                  "#64748b",
-                fontSize:
-                  "10px",
-                fontWeight:
-                  700,
-                cursor:
-                  "pointer",
-              }}
-            >
-              Clear
-            </button>
           </div>
         </div>
 
-        {/* COUNT */}
-        <div
-          style={{
-            padding:
-              "10px 16px",
-            backgroundColor:
-              "#f8fafc",
-            borderBottom:
-              "1px solid #eef2f7",
-            color:
-              "#64748b",
-            fontSize:
-              "10px",
-          }}
-        >
-          Showing{" "}
-          <strong
-            style={{
-              color:
-                "#334155",
-            }}
-          >
-            {filteredAnnouncements.length ===
-            0
-              ? 0
-              : startIndex +
-                1}
-            -
-            {Math.min(
-              startIndex +
-                announcementsPerPage,
-              filteredAnnouncements.length
-            )}
-          </strong>{" "}
-          of{" "}
-          <strong
-            style={{
-              color:
-                "#334155",
-            }}
-          >
-            {
-              filteredAnnouncements.length
-            }
-          </strong>{" "}
-          announcements
-        </div>
+        {/* Table */}
 
-        {/* TABLE */}
         <div
           style={{
-            width:
-              "100%",
-            overflowX:
-              "auto",
+            width: "100%",
+            overflowX: "auto",
           }}
         >
           <table
             style={{
-              width:
-                "100%",
-              minWidth:
-                "1050px",
+              width: "100%",
+              minWidth: "850px",
               borderCollapse:
                 "collapse",
             }}
@@ -1215,49 +1521,38 @@ export default function Announcements() {
               <tr>
                 {[
                   "Announcement",
-                  "Category",
                   "Audience",
+                  "Date",
                   "Priority",
                   "Status",
-                  "Published",
                   "Action",
-                ].map(
-                  (
-                    heading
-                  ) => (
-                    <th
-                      key={
-                        heading
-                      }
-                      style={{
-                        padding:
-                          "10px 13px",
-                        backgroundColor:
-                          "#f8fafc",
-                        borderBottom:
-                          "1px solid #e2e8f0",
-                        color:
-                          "#94a3b8",
-                        fontSize:
-                          "9px",
-                        fontWeight:
-                          750,
-                        textAlign:
-                          "left",
-                        textTransform:
-                          "uppercase",
-                        letterSpacing:
-                          "0.45px",
-                        whiteSpace:
-                          "nowrap",
-                      }}
-                    >
-                      {
-                        heading
-                      }
-                    </th>
-                  )
-                )}
+                ].map((heading) => (
+                  <th
+                    key={heading}
+                    style={{
+                      padding:
+                        "10px 13px",
+                      backgroundColor:
+                        "#f8fafc",
+                      borderBottom:
+                        "1px solid #e2e8f0",
+                      color:
+                        "#94a3b8",
+                      fontSize: "9px",
+                      fontWeight: 750,
+                      textAlign:
+                        "left",
+                      textTransform:
+                        "uppercase",
+                      letterSpacing:
+                        "0.45px",
+                      whiteSpace:
+                        "nowrap",
+                    }}
+                  >
+                    {heading}
+                  </th>
+                ))}
               </tr>
             </thead>
 
@@ -1265,19 +1560,18 @@ export default function Announcements() {
               {paginatedAnnouncements.length >
               0 ? (
                 paginatedAnnouncements.map(
-                  (
-                    announcement
-                  ) => (
+                  (announcement) => (
                     <tr
                       key={
                         announcement.id
                       }
                     >
-                      {/* TITLE */}
+                      {/* Announcement */}
+
                       <td
                         style={{
                           padding:
-                            "12px 13px",
+                            "13px",
                           borderBottom:
                             "1px solid #f1f5f9",
                         }}
@@ -1287,19 +1581,18 @@ export default function Announcements() {
                             display:
                               "flex",
                             alignItems:
-                              "center",
-                            gap:
-                              "9px",
+                              "flex-start",
+                            gap: "10px",
                           }}
                         >
                           <div
                             style={{
                               width:
-                                "35px",
+                                "34px",
                               height:
-                                "35px",
+                                "34px",
                               minWidth:
-                                "35px",
+                                "34px",
                               display:
                                 "flex",
                               alignItems:
@@ -1316,15 +1609,14 @@ export default function Announcements() {
                           >
                             <Megaphone
                               size={
-                                17
+                                16
                               }
                             />
                           </div>
 
                           <div
                             style={{
-                              maxWidth:
-                                "310px",
+                              minWidth: 0,
                             }}
                           >
                             <strong
@@ -1337,12 +1629,8 @@ export default function Announcements() {
                                   "11px",
                                 fontWeight:
                                   700,
-                                whiteSpace:
-                                  "nowrap",
-                                overflow:
-                                  "hidden",
-                                textOverflow:
-                                  "ellipsis",
+                                lineHeight:
+                                  "16px",
                               }}
                             >
                               {
@@ -1356,16 +1644,20 @@ export default function Announcements() {
                                   "block",
                                 marginTop:
                                   "3px",
+                                maxWidth:
+                                  "430px",
                                 color:
                                   "#94a3b8",
                                 fontSize:
                                   "9px",
-                                whiteSpace:
-                                  "nowrap",
+                                lineHeight:
+                                  "14px",
                                 overflow:
                                   "hidden",
                                 textOverflow:
                                   "ellipsis",
+                                whiteSpace:
+                                  "nowrap",
                               }}
                             >
                               {
@@ -1376,31 +1668,20 @@ export default function Announcements() {
                         </div>
                       </td>
 
-                      {/* CATEGORY */}
+                      {/* Audience */}
+
                       <td
                         style={{
                           padding:
-                            "12px 13px",
+                            "13px",
                           borderBottom:
                             "1px solid #f1f5f9",
                           color:
                             "#64748b",
                           fontSize:
                             "10px",
-                        }}
-                      >
-                        {
-                          announcement.category
-                        }
-                      </td>
-
-                      {/* AUDIENCE */}
-                      <td
-                        style={{
-                          padding:
-                            "12px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
+                          whiteSpace:
+                            "nowrap",
                         }}
                       >
                         <div
@@ -1409,19 +1690,12 @@ export default function Announcements() {
                               "flex",
                             alignItems:
                               "center",
-                            gap:
-                              "6px",
-                            color:
-                              "#64748b",
-                            fontSize:
-                              "10px",
-                            whiteSpace:
-                              "nowrap",
+                            gap: "6px",
                           }}
                         >
                           <Users
                             size={
-                              13
+                              14
                             }
                             color="#94a3b8"
                           />
@@ -1432,11 +1706,50 @@ export default function Announcements() {
                         </div>
                       </td>
 
-                      {/* PRIORITY */}
+                      {/* Date */}
+
                       <td
                         style={{
                           padding:
-                            "12px 13px",
+                            "13px",
+                          borderBottom:
+                            "1px solid #f1f5f9",
+                          color:
+                            "#64748b",
+                          fontSize:
+                            "10px",
+                          whiteSpace:
+                            "nowrap",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display:
+                              "flex",
+                            alignItems:
+                              "center",
+                            gap: "6px",
+                          }}
+                        >
+                          <CalendarDays
+                            size={
+                              14
+                            }
+                            color="#94a3b8"
+                          />
+
+                          {formatDate(
+                            announcement.date
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Priority */}
+
+                      <td
+                        style={{
+                          padding:
+                            "13px",
                           borderBottom:
                             "1px solid #f1f5f9",
                         }}
@@ -1448,11 +1761,12 @@ export default function Announcements() {
                         />
                       </td>
 
-                      {/* STATUS */}
+                      {/* Status */}
+
                       <td
                         style={{
                           padding:
-                            "12px 13px",
+                            "13px",
                           borderBottom:
                             "1px solid #f1f5f9",
                         }}
@@ -1464,63 +1778,30 @@ export default function Announcements() {
                         />
                       </td>
 
-                      {/* DATE */}
+                      {/* Action */}
+
                       <td
                         style={{
                           padding:
-                            "12px 13px",
+                            "13px",
                           borderBottom:
                             "1px solid #f1f5f9",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display:
-                              "flex",
-                            alignItems:
-                              "center",
-                            gap:
-                              "5px",
-                            color:
-                              "#64748b",
-                            fontSize:
-                              "9px",
-                            whiteSpace:
-                              "nowrap",
-                          }}
-                        >
-                          <CalendarDays
-                            size={
-                              12
-                            }
-                            color="#94a3b8"
-                          />
-
-                          {
-                            announcement.date
-                          }
-                        </div>
-                      </td>
-
-                      {/* ACTION */}
-                      <td
-                        style={{
                           position:
                             "relative",
-                          padding:
-                            "12px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
                         }}
                       >
                         <button
                           type="button"
+                          title="Announcement actions"
                           onClick={() =>
-                            setActionId(
-                              actionId ===
+                            setActionAnnouncement(
+                              (
+                                current
+                              ) =>
+                                current?.id ===
                                 announcement.id
-                                ? null
-                                : announcement.id
+                                  ? null
+                                  : announcement
                             )
                           }
                           style={{
@@ -1553,7 +1834,7 @@ export default function Announcements() {
                           />
                         </button>
 
-                        {actionId ===
+                        {actionAnnouncement?.id ===
                           announcement.id && (
                           <div
                             style={{
@@ -1562,11 +1843,11 @@ export default function Announcements() {
                               right:
                                 "13px",
                               top:
-                                "46px",
+                                "45px",
                               zIndex:
-                                20,
+                                50,
                               width:
-                                "170px",
+                                "145px",
                               padding:
                                 "5px",
                               border:
@@ -1582,14 +1863,41 @@ export default function Announcements() {
                             <button
                               type="button"
                               onClick={() => {
-                                setViewAnnouncement(
+                                setSelectedAnnouncement(
                                   announcement
                                 );
-                                setActionId(
+                                setActionAnnouncement(
                                   null
                                 );
                               }}
-                              className="announcement-action-button"
+                              style={{
+                                width:
+                                  "100%",
+                                height:
+                                  "34px",
+                                display:
+                                  "flex",
+                                alignItems:
+                                  "center",
+                                gap:
+                                  "8px",
+                                padding:
+                                  "0 9px",
+                                border:
+                                  "none",
+                                borderRadius:
+                                  "6px",
+                                backgroundColor:
+                                  "transparent",
+                                color:
+                                  "#475569",
+                                fontSize:
+                                  "10px",
+                                cursor:
+                                  "pointer",
+                                textAlign:
+                                  "left",
+                              }}
                             >
                               <Eye
                                 size={
@@ -1601,15 +1909,39 @@ export default function Announcements() {
 
                             <button
                               type="button"
-                              onClick={() => {
-                                setEditingAnnouncement(
+                              onClick={() =>
+                                openEditAnnouncement(
                                   announcement
-                                );
-                                setActionId(
-                                  null
-                                );
+                                )
+                              }
+                              style={{
+                                width:
+                                  "100%",
+                                height:
+                                  "34px",
+                                display:
+                                  "flex",
+                                alignItems:
+                                  "center",
+                                gap:
+                                  "8px",
+                                padding:
+                                  "0 9px",
+                                border:
+                                  "none",
+                                borderRadius:
+                                  "6px",
+                                backgroundColor:
+                                  "transparent",
+                                color:
+                                  "#475569",
+                                fontSize:
+                                  "10px",
+                                cursor:
+                                  "pointer",
+                                textAlign:
+                                  "left",
                               }}
-                              className="announcement-action-button"
                             >
                               <Pencil
                                 size={
@@ -1622,11 +1954,38 @@ export default function Announcements() {
                             <button
                               type="button"
                               onClick={() =>
-                                deleteAnnouncement(
-                                  announcement.id
+                                handleDeleteAnnouncement(
+                                  announcement
                                 )
                               }
-                              className="announcement-action-button announcement-delete"
+                              style={{
+                                width:
+                                  "100%",
+                                height:
+                                  "34px",
+                                display:
+                                  "flex",
+                                alignItems:
+                                  "center",
+                                gap:
+                                  "8px",
+                                padding:
+                                  "0 9px",
+                                border:
+                                  "none",
+                                borderRadius:
+                                  "6px",
+                                backgroundColor:
+                                  "transparent",
+                                color:
+                                  "#dc2626",
+                                fontSize:
+                                  "10px",
+                                cursor:
+                                  "pointer",
+                                textAlign:
+                                  "left",
+                              }}
                             >
                               <Trash2
                                 size={
@@ -1644,43 +2003,46 @@ export default function Announcements() {
               ) : (
                 <tr>
                   <td
-                    colSpan="7"
+                    colSpan="6"
                     style={{
                       padding:
-                        "55px 20px",
+                        "45px 20px",
                       textAlign:
                         "center",
-                      color:
-                        "#94a3b8",
-                      fontSize:
-                        "11px",
                     }}
                   >
                     <Megaphone
-                      size={30}
+                      size={28}
                       color="#cbd5e1"
-                      style={{
-                        marginBottom:
-                          "8px",
-                      }}
                     />
 
-                    <div>
-                      No announcements
-                      found
+                    <div
+                      style={{
+                        marginTop:
+                          "10px",
+                        color:
+                          "#64748b",
+                        fontSize:
+                          "12px",
+                        fontWeight:
+                          700,
+                      }}
+                    >
+                      No announcements found
                     </div>
 
                     <div
                       style={{
                         marginTop:
                           "4px",
+                        color:
+                          "#94a3b8",
                         fontSize:
                           "10px",
                       }}
                     >
-                      Try changing
-                      your search
-                      or filters.
+                      Try changing your
+                      search or filters.
                     </div>
                   </td>
                 </tr>
@@ -1689,47 +2051,48 @@ export default function Announcements() {
           </table>
         </div>
 
-        {/* PAGINATION */}
+        {/* Pagination */}
+
         <div
           style={{
-            minHeight:
-              "58px",
-            display:
-              "flex",
-            alignItems:
-              "center",
+            display: "flex",
+            alignItems: "center",
             justifyContent:
               "space-between",
-            gap:
-              "12px",
+            gap: "10px",
             padding:
-              "10px 16px",
+              "12px 18px",
             borderTop:
               "1px solid #eef2f7",
           }}
         >
           <span
             style={{
-              color:
-                "#94a3b8",
-              fontSize:
-                "10px",
+              color: "#94a3b8",
+              fontSize: "10px",
             }}
           >
-            Page{" "}
-            {safeCurrentPage}{" "}
+            Showing{" "}
+            {filteredAnnouncements.length ===
+            0
+              ? 0
+              : startIndex + 1}{" "}
+            to{" "}
+            {Math.min(
+              startIndex +
+                announcementsPerPage,
+              filteredAnnouncements.length
+            )}{" "}
             of{" "}
-            {totalPages}
+            {filteredAnnouncements.length}
           </span>
 
           <div
             style={{
-              display:
-                "flex",
+              display: "flex",
               alignItems:
                 "center",
-              gap:
-                "5px",
+              gap: "5px",
             }}
           >
             <button
@@ -1747,7 +2110,26 @@ export default function Announcements() {
                     )
                 )
               }
-              className="announcement-page-button"
+              style={{
+                width: "30px",
+                height: "30px",
+                border:
+                  "1px solid #e2e8f0",
+                borderRadius: "7px",
+                backgroundColor:
+                  "#ffffff",
+                color:
+                  safeCurrentPage ===
+                  1
+                    ? "#cbd5e1"
+                    : "#64748b",
+                fontSize: "13px",
+                cursor:
+                  safeCurrentPage ===
+                  1
+                    ? "not-allowed"
+                    : "pointer",
+              }}
             >
               ‹
             </button>
@@ -1759,29 +2141,48 @@ export default function Announcements() {
               },
               (_, index) =>
                 index + 1
-            ).map(
-              (page) => (
-                <button
-                  key={
+            ).map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() =>
+                  setCurrentPage(
                     page
-                  }
-                  type="button"
-                  onClick={() =>
-                    setCurrentPage(
-                      page
-                    )
-                  }
-                  className={`announcement-page-button ${
+                  )
+                }
+                style={{
+                  width: "30px",
+                  height: "30px",
+                  border:
                     safeCurrentPage ===
                     page
-                      ? "announcement-page-active"
-                      : ""
-                  }`}
-                >
-                  {page}
-                </button>
-              )
-            )}
+                      ? "none"
+                      : "1px solid #e2e8f0",
+                  borderRadius:
+                    "7px",
+                  backgroundColor:
+                    safeCurrentPage ===
+                    page
+                      ? "#2563eb"
+                      : "#ffffff",
+                  color:
+                    safeCurrentPage ===
+                    page
+                      ? "#ffffff"
+                      : "#64748b",
+                  fontSize: "10px",
+                  fontWeight:
+                    safeCurrentPage ===
+                    page
+                      ? 700
+                      : 400,
+                  cursor:
+                    "pointer",
+                }}
+              >
+                {page}
+              </button>
+            ))}
 
             <button
               type="button"
@@ -1798,7 +2199,26 @@ export default function Announcements() {
                     )
                 )
               }
-              className="announcement-page-button"
+              style={{
+                width: "30px",
+                height: "30px",
+                border:
+                  "1px solid #e2e8f0",
+                borderRadius: "7px",
+                backgroundColor:
+                  "#ffffff",
+                color:
+                  safeCurrentPage ===
+                  totalPages
+                    ? "#cbd5e1"
+                    : "#64748b",
+                fontSize: "13px",
+                cursor:
+                  safeCurrentPage ===
+                  totalPages
+                    ? "not-allowed"
+                    : "pointer",
+              }}
             >
               ›
             </button>
@@ -1807,64 +2227,194 @@ export default function Announcements() {
       </section>
 
       {/* =====================================================
-          CREATE / EDIT MODAL
+          ADD ANNOUNCEMENT MODAL
       ====================================================== */}
-      {(showCreate ||
-        editingAnnouncement) && (
-        <AnnouncementForm
-          announcement={
-            editingAnnouncement
+
+      {showAddModal && (
+        <div
+          onClick={() =>
+            setShowAddModal(false)
           }
-          onClose={() => {
-            setShowCreate(false);
-            setEditingAnnouncement(
-              null
-            );
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent:
+              "center",
+            padding: "20px",
+            backgroundColor:
+              "rgba(15, 23, 42, 0.45)",
+            boxSizing:
+              "border-box",
           }}
-          onSave={
-            saveAnnouncement
-          }
-        />
-      )}
-
-      {/* =====================================================
-          VIEW MODAL
-      ====================================================== */}
-      {viewAnnouncement && (
-        <Modal
-          onClose={() =>
-            setViewAnnouncement(
-              null
-            )
-          }
-          width="600px"
         >
-          <ModalHeader
-            title="Announcement Preview"
-            subtitle="Preview how the announcement will appear"
-            onClose={() =>
-              setViewAnnouncement(
-                null
-              )
-            }
-          />
-
           <div
+            onClick={(event) =>
+              event.stopPropagation()
+            }
             style={{
-              padding:
-                "20px",
+              width: "100%",
+              maxWidth: "650px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              borderRadius:
+                "16px",
+              backgroundColor:
+                "#ffffff",
+              boxShadow:
+                "0 20px 50px rgba(15, 23, 42, 0.18)",
             }}
           >
             <div
               style={{
+                display: "flex",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "space-between",
                 padding:
-                  "17px",
-                border:
-                  "1px solid #dbeafe",
-                borderRadius:
-                  "12px",
-                backgroundColor:
-                  "#eff6ff",
+                  "18px 20px",
+                borderBottom:
+                  "1px solid #eef2f7",
+              }}
+            >
+              <div>
+                <h2
+                  style={{
+                    margin: 0,
+                    color:
+                      "#1e293b",
+                    fontSize:
+                      "18px",
+                    fontWeight:
+                      800,
+                  }}
+                >
+                  Create Announcement
+                </h2>
+
+                <p
+                  style={{
+                    margin:
+                      "5px 0 0",
+                    color:
+                      "#94a3b8",
+                    fontSize:
+                      "11px",
+                  }}
+                >
+                  Create a new OJT
+                  announcement.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setShowAddModal(
+                    false
+                  )
+                }
+                style={{
+                  width: "34px",
+                  height: "34px",
+                  display:
+                    "flex",
+                  alignItems:
+                    "center",
+                  justifyContent:
+                    "center",
+                  border: "none",
+                  borderRadius:
+                    "8px",
+                  backgroundColor:
+                    "#f8fafc",
+                  color:
+                    "#64748b",
+                  cursor:
+                    "pointer",
+                }}
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <AnnouncementForm
+              formData={formData}
+              onChange={
+                handleFormChange
+              }
+              onSubmit={
+                handleAddAnnouncement
+              }
+              onCancel={() =>
+                setShowAddModal(
+                  false
+                )
+              }
+              submitText="Create Announcement"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================
+          VIEW ANNOUNCEMENT MODAL
+      ====================================================== */}
+
+      {selectedAnnouncement && (
+        <div
+          onClick={() =>
+            setSelectedAnnouncement(
+              null
+            )
+          }
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100001,
+            display: "flex",
+            alignItems:
+              "center",
+            justifyContent:
+              "center",
+            padding: "20px",
+            backgroundColor:
+              "rgba(15, 23, 42, 0.45)",
+            boxSizing:
+              "border-box",
+          }}
+        >
+          <div
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+            style={{
+              width: "100%",
+              maxWidth: "570px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              borderRadius:
+                "16px",
+              backgroundColor:
+                "#ffffff",
+              boxShadow:
+                "0 20px 50px rgba(15, 23, 42, 0.18)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "space-between",
+                padding:
+                  "18px 20px",
+                borderBottom:
+                  "1px solid #eef2f7",
               }}
             >
               <div
@@ -1873,874 +2423,566 @@ export default function Announcements() {
                     "flex",
                   alignItems:
                     "center",
-                  justifyContent:
-                    "space-between",
-                  gap:
-                    "10px",
-                  marginBottom:
-                    "12px",
+                  gap: "10px",
                 }}
               >
                 <div
                   style={{
+                    width: "40px",
+                    height: "40px",
                     display:
                       "flex",
                     alignItems:
                       "center",
-                    gap:
-                      "8px",
+                    justifyContent:
+                      "center",
+                    borderRadius:
+                      "10px",
+                    backgroundColor:
+                      "#eff6ff",
+                    color:
+                      "#2563eb",
                   }}
                 >
-                  <div
-                    style={{
-                      width:
-                        "38px",
-                      height:
-                        "38px",
-                      display:
-                        "flex",
-                      alignItems:
-                        "center",
-                      justifyContent:
-                        "center",
-                      borderRadius:
-                        "10px",
-                      backgroundColor:
-                        "#ffffff",
-                      color:
-                        "#2563eb",
-                    }}
-                  >
-                    <Megaphone
-                      size={
-                        18
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <div
-                      style={{
-                        color:
-                          "#1e3a8a",
-                        fontSize:
-                          "9px",
-                        fontWeight:
-                          700,
-                        textTransform:
-                          "uppercase",
-                        letterSpacing:
-                          "0.6px",
-                      }}
-                    >
-                      OJT
-                      Announcement
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop:
-                          "2px",
-                        color:
-                          "#64748b",
-                        fontSize:
-                          "9px",
-                      }}
-                    >
-                      {
-                        viewAnnouncement.date
-                      }
-                    </div>
-                  </div>
+                  <Megaphone
+                    size={19}
+                  />
                 </div>
 
-                <PriorityBadge
-                  priority={
-                    viewAnnouncement.priority
-                  }
-                />
-              </div>
-
-              <h2
-                style={{
-                  margin:
-                    "0 0 9px",
-                  color:
-                    "#1e293b",
-                  fontSize:
-                    "18px",
-                  lineHeight:
-                    "1.3",
-                  fontWeight:
-                    750,
-                }}
-              >
-                {
-                  viewAnnouncement.title
-                }
-              </h2>
-
-              <p
-                style={{
-                  margin:
-                    0,
-                  color:
-                    "#64748b",
-                  fontSize:
-                    "11px",
-                  lineHeight:
-                    "1.7",
-                }}
-              >
-                {
-                  viewAnnouncement.description
-                }
-              </p>
-            </div>
-
-            <div
-              className="announcement-preview-grid"
-              style={{
-                display:
-                  "grid",
-                gridTemplateColumns:
-                  "1fr 1fr",
-                gap:
-                  "10px",
-                marginTop:
-                  "15px",
-              }}
-            >
-              {[
-                {
-                  icon:
-                    Users,
-                  label:
-                    "Audience",
-                  value:
-                    viewAnnouncement.audience,
-                },
-                {
-                  icon:
-                    FileText,
-                  label:
-                    "Category",
-                  value:
-                    viewAnnouncement.category,
-                },
-                {
-                  icon:
-                    CheckCircle2,
-                  label:
-                    "Status",
-                  value:
-                    viewAnnouncement.status,
-                },
-                {
-                  icon:
-                    CalendarDays,
-                  label:
-                    "Published",
-                  value:
-                    viewAnnouncement.date,
-                },
-              ].map(
-                ({
-                  icon: Icon,
-                  label,
-                  value,
-                }) => (
-                  <div
-                    key={
-                      label
-                    }
+                <div>
+                  <h2
                     style={{
-                      padding:
-                        "12px",
-                      border:
-                        "1px solid #edf2f7",
-                      borderRadius:
+                      margin: 0,
+                      color:
+                        "#1e293b",
+                      fontSize:
+                        "17px",
+                      fontWeight:
+                        800,
+                    }}
+                  >
+                    Announcement Details
+                  </h2>
+
+                  <p
+                    style={{
+                      margin:
+                        "4px 0 0",
+                      color:
+                        "#94a3b8",
+                      fontSize:
                         "10px",
                     }}
                   >
-                    <div
-                      style={{
-                        display:
-                          "flex",
-                        alignItems:
-                          "center",
-                        gap:
-                          "7px",
-                        color:
-                          "#94a3b8",
-                        fontSize:
-                          "9px",
-                        fontWeight:
-                          700,
-                        textTransform:
-                          "uppercase",
-                      }}
-                    >
-                      <Icon
-                        size={
-                          13
-                        }
-                      />
-                      {
-                        label
-                      }
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop:
-                          "6px",
-                        color:
-                          "#334155",
-                        fontSize:
-                          "10px",
-                        fontWeight:
-                          650,
-                      }}
-                    >
-                      {
-                        value
-                      }
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-
-            <div
-              style={{
-                display:
-                  "flex",
-                alignItems:
-                  "center",
-                justifyContent:
-                  "space-between",
-                marginTop:
-                  "18px",
-                paddingTop:
-                  "14px",
-                borderTop:
-                  "1px solid #eef2f7",
-              }}
-            >
-              <span
-                style={{
-                  color:
-                    "#94a3b8",
-                  fontSize:
-                    "9px",
-                }}
-              >
-                Created by{" "}
-                {
-                  viewAnnouncement.author
-                }
-              </span>
+                    Announcement information
+                  </p>
+                </div>
+              </div>
 
               <button
                 type="button"
                 onClick={() =>
-                  setViewAnnouncement(
+                  setSelectedAnnouncement(
                     null
                   )
                 }
                 style={{
-                  height:
-                    "36px",
-                  padding:
-                    "0 15px",
-                  border:
-                    "1px solid #dbe4ee",
+                  width: "34px",
+                  height: "34px",
+                  display:
+                    "flex",
+                  alignItems:
+                    "center",
+                  justifyContent:
+                    "center",
+                  border: "none",
                   borderRadius:
                     "8px",
                   backgroundColor:
-                    "#ffffff",
+                    "#f8fafc",
                   color:
-                    "#475569",
-                  fontSize:
-                    "10px",
-                  fontWeight:
-                    700,
+                    "#64748b",
                   cursor:
                     "pointer",
                 }}
               >
-                Close
+                <X size={17} />
               </button>
             </div>
+
+            <div
+              style={{
+                padding: "20px",
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  color:
+                    "#0f172a",
+                  fontSize:
+                    "20px",
+                  lineHeight:
+                    "1.3",
+                  fontWeight:
+                    800,
+                }}
+              >
+                {
+                  selectedAnnouncement.title
+                }
+              </h3>
+
+              <div
+                style={{
+                  display:
+                    "flex",
+                  flexWrap:
+                    "wrap",
+                  alignItems:
+                    "center",
+                  gap: "7px",
+                  marginTop:
+                    "12px",
+                }}
+              >
+                <StatusBadge
+                  status={
+                    selectedAnnouncement.status
+                  }
+                />
+
+                <PriorityBadge
+                  priority={
+                    selectedAnnouncement.priority
+                  }
+                />
+              </div>
+
+              <div
+                style={{
+                  marginTop:
+                    "20px",
+                  padding:
+                    "15px",
+                  border:
+                    "1px solid #eef2f7",
+                  borderRadius:
+                    "10px",
+                  backgroundColor:
+                    "#f8fafc",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color:
+                      "#475569",
+                    fontSize:
+                      "12px",
+                    lineHeight:
+                      "1.7",
+                  }}
+                >
+                  {
+                    selectedAnnouncement.description
+                  }
+                </p>
+              </div>
+
+              <div
+                className="announcement-view-details"
+                style={{
+                  display:
+                    "grid",
+                  gridTemplateColumns:
+                    "repeat(2, minmax(0, 1fr))",
+                  gap: "10px",
+                  marginTop:
+                    "15px",
+                }}
+              >
+                <div
+                  style={{
+                    padding:
+                      "12px",
+                    border:
+                      "1px solid #eef2f7",
+                    borderRadius:
+                      "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display:
+                        "flex",
+                      alignItems:
+                        "center",
+                      gap: "7px",
+                      color:
+                        "#94a3b8",
+                      fontSize:
+                        "9px",
+                      fontWeight:
+                        700,
+                      textTransform:
+                        "uppercase",
+                    }}
+                  >
+                    <Users
+                      size={
+                        14
+                      }
+                    />
+                    Audience
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop:
+                        "6px",
+                      color:
+                        "#334155",
+                      fontSize:
+                        "11px",
+                      fontWeight:
+                        700,
+                    }}
+                  >
+                    {
+                      selectedAnnouncement.audience
+                    }
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    padding:
+                      "12px",
+                    border:
+                      "1px solid #eef2f7",
+                    borderRadius:
+                      "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display:
+                        "flex",
+                      alignItems:
+                        "center",
+                      gap: "7px",
+                      color:
+                        "#94a3b8",
+                      fontSize:
+                        "9px",
+                      fontWeight:
+                        700,
+                      textTransform:
+                        "uppercase",
+                    }}
+                  >
+                    <CalendarDays
+                      size={
+                        14
+                      }
+                    />
+                    Date
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop:
+                        "6px",
+                      color:
+                        "#334155",
+                      fontSize:
+                        "11px",
+                      fontWeight:
+                        700,
+                    }}
+                  >
+                    {formatDate(
+                      selectedAnnouncement.date
+                    )}
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    padding:
+                      "12px",
+                    border:
+                      "1px solid #eef2f7",
+                    borderRadius:
+                      "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display:
+                        "flex",
+                      alignItems:
+                        "center",
+                      gap: "7px",
+                      color:
+                        "#94a3b8",
+                      fontSize:
+                        "9px",
+                      fontWeight:
+                        700,
+                      textTransform:
+                        "uppercase",
+                    }}
+                  >
+                    <Pencil
+                      size={
+                        14
+                      }
+                    />
+                    Created By
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop:
+                        "6px",
+                      color:
+                        "#334155",
+                      fontSize:
+                        "11px",
+                      fontWeight:
+                        700,
+                    }}
+                  >
+                    {
+                      selectedAnnouncement.createdBy
+                    }
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    padding:
+                      "12px",
+                    border:
+                      "1px solid #eef2f7",
+                    borderRadius:
+                      "10px",
+                  }}
+                >
+                  <div
+                    style={{
+                      display:
+                        "flex",
+                      alignItems:
+                        "center",
+                      gap: "7px",
+                      color:
+                        "#94a3b8",
+                      fontSize:
+                        "9px",
+                      fontWeight:
+                        700,
+                      textTransform:
+                        "uppercase",
+                    }}
+                  >
+                    <Megaphone
+                      size={
+                        14
+                      }
+                    />
+                    Status
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop:
+                        "6px",
+                    }}
+                  >
+                    <StatusBadge
+                      status={
+                        selectedAnnouncement.status
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </Modal>
+        </div>
       )}
 
       {/* =====================================================
-          STYLES
+          EDIT ANNOUNCEMENT MODAL
       ====================================================== */}
+
+      {editingAnnouncement && (
+        <div
+          onClick={() =>
+            setEditingAnnouncement(
+              null
+            )
+          }
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100002,
+            display: "flex",
+            alignItems:
+              "center",
+            justifyContent:
+              "center",
+            padding: "20px",
+            backgroundColor:
+              "rgba(15, 23, 42, 0.45)",
+            boxSizing:
+              "border-box",
+          }}
+        >
+          <div
+            onClick={(event) =>
+              event.stopPropagation()
+            }
+            style={{
+              width: "100%",
+              maxWidth: "650px",
+              maxHeight: "90vh",
+              overflowY: "auto",
+              borderRadius:
+                "16px",
+              backgroundColor:
+                "#ffffff",
+              boxShadow:
+                "0 20px 50px rgba(15, 23, 42, 0.18)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "space-between",
+                padding:
+                  "18px 20px",
+                borderBottom:
+                  "1px solid #eef2f7",
+              }}
+            >
+              <div>
+                <h2
+                  style={{
+                    margin: 0,
+                    color:
+                      "#1e293b",
+                    fontSize:
+                      "18px",
+                    fontWeight:
+                      800,
+                  }}
+                >
+                  Edit Announcement
+                </h2>
+
+                <p
+                  style={{
+                    margin:
+                      "5px 0 0",
+                    color:
+                      "#94a3b8",
+                    fontSize:
+                      "11px",
+                  }}
+                >
+                  Update announcement
+                  information.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setEditingAnnouncement(
+                    null
+                  )
+                }
+                style={{
+                  width: "34px",
+                  height: "34px",
+                  display:
+                    "flex",
+                  alignItems:
+                    "center",
+                  justifyContent:
+                    "center",
+                  border: "none",
+                  borderRadius:
+                    "8px",
+                  backgroundColor:
+                    "#f8fafc",
+                  color:
+                    "#64748b",
+                  cursor:
+                    "pointer",
+                }}
+              >
+                <X size={17} />
+              </button>
+            </div>
+
+            <AnnouncementForm
+              formData={formData}
+              onChange={
+                handleFormChange
+              }
+              onSubmit={
+                handleEditAnnouncement
+              }
+              onCancel={() =>
+                setEditingAnnouncement(
+                  null
+                )
+              }
+              submitText="Save Changes"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================
+          RESPONSIVE
+      ====================================================== */}
+
       <style>
         {`
-          .announcement-action-button {
-            width: 100%;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 9px;
-            border: none;
-            border-radius: 6px;
-            background: transparent;
-            color: #475569;
-            font-size: 10px;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
-          }
-
-          .announcement-action-button:hover {
-            background: #f8fafc;
-          }
-
-          .announcement-delete {
-            color: #dc2626;
-          }
-
-          .announcement-delete:hover {
-            background: #fef2f2;
-          }
-
-          .announcement-page-button {
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #e2e8f0;
-            border-radius: 7px;
-            background: #ffffff;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-          }
-
-          .announcement-page-button:hover:not(:disabled) {
-            border-color: #bfdbfe;
-            background: #eff6ff;
-            color: #2563eb;
-          }
-
-          .announcement-page-button:disabled {
-            color: #cbd5e1;
-            cursor: not-allowed;
-            background: #f8fafc;
-          }
-
-          .announcement-page-active {
-            border-color: #2563eb;
-            background: #2563eb;
-            color: #ffffff;
-          }
-
           @media (max-width: 1100px) {
-            .announcement-stat-grid {
+            .announcement-stats {
               grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
             }
 
-            .announcement-filter-grid {
-              grid-template-columns: 1fr 1fr !important;
+            .announcement-filters {
+              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
             }
           }
 
-          @media (max-width: 700px) {
-            .announcement-stat-grid {
+          @media (max-width: 650px) {
+            .announcement-stats {
               grid-template-columns: 1fr !important;
             }
 
-            .announcement-filter-grid {
+            .announcement-filters {
               grid-template-columns: 1fr !important;
             }
 
-            .announcement-preview-grid {
+            .announcement-view-details {
               grid-template-columns: 1fr !important;
             }
           }
         `}
       </style>
     </div>
-  );
-}
-
-function AnnouncementForm({
-  announcement,
-  onClose,
-  onSave,
-}) {
-  const [title, setTitle] =
-    useState(
-      announcement?.title || ""
-    );
-
-  const [description, setDescription] =
-    useState(
-      announcement?.description ||
-        ""
-    );
-
-  const [category, setCategory] =
-    useState(
-      announcement?.category ||
-        "OJT"
-    );
-
-  const [priority, setPriority] =
-    useState(
-      announcement?.priority ||
-        "Medium"
-    );
-
-  const [audience, setAudience] =
-    useState(
-      announcement?.audience ||
-        "All Students"
-    );
-
-  const [status, setStatus] =
-    useState(
-      announcement?.status ||
-        "Draft"
-    );
-
-  const handleSubmit = (
-    event
-  ) => {
-    event.preventDefault();
-
-    onSave({
-      title:
-        title.trim(),
-      description:
-        description.trim(),
-      category,
-      priority,
-      audience,
-      status,
-    });
-  };
-
-  return (
-    <Modal
-      onClose={onClose}
-      width="600px"
-    >
-      <ModalHeader
-        title={
-          announcement
-            ? "Edit Announcement"
-            : "Create Announcement"
-        }
-        subtitle={
-          announcement
-            ? "Update announcement details"
-            : "Publish an announcement for OJT users"
-        }
-        onClose={onClose}
-      />
-
-      <form
-        onSubmit={
-          handleSubmit
-        }
-        style={{
-          padding:
-            "20px",
-        }}
-      >
-        <div
-          style={{
-            display:
-              "flex",
-            flexDirection:
-              "column",
-            gap:
-              "14px",
-          }}
-        >
-          <div>
-            <label className="announcement-form-label">
-              Announcement Title
-            </label>
-
-            <input
-              required
-              value={title}
-              onChange={(
-                event
-              ) =>
-                setTitle(
-                  event
-                    .target
-                    .value
-                )
-              }
-              placeholder="Enter announcement title"
-              className="announcement-form-input"
-            />
-          </div>
-
-          <div>
-            <label className="announcement-form-label">
-              Description
-            </label>
-
-            <textarea
-              required
-              value={
-                description
-              }
-              onChange={(
-                event
-              ) =>
-                setDescription(
-                  event
-                    .target
-                    .value
-                )
-              }
-              placeholder="Write announcement details..."
-              rows="5"
-              className="announcement-form-input announcement-textarea"
-            />
-          </div>
-
-          <div
-            className="announcement-form-grid"
-            style={{
-              display:
-                "grid",
-              gridTemplateColumns:
-                "1fr 1fr",
-              gap:
-                "11px",
-            }}
-          >
-            <div>
-              <label className="announcement-form-label">
-                Category
-              </label>
-
-              <select
-                value={
-                  category
-                }
-                onChange={(
-                  event
-                ) =>
-                  setCategory(
-                    event
-                      .target
-                      .value
-                  )
-                }
-                className="announcement-form-input"
-              >
-                {categories
-                  .filter(
-                    (
-                      item
-                    ) =>
-                      item !==
-                      "All Categories"
-                  )
-                  .map(
-                    (
-                      item
-                    ) => (
-                      <option
-                        key={
-                          item
-                        }
-                        value={
-                          item
-                        }
-                      >
-                        {
-                          item
-                        }
-                      </option>
-                    )
-                  )}
-              </select>
-            </div>
-
-            <div>
-              <label className="announcement-form-label">
-                Priority
-              </label>
-
-              <select
-                value={
-                  priority
-                }
-                onChange={(
-                  event
-                ) =>
-                  setPriority(
-                    event
-                      .target
-                      .value
-                  )
-                }
-                className="announcement-form-input"
-              >
-                {priorities
-                  .filter(
-                    (
-                      item
-                    ) =>
-                      item !==
-                      "All Priority"
-                  )
-                  .map(
-                    (
-                      item
-                    ) => (
-                      <option
-                        key={
-                          item
-                        }
-                        value={
-                          item
-                        }
-                      >
-                        {
-                          item
-                        }
-                      </option>
-                    )
-                  )}
-              </select>
-            </div>
-
-            <div>
-              <label className="announcement-form-label">
-                Target Audience
-              </label>
-
-              <select
-                value={
-                  audience
-                }
-                onChange={(
-                  event
-                ) =>
-                  setAudience(
-                    event
-                      .target
-                      .value
-                  )
-                }
-                className="announcement-form-input"
-              >
-                {audiences.map(
-                  (
-                    item
-                  ) => (
-                    <option
-                      key={
-                        item
-                      }
-                      value={
-                        item
-                      }
-                    >
-                      {
-                        item
-                      }
-                    </option>
-                  )
-                )}
-              </select>
-            </div>
-
-            <div>
-              <label className="announcement-form-label">
-                Status
-              </label>
-
-              <select
-                value={
-                  status
-                }
-                onChange={(
-                  event
-                ) =>
-                  setStatus(
-                    event
-                      .target
-                      .value
-                  )
-                }
-                className="announcement-form-input"
-              >
-                <option value="Draft">
-                  Draft
-                </option>
-
-                <option value="Published">
-                  Published
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            display:
-              "flex",
-            alignItems:
-              "center",
-            justifyContent:
-              "flex-end",
-            gap:
-              "8px",
-            marginTop:
-              "20px",
-            paddingTop:
-              "15px",
-            borderTop:
-              "1px solid #eef2f7",
-          }}
-        >
-          <button
-            type="button"
-            onClick={
-              onClose
-            }
-            style={{
-              height:
-                "37px",
-              padding:
-                "0 14px",
-              border:
-                "1px solid #dbe4ee",
-              borderRadius:
-                "8px",
-              backgroundColor:
-                "#ffffff",
-              color:
-                "#64748b",
-              fontSize:
-                "10px",
-              fontWeight:
-                700,
-              cursor:
-                "pointer",
-            }}
-          >
-            Cancel
-          </button>
-
-          <button
-            type="submit"
-            style={{
-              height:
-                "37px",
-              display:
-                "inline-flex",
-              alignItems:
-                "center",
-              gap:
-                "6px",
-              padding:
-                "0 15px",
-              border:
-                "none",
-              borderRadius:
-                "8px",
-              backgroundColor:
-                "#2563eb",
-              color:
-                "#ffffff",
-              fontSize:
-                "10px",
-              fontWeight:
-                700,
-              cursor:
-                "pointer",
-            }}
-          >
-            {status ===
-            "Published" ? (
-              <Send
-                size={
-                  13
-                }
-              />
-            ) : (
-              <FileText
-                size={
-                  13
-                }
-              />
-            )}
-
-            {announcement
-              ? "Save Changes"
-              : status ===
-                "Published"
-              ? "Publish Announcement"
-              : "Save Draft"}
-          </button>
-        </div>
-      </form>
-
-      <style>
-        {`
-          .announcement-form-label {
-            display: block;
-            margin-bottom: 6px;
-            color: #475569;
-            font-size: 10px;
-            font-weight: 700;
-          }
-
-          .announcement-form-input {
-            width: 100%;
-            height: 40px;
-            padding: 0 11px;
-            border: 1px solid #dbe4ee;
-            border-radius: 8px;
-            background: #ffffff;
-            color: #334155;
-            font-size: 11px;
-            outline: none;
-            box-sizing: border-box;
-          }
-
-          .announcement-form-input:focus {
-            border-color: #93c5fd;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.07);
-          }
-
-          .announcement-textarea {
-            height: auto;
-            min-height: 110px;
-            padding: 10px 11px;
-            resize: vertical;
-            line-height: 1.6;
-          }
-
-          @media (max-width: 600px) {
-            .announcement-form-grid {
-              grid-template-columns: 1fr !important;
-            }
-          }
-        `}
-      </style>
-    </Modal>
   );
 }

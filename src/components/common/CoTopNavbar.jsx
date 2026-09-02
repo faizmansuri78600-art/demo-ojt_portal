@@ -13,103 +13,140 @@ export default function CoTopNavbar({
   onThemeToggle,
 }) {
   return (
-    <header className="top-navbar">
-      {/* LEFT SIDE */}
-      <div className="top-navbar-left">
-        {/* Mobile menu */}
+    <header
+      className="w-full h-[80px] bg-white border-b border-slate-200 flex items-center justify-between px-6 relative z-30"
+    >
+      {/* =====================================================
+          LEFT SIDE
+      ====================================================== */}
+      <div className="flex items-center gap-5 min-w-0">
+
+        {/* Mobile Menu */}
         <button
           type="button"
-          className="mobile-menu-button"
           onClick={onMenuClick}
           aria-label="Open menu"
+          className="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg text-slate-700 hover:bg-slate-100 transition"
         >
-          <Menu size={20} />
+          <Menu size={22} />
         </button>
 
         {/* Breadcrumb */}
-        <div className="breadcrumb">
-          <span className="breadcrumb-main">
-            AISC OJT PORTAL
+        <div className="flex items-center gap-3 whitespace-nowrap">
+          <span className="text-sm font-medium text-slate-500">
+            AISC OJT
           </span>
 
-          <span className="breadcrumb-separator">
+          <span className="text-slate-300 text-lg">
             /
           </span>
 
-          <strong>
-            Dashboard
-          </strong>
+          <span className="text-sm font-semibold text-slate-900">
+            Coordinator Dashboard
+          </span>
         </div>
       </div>
 
-      {/* RIGHT SIDE */}
-      <div className="top-navbar-right">
-        {/* Search */}
+
+      {/* =====================================================
+          RIGHT SIDE
+      ====================================================== */}
+      <div className="flex items-center gap-3">
+
+        {/* =================================================
+            SEARCH
+        ================================================== */}
         <button
           type="button"
-          className="search-box"
           aria-label="Search"
+          className="hidden md:flex items-center justify-between w-[215px] h-[44px] px-3 rounded-xl border border-slate-200 bg-white hover:border-slate-300 transition"
         >
-          <span className="search-box-content">
+          <span className="flex items-center gap-2 text-slate-400">
             <Search size={18} />
-            <span>Search</span>
+
+            <span className="text-sm">
+              Search
+            </span>
           </span>
 
-          <kbd>Ctrl K</kbd>
+          <kbd className="text-[11px] font-medium text-slate-400 bg-slate-50 border border-slate-200 rounded-md px-2 py-1">
+            Ctrl K
+          </kbd>
         </button>
 
-        {/* Theme */}
+
+        {/* =================================================
+            THEME BUTTON
+        ================================================== */}
         <button
           type="button"
-          className="navbar-icon-button"
           onClick={onThemeToggle}
           aria-label="Toggle theme"
+          className="relative w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
         >
           {darkMode ? (
-            <Sun size={19} />
+            <Sun size={20} />
           ) : (
-            <Moon size={19} />
+            <Moon size={20} />
           )}
         </button>
 
-        {/* Notification */}
+
+        {/* =================================================
+            NOTIFICATION
+        ================================================== */}
         <button
           type="button"
-          className="navbar-icon-button"
           aria-label="Notifications"
+          className="relative w-10 h-10 flex items-center justify-center rounded-xl text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition"
         >
-          <Bell size={19} />
+          <Bell size={20} />
 
-          <span className="notification-dot" />
+          <span className="absolute top-[8px] right-[8px] w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
         </button>
 
-        <div className="navbar-divider" />
 
-        {/* Profile */}
+        {/* =================================================
+            DIVIDER
+        ================================================== */}
+        <div className="hidden sm:block h-8 w-px bg-slate-200 mx-2" />
+
+
+        {/* =================================================
+            PROFILE
+        ================================================== */}
         <button
           type="button"
-          className="profile-button"
           aria-label="Profile"
+          className="flex items-center gap-3 h-12 px-2 rounded-xl hover:bg-slate-50 transition"
         >
-          <div className="profile-avatar">
+
+          {/* Avatar */}
+          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-sm font-bold">
             SB
           </div>
 
-          <div className="profile-info">
-            <strong>
-              Safwan Baduda
-            </strong>
 
-            <span>
+          {/* Profile Information */}
+          <div className="hidden sm:flex flex-col items-start leading-tight">
+            <span className="text-sm font-semibold text-slate-900">
+              Safwan Baduda
+            </span>
+
+            <span className="text-xs text-slate-500 mt-1">
               OJT Coordinator
             </span>
           </div>
 
+
+          {/* Dropdown */}
           <ChevronDown
             size={16}
-            color="#94a3b8"
+            className="text-slate-400"
           />
+
         </button>
+
       </div>
     </header>
   );
