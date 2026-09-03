@@ -15,6 +15,9 @@ import CompanyProfile from "../pages/Company/CompanyProfile";
 import ManageOjtOpportunities from "../pages/Company/ManageOjtOpportunities";
 import Certificate from "../pages/Company/Certificate";
 import NotificationsSettings from "../pages/Company/NotificationsSettings";
+import Evaluation from "../pages/Company/Evaluation";
+import Applications from "../pages/Company/Applications";
+
 
 // ============================================================
 // ADMIN
@@ -26,10 +29,10 @@ import ManageUsers from "../pages/admin/ManageUsers";
 import Analytics from "../pages/admin/Analytics";
 import Settings from "../pages/admin/Settings";
 
-// ============================================================
-// STUDENT
-// ============================================================
-
+// student
+import Attendance from "../pages/Student/Attendance";
+import MarkAttendance from "../pages/Student/MarkAttendance"; // ADDED
+import Certificates from "../pages/Student/Certificates";
 import StudentDashboard from "../pages/Student/StudentDashboard";
 import BrowseOJT from "../pages/Student/BrowseOjt";
 import MyProfile from "../pages/Student/MyProfile";
@@ -103,10 +106,13 @@ function AppRoutes() {
         element={<About />}
       />
 
-      <Route
-        path="/contact"
-        element={<Contact />}
-      />
+        <Route
+          path="/company/notifications-settings"
+          element={<NotificationsSettings />}
+        />
+        <Route path="/company/evaluation" element={<Evaluation />} />
+      <Route path="/company/applications-students" element={<Applications />} />
+//Admin
 
 
       {/* ======================================================
@@ -303,6 +309,7 @@ function AppRoutes() {
           element={<OJTReports />}
         />
 
+
       </Route>
 
 
@@ -319,6 +326,23 @@ function AppRoutes() {
           />
         }
       />
+
+    // student
+        <Route path="/student" element={<StudentDashboard />} />
+        <Route path="/student/dashboard" element={<StudentDashboard />} />
+        <Route path="/student/browse-ojt" element={<BrowseOJT />} />
+        <Route path="/student/profile" element={<MyProfile />} />
+        <Route path="/student/weekly-diary" element={<WeeklyDiary />} />
+        <Route path="/student/Myapplication" element={<MyApplication/>}/>
+        <Route path="/student/Reports" element={<Reports/>}/>
+        <Route path="/student/Feedback" element={<Feedback/>}/>
+        <Route path="/student/Settings" element={<SSettings/>}/>
+         
+            
+              <Route path="/student/attendance" element={<Attendance />} />
+              <Route path="/student/attendance/mark" element={<MarkAttendance />} /> {/* ADDED */}
+              <Route path="/student/certificates" element={<Certificates />} />
+              <Route path="/certificates" element={<Certificates />} />
 
     </Routes>
   );

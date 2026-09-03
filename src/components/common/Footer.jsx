@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 import {
-  Facebook,
-  Instagram,
-  Linkedin,
-  Youtube,
+  // Facebook,
+  // Instagram,
+  // Linkedin,
+  // Youtube,
 } from "lucide-react";
 
 import logo from "../../assets/aisc-logo.png";
