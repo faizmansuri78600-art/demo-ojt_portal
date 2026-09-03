@@ -39,6 +39,15 @@ import Reports from "../pages/Student/Reports";
 import Feedback from "../pages/Student/Feedback";
 import SSettings from "../pages/Student/Settings";
 
+// Faculty
+
+import FacultyDashboard from "../pages/faculty/FacultyDashboard";
+import AssignedStudents from "../pages/faculty/AssignedStudents";
+import StudentDetails from "../pages/faculty/StudentDetails";
+import ReviewReports from "../pages/faculty/ReviewReports";
+import ApproveDiary from "../pages/faculty/ApproveDiary";
+import Evaluation from "../pages/faculty/Evaluation";
+
 // ============================================================
 // COORDINATOR
 // ============================================================
@@ -60,6 +69,16 @@ function AppRoutes() {
   return (
     <Routes>
 
+//Faculty
+
+      <Route path="/faculty" element={<FacultyDashboard />} />
+      <Route path="/faculty/AssignedStudents" element={<AssignedStudents />} />
+      <Route path="/faculty/StudentDetails" element={<StudentDetails />} />
+      <Route path="/faculty/ReviewReports" element={<ReviewReports/>} />
+      <Route path="/faculty/ApproveDiary" element={<ApproveDiary/>} />
+      <Route path="/faculty/Evaluation" element={<Evaluation/>} />
+
+// company
       {/* ======================================================
           PUBLIC ROUTES
       ======================================================= */}
