@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
-import Sidebar from "../../components/common/CompanySidebar";
-import Header from "../../components/common/CompanyHeader";
-import Footer from "../../components/common/CompanyFooter";
+import CompanySidebar from "../../components/common/CompanySidebar";
+import CompanyHeader from "../../components/common/CompanyHeader";
+import CompanyFooter from "../../components/common/CompanyFooter";
 
 import ApplicationsStatsCards from "../../components/company/ApplicationsStatsCards";
 import ApplicationsFiltersBar from "../../components/company/ApplicationsFiltersBar";
@@ -170,10 +170,10 @@ const Applications = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <Sidebar />
+      <CompanySidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Header />
+        <CompanyHeader />
 
         <main className="flex-1 p-4 md:p-6 space-y-5">
 
@@ -282,7 +282,7 @@ const Applications = () => {
           </div>
         </main>
 
-        <Footer />
+        <CompanyFooter />
       </div>
     </div>
   );

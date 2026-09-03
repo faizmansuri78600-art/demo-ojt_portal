@@ -13,6 +13,9 @@ import CompanyProfile from "../pages/Company/CompanyProfile";
 import ManageOjtOpportunities from "../pages/Company/ManageOjtOpportunities";
 import Certificate from "../pages/Company/Certificate";
 import NotificationsSettings from "../pages/Company/NotificationsSettings";
+import Evaluation from "../pages/Company/Evaluation";
+import Applications from "../pages/Company/Applications";
+
 
 //admin
 
@@ -23,7 +26,9 @@ import Analytics from "../pages/admin/Analytics";
 import Settings from "../pages/admin/Settings";
 
 // student
-
+import Attendance from "../pages/Student/Attendance";
+import MarkAttendance from "../pages/Student/MarkAttendance"; // ADDED
+import Certificates from "../pages/Student/Certificates";
 import StudentDashboard from "../pages/Student/StudentDashboard";
 import BrowseOJT from "../pages/Student/BrowseOjt";
 import MyProfile from "../pages/Student/MyProfile";
@@ -66,6 +71,8 @@ function AppRoutes() {
           path="/company/notifications-settings"
           element={<NotificationsSettings />}
         />
+        <Route path="/company/evaluation" element={<Evaluation />} />
+      <Route path="/company/applications-students" element={<Applications />} />
 //Admin
 
         {/* Admin Routes */}
@@ -101,6 +108,7 @@ function AppRoutes() {
           element={<Settings />}
         />
 
+
       </Route>
 
       {/* Any wrong URL */}
@@ -119,6 +127,12 @@ function AppRoutes() {
         <Route path="/student/Reports" element={<Reports/>}/>
         <Route path="/student/Feedback" element={<Feedback/>}/>
         <Route path="/student/Settings" element={<SSettings/>}/>
+         
+            
+              <Route path="/student/attendance" element={<Attendance />} />
+              <Route path="/student/attendance/mark" element={<MarkAttendance />} /> {/* ADDED */}
+              <Route path="/student/certificates" element={<Certificates />} />
+              <Route path="/certificates" element={<Certificates />} />
 
     </Routes>
   );
