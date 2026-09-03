@@ -1,6 +1,17 @@
 import { Search, RotateCcw, ChevronDown } from "lucide-react";
 
-export default function OpportunityFilters() {
+export default function OpportunityFilters({
+  search,
+  setSearch,
+  department,
+  setDepartment,
+  status,
+  setStatus,
+  duration,
+  setDuration,
+  onReset,
+}) {
+
   return (
     <div
       className="
@@ -12,7 +23,9 @@ export default function OpportunityFilters() {
         p-3
       "
     >
+
       <div className="flex items-end gap-3">
+
 
         {/* SEARCH */}
 
@@ -44,6 +57,10 @@ export default function OpportunityFilters() {
 
             <input
               type="text"
+              value={search}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
               placeholder="Search opportunities by title, skills..."
               className="
                 w-full
@@ -64,14 +81,16 @@ export default function OpportunityFilters() {
 
         <FilterSelect
           label="Department"
-          value="All Departments"
+          value={department}
+          onChange={setDepartment}
           options={[
             "All Departments",
             "Computer Science",
             "Data Science",
             "Marketing",
             "Management",
-            "Information Tech."
+            "Information Tech.",
+            "IT / Design"
           ]}
         />
 
@@ -80,7 +99,8 @@ export default function OpportunityFilters() {
 
         <FilterSelect
           label="Status"
-          value="All Status"
+          value={status}
+          onChange={setStatus}
           options={[
             "All Status",
             "Active",
@@ -94,7 +114,8 @@ export default function OpportunityFilters() {
 
         <FilterSelect
           label="Duration"
-          value="All Duration"
+          value={duration}
+          onChange={setDuration}
           options={[
             "All Duration",
             "2 Months",
@@ -108,6 +129,7 @@ export default function OpportunityFilters() {
 
         <button
           type="button"
+          onClick={onReset}
           className="
             h-[38px]
             px-3
@@ -137,6 +159,7 @@ export default function OpportunityFilters() {
         </button>
 
       </div>
+
     </div>
   );
 }
@@ -144,7 +167,12 @@ export default function OpportunityFilters() {
 
 /* ================= FILTER SELECT ================= */
 
-function FilterSelect({ label, value, options }) {
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options
+}) {
 
   return (
     <div className="w-[105px] shrink-0">
@@ -156,7 +184,10 @@ function FilterSelect({ label, value, options }) {
       <div className="relative">
 
         <select
-          defaultValue={value}
+          value={value}
+          onChange={(e) =>
+            onChange(e.target.value)
+          }
           className="
             appearance-none
             w-full
@@ -176,15 +207,20 @@ function FilterSelect({ label, value, options }) {
         >
 
           {options.map((option) => (
+
             <option
               key={option}
               value={option}
             >
               {option}
             </option>
+
           ))}
 
         </select>
+
+
+        {/* SAME CHEVRON */}
 
         <ChevronDown
           size={12}

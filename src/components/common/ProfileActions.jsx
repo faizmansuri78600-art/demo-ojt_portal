@@ -1,56 +1,75 @@
-import { LockKeyhole } from "lucide-react";
+import { Save, X } from "lucide-react";
 
-export default function ProfileActions() {
+export default function ProfileActions({
+  onCancel,
+  onSave
+}) {
+
   return (
-    <div className="flex justify-end gap-4 mt-6">
 
-      {/* CANCEL */}
+    <div className="flex justify-end items-center gap-4">
+
+      {/* ================= CANCEL ================= */}
+
       <button
         type="button"
+        onClick={onCancel}
         className="
-          w-[180px]
-          h-[52px]
-          rounded-[12px]
+          w-[215px]
+          h-[62px]
+          bg-white
           border
           border-[#E5E7EB]
-          bg-white
-          text-[#111827]
+          rounded-[12px]
           text-[16px]
           font-medium
-          hover:bg-slate-50
-          transition-colors
+          text-[#111827]
+          flex
+          items-center
+          justify-center
+          gap-2
+          hover:bg-[#F8FAFC]
+          transition
         "
       >
+
+        <X size={18} />
+
         Cancel
+
       </button>
 
-      {/* SAVE CHANGES */}
+
+      {/* ================= SAVE CHANGES ================= */}
+
       <button
         type="button"
+        onClick={onSave}
         className="
-          w-[240px]
-          h-[52px]
-          rounded-[12px]
+          w-[290px]
+          h-[62px]
           bg-[#1E5EFF]
+          rounded-[12px]
           text-white
           text-[16px]
-          font-medium
+          font-semibold
           flex
           items-center
           justify-center
           gap-2
           hover:bg-[#174dcc]
-          transition-colors
+          active:scale-[0.98]
+          transition
         "
       >
-        <LockKeyhole
-          size={17}
-          strokeWidth={2}
-        />
+
+        <Save size={18} />
 
         Save Changes
+
       </button>
 
     </div>
+
   );
 }

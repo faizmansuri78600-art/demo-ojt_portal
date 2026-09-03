@@ -4,7 +4,124 @@ import {
   ChevronDown,
 } from "lucide-react";
 
+import { useState } from "react";
+
 export default function CertificateFilters() {
+
+  const [search, setSearch] = useState("");
+  const [opportunity, setOpportunity] = useState("All Opportunities");
+  const [department, setDepartment] = useState("All Departments");
+  const [status, setStatus] = useState("All Status");
+
+  const applyFilters = () => {
+
+    window.dispatchEvent(
+      new CustomEvent("certificateFilters", {
+        detail: {
+          search,
+          opportunity,
+          department,
+          status,
+        },
+      })
+    );
+
+  };
+
+
+  const handleSearch = (value) => {
+
+    setSearch(value);
+
+    window.dispatchEvent(
+      new CustomEvent("certificateFilters", {
+        detail: {
+          search: value,
+          opportunity,
+          department,
+          status,
+        },
+      })
+    );
+
+  };
+
+
+  const handleOpportunity = (value) => {
+
+    setOpportunity(value);
+
+    window.dispatchEvent(
+      new CustomEvent("certificateFilters", {
+        detail: {
+          search,
+          opportunity: value,
+          department,
+          status,
+        },
+      })
+    );
+
+  };
+
+
+  const handleDepartment = (value) => {
+
+    setDepartment(value);
+
+    window.dispatchEvent(
+      new CustomEvent("certificateFilters", {
+        detail: {
+          search,
+          opportunity,
+          department: value,
+          status,
+        },
+      })
+    );
+
+  };
+
+
+  const handleStatus = (value) => {
+
+    setStatus(value);
+
+    window.dispatchEvent(
+      new CustomEvent("certificateFilters", {
+        detail: {
+          search,
+          opportunity,
+          department,
+          status: value,
+        },
+      })
+    );
+
+  };
+
+
+  const resetFilters = () => {
+
+    setSearch("");
+    setOpportunity("All Opportunities");
+    setDepartment("All Departments");
+    setStatus("All Status");
+
+    window.dispatchEvent(
+      new CustomEvent("certificateFilters", {
+        detail: {
+          search: "",
+          opportunity: "All Opportunities",
+          department: "All Departments",
+          status: "All Status",
+        },
+      })
+    );
+
+  };
+
+
   return (
     <div className="w-full">
 
@@ -41,6 +158,8 @@ export default function CertificateFilters() {
 
             <input
               type="text"
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
               placeholder="Search by student name, email..."
               className="
                 flex-1
@@ -58,16 +177,21 @@ export default function CertificateFilters() {
         </div>
 
 
-        {/* INTERNSHIP / OPPORTUNITY */}
+        {/* OPPORTUNITY */}
 
         <Filter
           label="Internship / Opportunity"
-          value="All Opportunities"
+          value={opportunity}
+          onChange={handleOpportunity}
           options={[
             "All Opportunities",
             "Web Development Intern",
             "Data Science Intern",
             "UI/UX Design Intern",
+            "Data Analyst Intern",
+            "Android Developer Intern",
+            "Cybersecurity Intern",
+            "Digital Marketing Intern",
           ]}
           width="w-[145px]"
         />
@@ -77,13 +201,15 @@ export default function CertificateFilters() {
 
         <Filter
           label="Department"
-          value="All Departments"
+          value={department}
+          onChange={handleDepartment}
           options={[
             "All Departments",
             "Computer Science",
             "Data Science",
             "IT / Design",
             "Marketing",
+            "Information Tech.",
           ]}
           width="w-[125px]"
         />
@@ -93,7 +219,8 @@ export default function CertificateFilters() {
 
         <Filter
           label="Status"
-          value="All Status"
+          value={status}
+          onChange={handleStatus}
           options={[
             "All Status",
             "Issued",
@@ -107,6 +234,7 @@ export default function CertificateFilters() {
 
         <button
           type="button"
+          onClick={resetFilters}
           className="
             h-[38px]
             px-3
@@ -147,9 +275,11 @@ export default function CertificateFilters() {
 function Filter({
   label,
   value,
+  onChange,
   options,
   width,
 }) {
+
   return (
     <div className={`${width} shrink-0`}>
 
@@ -160,7 +290,8 @@ function Filter({
       <div className="relative">
 
         <select
-          defaultValue={value}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
           className="
             appearance-none
             w-full
@@ -180,12 +311,14 @@ function Filter({
         >
 
           {options.map((option) => (
+
             <option
               key={option}
               value={option}
             >
               {option}
             </option>
+
           ))}
 
         </select>
