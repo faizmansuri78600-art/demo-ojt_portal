@@ -291,7 +291,7 @@ const StudentDetails =() => {
 const navigate = useNavigate();
 
 const goBackToStudents = () => {
-  navigate("/students");
+  navigate("/faculty/AssignedStudents");
 };
   return (
     <FacultyLayout
