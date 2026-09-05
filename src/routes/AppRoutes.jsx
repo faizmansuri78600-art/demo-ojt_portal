@@ -111,9 +111,7 @@ function AppRoutes() {
           path="/company/notifications-settings"
           element={<NotificationsSettings />}
         />
-        <Route path="/company/evaluation" element={<Evaluation />} />
-      <Route path="/company/applications-students" element={<Applications />} />
-      <Route path="/company/attendance" element={<AttendancePage />} />
+        
 //Admin
 
 
@@ -145,6 +143,9 @@ function AppRoutes() {
         path="/company/notifications-settings"
         element={<NotificationsSettings />}
       />
+      <Route path="/company/evaluation" element={<Evaluation />} />
+      <Route path="/company/applications-students" element={<Applications />} />
+      <Route path="/company/attendance" element={<AttendancePage />} />
 
 
       {/* ======================================================
