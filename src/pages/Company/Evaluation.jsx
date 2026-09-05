@@ -3,7 +3,7 @@ import { Plus, FileDown, X, Download } from "lucide-react";
 
 import CompanySidebar from "../../components/common/CompanySidebar";
 import CompanyHeader from "../../components/common/CompanyHeader";
-import CompanyFooter from "../../components/common/CompanyFooter";
+import Footer from "../../components/common/CompanyFooter";
 
 import EvaluationStatsCards from "../../components/Company/EvaluationStatsCards";
 import EvaluationFiltersBar from "../../components12/Company/EvaluationFiltersBar";
@@ -16,7 +16,7 @@ import {
   opportunityOptions,
   departmentOptions,
   statusOptions,
-} from "../../Components12/company2/evaluationData";
+} from "../../components/companyevaluationData";
 
 const PER_PAGE_DEFAULT = 10;
 const STORAGE_KEY = "ojt_evaluation_students";
@@ -502,7 +502,7 @@ const Evaluation = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <CompznySidebar />
+      <CompanySidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
         <CompanyHeader />
