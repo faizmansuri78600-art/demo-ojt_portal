@@ -1,0 +1,586 @@
+// Sample data for the Applications & Student Details page.
+// Replace with an API call when the backend is ready.
+
+export const applicationsStats = {
+  total: 48,
+  totalDelta: "+ 12 this month",
+  newApps: 18,
+  newAppsDelta: "+ 6 this month",
+  shortlisted: 12,
+  shortlistedDelta: "+ 3 this month",
+  selected: 6,
+  selectedDelta: "+ 2 this month",
+  rejected: 12,
+  rejectedDelta: "+ 1 this month",
+};
+
+export const applications = [
+  // =========================
+  // PAGE 1
+  // =========================
+
+  {
+    id: 1,
+    name: "Rahul Sharma",
+    initials: "RS",
+    email: "rahul@gmail.com",
+    phone: "+91 98765 43210",
+    location: "Pune, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=12",
+    isNew: true,
+    opportunity: "Web Development Intern",
+    department: "Computer Science",
+    college: "AISC College, Pune",
+    appliedOn: "15 Jul 2025",
+    status: "New",
+    dob: "12 Feb 2003",
+    gender: "Male",
+    address: "Pune, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Motivated and passionate developer looking forward to work on real-time projects and grow my skills.",
+    education: [
+      {
+        degree: "B.Tech, Computer Science",
+        institution: "AISC College, Pune",
+        year: "2022 - 2026",
+      },
+      {
+        degree: "HSC (12th)",
+        institution: "St. Xavier's Junior College",
+        year: "2021 - 2022",
+      },
+    ],
+    skills: ["React", "Node.js", "JavaScript", "MongoDB", "Git"],
+    resume: {
+      name: "Rahul_Sharma_Resume.pdf",
+      type: "PDF",
+      size: "1.4 MB",
+    },
+    coverLetter: {
+      name: "Rahul_Sharma_CoverLetter.pdf",
+      type: "PDF",
+      size: "0.8 MB",
+    },
+  },
+
+  {
+    id: 2,
+    name: "Priya Patel",
+    initials: "PP",
+    email: "priya21@gmail.com",
+    phone: "+91 98123 45678",
+    location: "Mumbai, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=32",
+    isNew: true,
+    opportunity: "Data Science Intern",
+    department: "Data Science",
+    college: "AISC College, Pune",
+    appliedOn: "15 Jul 2025",
+    status: "New",
+    dob: "05 May 2003",
+    gender: "Female",
+    address: "Mumbai, Maharashtra, India",
+    languages: "English, Hindi, Gujarati",
+    about:
+      "Data enthusiast with a strong foundation in statistics and machine learning, eager to apply skills to real-world problems.",
+    education: [
+      {
+        degree: "B.Tech, Data Science",
+        institution: "AISC College, Pune",
+        year: "2022 - 2026",
+      },
+    ],
+    skills: ["Python", "Pandas", "Scikit-learn", "SQL"],
+    resume: {
+      name: "Priya_Patel_Resume.pdf",
+      type: "PDF",
+      size: "1.1 MB",
+    },
+    coverLetter: {
+      name: "Priya_Patel_CoverLetter.pdf",
+      type: "PDF",
+      size: "0.6 MB",
+    },
+  },
+
+  {
+    id: 3,
+    name: "Ankeet Singh",
+    initials: "AS",
+    email: "ankeetsingh@gmail.com",
+    phone: "+91 99887 66554",
+    location: "Nagpur, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=14",
+    isNew: false,
+    opportunity: "UI/UX Design Intern",
+    department: "IT / Design",
+    college: "AISC College, Pune",
+    appliedOn: "14 Jul 2025",
+    status: "Shortlisted",
+    dob: "20 Sep 2002",
+    gender: "Male",
+    address: "Nagpur, Maharashtra, India",
+    languages: "English, Hindi",
+    about:
+      "Design-focused engineering student with a keen interest in creating intuitive and accessible user interfaces.",
+    education: [
+      {
+        degree: "B.Des, Interaction Design",
+        institution: "AISC College, Pune",
+        year: "2021 - 2025",
+      },
+    ],
+    skills: ["Figma", "Adobe XD", "Wireframing", "User Research"],
+    resume: {
+      name: "Ankeet_Singh_Resume.pdf",
+      type: "PDF",
+      size: "1.3 MB",
+    },
+    coverLetter: null,
+  },
+
+  {
+    id: 4,
+    name: "Sneha Verma",
+    initials: "SV",
+    email: "snehaverma@gmail.com",
+    phone: "+91 91234 56789",
+    location: "Pune, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=47",
+    isNew: false,
+    opportunity: "Web Development Intern",
+    department: "Computer Science",
+    college: "AISC College, Pune",
+    appliedOn: "13 Jul 2025",
+    status: "In Review",
+    dob: "18 Jan 2003",
+    gender: "Female",
+    address: "Pune, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Front-end focused developer who enjoys turning designs into responsive, accessible web pages.",
+    education: [
+      {
+        degree: "B.Tech, Computer Science",
+        institution: "AISC College, Pune",
+        year: "2022 - 2026",
+      },
+    ],
+    skills: ["HTML", "CSS", "JavaScript", "React"],
+    resume: {
+      name: "Sneha_Verma_Resume.pdf",
+      type: "PDF",
+      size: "1.0 MB",
+    },
+    coverLetter: {
+      name: "Sneha_Verma_CoverLetter.pdf",
+      type: "PDF",
+      size: "0.5 MB",
+    },
+  },
+
+  {
+    id: 5,
+    name: "Aman Gupta",
+    initials: "AG",
+    email: "amangupta@gmail.com",
+    phone: "+91 90123 45678",
+    location: "Nashik, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=51",
+    isNew: false,
+    opportunity: "Data Analyst Intern",
+    department: "Data Science",
+    college: "AISC College, Pune",
+    appliedOn: "13 Jul 2025",
+    status: "Shortlisted",
+    dob: "02 Mar 2003",
+    gender: "Male",
+    address: "Nashik, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Analytical thinker who enjoys uncovering insights from data and communicating them clearly.",
+    education: [
+      {
+        degree: "B.Sc, Statistics",
+        institution: "AISC College, Pune",
+        year: "2022 - 2025",
+      },
+    ],
+    skills: ["Excel", "SQL", "Power BI", "Python"],
+    resume: {
+      name: "Aman_Gupta_Resume.pdf",
+      type: "PDF",
+      size: "0.9 MB",
+    },
+    coverLetter: null,
+  },
+
+  {
+    id: 6,
+    name: "Neha Kulkarni",
+    initials: "NK",
+    email: "neha.k@gmail.com",
+    phone: "+91 89012 34567",
+    location: "Pune, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=25",
+    isNew: true,
+    opportunity: "Android Developer Intern",
+    department: "Computer Science",
+    college: "AISC College, Pune",
+    appliedOn: "12 Jul 2025",
+    status: "New",
+    dob: "30 Nov 2003",
+    gender: "Female",
+    address: "Pune, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Mobile app developer passionate about building smooth, well-designed Android experiences.",
+    education: [
+      {
+        degree: "B.Tech, Computer Science",
+        institution: "AISC College, Pune",
+        year: "2022 - 2026",
+      },
+    ],
+    skills: ["Kotlin", "Java", "Android Studio", "Firebase"],
+    resume: {
+      name: "Neha_Kulkarni_Resume.pdf",
+      type: "PDF",
+      size: "1.2 MB",
+    },
+    coverLetter: {
+      name: "Neha_Kulkarni_CoverLetter.pdf",
+      type: "PDF",
+      size: "0.7 MB",
+    },
+  },
+
+  {
+    id: 7,
+    name: "Vikram Purohit",
+    initials: "VP",
+    email: "vikram.p@gmail.com",
+    phone: "+91 88901 23456",
+    location: "Aurangabad, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=60",
+    isNew: false,
+    opportunity: "Cybersecurity Intern",
+    department: "Information Tech",
+    college: "AISC College, Pune",
+    appliedOn: "11 Jul 2025",
+    status: "Rejected",
+    dob: "14 Jul 2002",
+    gender: "Male",
+    address: "Aurangabad, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Security enthusiast interested in network defense and ethical hacking practices.",
+    education: [
+      {
+        degree: "B.Tech, Information Technology",
+        institution: "AISC College, Pune",
+        year: "2021 - 2025",
+      },
+    ],
+    skills: ["Networking", "Linux", "Wireshark", "Python"],
+    resume: {
+      name: "Vikram_Purohit_Resume.pdf",
+      type: "PDF",
+      size: "1.1 MB",
+    },
+    coverLetter: null,
+  },
+
+  // =========================
+  // PAGE 2
+  // =========================
+
+  {
+    id: 8,
+    name: "Aisha Khan",
+    initials: "AK",
+    email: "aisha.khan@gmail.com",
+    phone: "+91 98761 23456",
+    location: "Pune, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=44",
+    isNew: true,
+    opportunity: "Web Development Intern",
+    department: "Computer Science",
+    college: "AISC College, Pune",
+    appliedOn: "10 Jul 2025",
+    status: "New",
+    dob: "16 Apr 2003",
+    gender: "Female",
+    address: "Pune, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Passionate web developer interested in building modern and user-friendly websites.",
+    education: [
+      {
+        degree: "B.Sc, Computer Science",
+        institution: "AISC College, Pune",
+        year: "2022 - 2025",
+      },
+    ],
+    skills: ["HTML", "CSS", "JavaScript", "React", "Tailwind"],
+    resume: {
+      name: "Aisha_Khan_Resume.pdf",
+      type: "PDF",
+      size: "1.2 MB",
+    },
+    coverLetter: {
+      name: "Aisha_Khan_CoverLetter.pdf",
+      type: "PDF",
+      size: "0.6 MB",
+    },
+  },
+
+  {
+    id: 9,
+    name: "Rohan Mehta",
+    initials: "RM",
+    email: "rohan.mehta@gmail.com",
+    phone: "+91 97654 32109",
+    location: "Mumbai, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=11",
+    isNew: false,
+    opportunity: "Data Science Intern",
+    department: "Data Science",
+    college: "AISC College, Pune",
+    appliedOn: "10 Jul 2025",
+    status: "Shortlisted",
+    dob: "21 Aug 2002",
+    gender: "Male",
+    address: "Mumbai, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Aspiring data scientist with an interest in machine learning and predictive analytics.",
+    education: [
+      {
+        degree: "B.Tech, Data Science",
+        institution: "AISC College, Pune",
+        year: "2022 - 2026",
+      },
+    ],
+    skills: ["Python", "NumPy", "Pandas", "Machine Learning", "SQL"],
+    resume: {
+      name: "Rohan_Mehta_Resume.pdf",
+      type: "PDF",
+      size: "1.3 MB",
+    },
+    coverLetter: null,
+  },
+
+  {
+    id: 10,
+    name: "Kavya Joshi",
+    initials: "KJ",
+    email: "kavya.joshi@gmail.com",
+    phone: "+91 96543 21098",
+    location: "Pune, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=45",
+    isNew: false,
+    opportunity: "UI/UX Design Intern",
+    department: "IT / Design",
+    college: "AISC College, Pune",
+    appliedOn: "09 Jul 2025",
+    status: "In Review",
+    dob: "11 Jun 2003",
+    gender: "Female",
+    address: "Pune, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Creative designer interested in user experience, visual design and product research.",
+    education: [
+      {
+        degree: "B.Des, Communication Design",
+        institution: "AISC College, Pune",
+        year: "2022 - 2026",
+      },
+    ],
+    skills: ["Figma", "Adobe XD", "UI Design", "Prototyping"],
+    resume: {
+      name: "Kavya_Joshi_Resume.pdf",
+      type: "PDF",
+      size: "1.0 MB",
+    },
+    coverLetter: {
+      name: "Kavya_Joshi_CoverLetter.pdf",
+      type: "PDF",
+      size: "0.5 MB",
+    },
+  },
+
+  {
+    id: 11,
+    name: "Arjun Desai",
+    initials: "AD",
+    email: "arjun.desai@gmail.com",
+    phone: "+91 95432 10987",
+    location: "Nashik, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=13",
+    isNew: false,
+    opportunity: "Data Analyst Intern",
+    department: "Data Science",
+    college: "AISC College, Pune",
+    appliedOn: "09 Jul 2025",
+    status: "Accepted",
+    dob: "07 Mar 2002",
+    gender: "Male",
+    address: "Nashik, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Detail-oriented student interested in data visualization and business intelligence.",
+    education: [
+      {
+        degree: "B.Sc, Data Analytics",
+        institution: "AISC College, Pune",
+        year: "2022 - 2025",
+      },
+    ],
+    skills: ["Excel", "SQL", "Power BI", "Tableau"],
+    resume: {
+      name: "Arjun_Desai_Resume.pdf",
+      type: "PDF",
+      size: "1.1 MB",
+    },
+    coverLetter: null,
+  },
+
+  {
+    id: 12,
+    name: "Meera Shah",
+    initials: "MS",
+    email: "meera.shah@gmail.com",
+    phone: "+91 94321 09876",
+    location: "Pune, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=48",
+    isNew: true,
+    opportunity: "Android Developer Intern",
+    department: "Computer Science",
+    college: "AISC College, Pune",
+    appliedOn: "08 Jul 2025",
+    status: "New",
+    dob: "24 Oct 2003",
+    gender: "Female",
+    address: "Pune, Maharashtra, India",
+    languages: "English, Hindi, Marathi, Gujarati",
+    about:
+      "Enthusiastic mobile developer interested in Android development and cloud-based applications.",
+    education: [
+      {
+        degree: "B.Tech, Computer Science",
+        institution: "AISC College, Pune",
+        year: "2022 - 2026",
+      },
+    ],
+    skills: ["Java", "Kotlin", "Android", "Firebase"],
+    resume: {
+      name: "Meera_Shah_Resume.pdf",
+      type: "PDF",
+      size: "1.2 MB",
+    },
+    coverLetter: {
+      name: "Meera_Shah_CoverLetter.pdf",
+      type: "PDF",
+      size: "0.7 MB",
+    },
+  },
+
+  {
+    id: 13,
+    name: "Yash Patil",
+    initials: "YP",
+    email: "yash.patil@gmail.com",
+    phone: "+91 93210 98765",
+    location: "Kolhapur, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=15",
+    isNew: false,
+    opportunity: "Cybersecurity Intern",
+    department: "Information Tech",
+    college: "AISC College, Pune",
+    appliedOn: "08 Jul 2025",
+    status: "Shortlisted",
+    dob: "29 Jan 2003",
+    gender: "Male",
+    address: "Kolhapur, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Cybersecurity student interested in network security, vulnerability assessment and security monitoring.",
+    education: [
+      {
+        degree: "B.Tech, Information Technology",
+        institution: "AISC College, Pune",
+        year: "2022 - 2026",
+      },
+    ],
+    skills: ["Linux", "Networking", "Python", "Wireshark", "Cybersecurity"],
+    resume: {
+      name: "Yash_Patil_Resume.pdf",
+      type: "PDF",
+      size: "1.0 MB",
+    },
+    coverLetter: null,
+  },
+
+  {
+    id: 14,
+    name: "Simran Kapoor",
+    initials: "SK",
+    email: "simran.kapoor@gmail.com",
+    phone: "+91 92109 87654",
+    location: "Mumbai, Maharashtra",
+    avatar: "https://i.pravatar.cc/80?img=49",
+    isNew: false,
+    opportunity: "Web Development Intern",
+    department: "Computer Science",
+    college: "AISC College, Pune",
+    appliedOn: "07 Jul 2025",
+    status: "Rejected",
+    dob: "13 Dec 2002",
+    gender: "Female",
+    address: "Mumbai, Maharashtra, India",
+    languages: "English, Hindi, Marathi",
+    about:
+      "Web development enthusiast with an interest in responsive interfaces and frontend technologies.",
+    education: [
+      {
+        degree: "B.Sc, Computer Science",
+        institution: "AISC College, Pune",
+        year: "2022 - 2025",
+      },
+    ],
+    skills: ["HTML", "CSS", "JavaScript", "Bootstrap"],
+    resume: {
+      name: "Simran_Kapoor_Resume.pdf",
+      type: "PDF",
+      size: "0.9 MB",
+    },
+    coverLetter: null,
+  },
+];
+
+export const opportunityOptions = [
+  "Web Development Intern",
+  "Data Science Intern",
+  "UI/UX Design Intern",
+  "Data Analyst Intern",
+  "Android Developer Intern",
+  "Cybersecurity Intern",
+];
+
+export const departmentOptions = [
+  "Computer Science",
+  "Data Science",
+  "IT / Design",
+  "Information Tech",
+];
+
+export const statusOptions = [
+  "New",
+  "Shortlisted",
+  "In Review",
+  "Accepted",
+  "Rejected",
+];
