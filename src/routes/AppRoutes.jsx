@@ -9,7 +9,7 @@ import Contact from "../pages/Contact";
 // ============================================================
 // COMPANY
 // ============================================================
-
+import AttendancePage from "./pages/Company/AttendancePage";
 import CompanyDashboard from "../pages/Company/CompanyDashboard";
 import CompanyProfile from "../pages/Company/CompanyProfile";
 import ManageOjtOpportunities from "../pages/Company/ManageOjtOpportunities";
@@ -30,6 +30,7 @@ import Analytics from "../pages/admin/Analytics";
 import Settings from "../pages/admin/Settings";
 
 // student
+import AssignedOJT from "./pages/Student/AssignedOJT";
 import Attendance from "../pages/Student/Attendance";
 import MarkAttendance from "../pages/Student/MarkAttendance"; // ADDED
 import Certificates from "../pages/Student/Certificates";
@@ -112,6 +113,7 @@ function AppRoutes() {
         />
         <Route path="/company/evaluation" element={<Evaluation />} />
       <Route path="/company/applications-students" element={<Applications />} />
+      <Route path="/company/attendance" element={<AttendancePage />} />
 //Admin
 
 
@@ -328,6 +330,8 @@ function AppRoutes() {
       />
 
     // student
+    <Route path="/student/assigned-ojt" element={<AssignedOJT />} />
+      <Route path="/assigned-ojt" element={<AssignedOJT />} />
         <Route path="/student" element={<StudentDashboard />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
         <Route path="/student/browse-ojt" element={<BrowseOJT />} />

@@ -11,6 +11,7 @@ import StatusBadge from "./StatusBadge";
  *  - onTabChange: (tab) => void
  *  - selectedId: currently selected student id (row highlight)
  *  - onSelect: (student) => void
+ *  - onEditClick: (student) => void
  *  - page, totalEntries, perPage, onPageChange, onPerPageChange
  */
 const EvaluationTable = ({
@@ -19,6 +20,7 @@ const EvaluationTable = ({
   onTabChange,
   selectedId,
   onSelect,
+  onEditClick,
   page = 1,
   totalPages = 1,
   totalEntries = 0,
@@ -72,7 +74,7 @@ const EvaluationTable = ({
                 </tr>
               </thead>
               <tbody>
-                {students.map((s) => (
+                {students.map((s, idx) => (
                   <tr
                     key={s.id}
                     onClick={() => onSelect(s)}
@@ -80,12 +82,15 @@ const EvaluationTable = ({
                       selectedId === s.id ? "bg-blue-50/60" : "hover:bg-gray-50"
                     }`}
                   >
-                    <td className="px-4 py-3 text-gray-500">{s.id}</td>
+                    {/* ✅ Serial number = row position across pages, not the raw id */}
+                    <td className="px-4 py-3 text-gray-500">{start + idx}</td>
                     <td className="px-4 py-3">
                       <p className="font-medium text-gray-800">{s.name}</p>
                       <p className="text-xs text-gray-400">{s.email}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-600">{s.opportunity}</td>
+                    <td className="px-4 py-3 text-gray-600">
+                      {typeof s.opportunity === "object" ? s.opportunity?.label : s.opportunity}
+                    </td>
                     <td className="px-4 py-3 text-gray-600">{s.department}</td>
                     <td className="px-4 py-3 text-gray-600">
                       {s.evaluatedOn || "-"}
@@ -112,7 +117,14 @@ const EvaluationTable = ({
                         >
                           <Eye size={15} />
                         </button>
-                        <button title="Edit" className="hover:text-blue-500">
+                        <button
+                          title="Edit"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditClick?.(s);
+                          }}
+                          className="hover:text-blue-500"
+                        >
                           <Pencil size={15} />
                         </button>
                       </div>
