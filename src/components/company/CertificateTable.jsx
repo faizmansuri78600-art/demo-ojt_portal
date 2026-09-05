@@ -12,94 +12,14 @@ import {
 
 
 const initialStudents = [
-  {
-    initials: "RS",
-    color: "bg-pink-100 text-pink-700",
-    name: "Rahul Sharma",
-    email: "rahul@gmail.com",
-    role: "Web Development Intern",
-    dept: "Computer Science",
-    date: "15 Jul 2025",
-    id: "CERT-2025-0001",
-    status: "Issued",
-  },
-  {
-    initials: "PP",
-    color: "bg-green-100 text-green-700",
-    name: "Priya Patel",
-    email: "priya21@gmail.com",
-    role: "Data Science Intern",
-    dept: "Data Science",
-    date: "14 Jul 2025",
-    id: "CERT-2025-0002",
-    status: "Issued",
-  },
-  {
-    initials: "AS",
-    color: "bg-purple-100 text-purple-700",
-    name: "Aniket Singh",
-    email: "aniket@gmail.com",
-    role: "UI/UX Design Intern",
-    dept: "IT / Design",
-    date: "12 Jul 2025",
-    id: "CERT-2025-0003",
-    status: "Issued",
-  },
-  {
-    initials: "SV",
-    color: "bg-pink-100 text-pink-700",
-    name: "Sneha Verma",
-    email: "sneha.verma@gmail.com",
-    role: "Web Development Intern",
-    dept: "Computer Science",
-    date: "10 Jul 2025",
-    id: "CERT-2025-0004",
-    status: "Issued",
-  },
-  {
-    initials: "AG",
-    color: "bg-orange-100 text-orange-700",
-    name: "Aman Gupta",
-    email: "aman.gupta@gmail.com",
-    role: "Data Analyst Intern",
-    dept: "Data Science",
-    date: "09 Jul 2025",
-    id: "CERT-2025-0005",
-    status: "Issued",
-  },
-  {
-    initials: "NK",
-    color: "bg-blue-100 text-blue-700",
-    name: "Neha Kulkarni",
-    email: "neha.k@gmail.com",
-    role: "Android Developer Intern",
-    dept: "Computer Science",
-    date: "-",
-    id: "-",
-    status: "Pending",
-  },
-  {
-    initials: "VP",
-    color: "bg-purple-100 text-purple-700",
-    name: "Vikram Purohit",
-    email: "vikram.p@gmail.com",
-    role: "Cybersecurity Intern",
-    dept: "Information Tech.",
-    date: "-",
-    id: "-",
-    status: "Pending",
-  },
-  {
-    initials: "MB",
-    color: "bg-pink-100 text-pink-700",
-    name: "Megha Bansal",
-    email: "megha.b@gmail.com",
-    role: "Digital Marketing Intern",
-    dept: "Marketing",
-    date: "-",
-    id: "-",
-    status: "Pending",
-  },
+  { initials: "RS", color: "bg-pink-100 text-pink-700", name: "Rahul Sharma", email: "rahul@gmail.com", role: "Web Development Intern", dept: "Computer Science", date: "15 Jul 2025", id: "CERT-2025-0001", status: "Issued" },
+  { initials: "PP", color: "bg-green-100 text-green-700", name: "Priya Patel", email: "priya21@gmail.com", role: "Data Science Intern", dept: "Data Science", date: "14 Jul 2025", id: "CERT-2025-0002", status: "Issued" },
+  { initials: "AS", color: "bg-purple-100 text-purple-700", name: "Aniket Singh", email: "aniket@gmail.com", role: "UI/UX Design Intern", dept: "IT / Design", date: "12 Jul 2025", id: "CERT-2025-0003", status: "Issued" },
+  { initials: "SV", color: "bg-pink-100 text-pink-700", name: "Sneha Verma", email: "sneha.verma@gmail.com", role: "Web Development Intern", dept: "Computer Science", date: "10 Jul 2025", id: "CERT-2025-0004", status: "Issued" },
+  { initials: "AG", color: "bg-orange-100 text-orange-700", name: "Aman Gupta", email: "aman.gupta@gmail.com", role: "Data Analyst Intern", dept: "Data Science", date: "09 Jul 2025", id: "CERT-2025-0005", status: "Issued" },
+  { initials: "NK", color: "bg-blue-100 text-blue-700", name: "Neha Kulkarni", email: "neha.k@gmail.com", role: "Android Developer Intern", dept: "Computer Science", date: "-", id: "-", status: "Pending" },
+  { initials: "VP", color: "bg-purple-100 text-purple-700", name: "Vikram Purohit", email: "vikram.p@gmail.com", role: "Cybersecurity Intern", dept: "Information Tech.", date: "-", id: "-", status: "Pending" },
+  { initials: "MB", color: "bg-pink-100 text-pink-700", name: "Megha Bansal", email: "megha.b@gmail.com", role: "Digital Marketing Intern", dept: "Marketing", date: "-", id: "-", status: "Pending" },
 ];
 
 
@@ -208,7 +128,11 @@ export default function CertificateTable({
   };
 
 
-  /* ================= DOWNLOAD ================= */
+  /* ================= DOWNLOAD =================
+     Rebuilt to visually match the on-screen popup / CertificatePreview.jsx:
+     same gold/blue corner accents (pure CSS clip-path, no image needed —
+     that's what keeps this safe to open as a standalone file), same gold
+     divider line, same gold seal, same "Jordan" mentor signature line. */
 
   const downloadCertificate = (student) => {
 
@@ -220,38 +144,142 @@ export default function CertificateTable({
 
 <style>
 
-body {
-  font-family: Arial, sans-serif;
-  background: #f8fafc;
-  display: flex;
-  justify-content: center;
-  padding: 40px;
-}
+  * { box-sizing: border-box; }
 
-.certificate {
-  width: 800px;
-  min-height: 550px;
-  background: white;
-  border: 8px solid #0B3091;
-  padding: 50px;
-  text-align: center;
-  box-sizing: border-box;
-}
+  body {
+    font-family: Arial, sans-serif;
+    background: #F8FAFC;
+    display: flex;
+    justify-content: center;
+    padding: 40px;
+    margin: 0;
+  }
 
-h1 {
-  color: #0B3091;
-  font-size: 42px;
-}
+  .certificate {
+    position: relative;
+    width: 650px;
+    min-height: 430px;
+    background: white;
+    border: 1px solid #D9D9D9;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    padding: 40px 48px;
+    text-align: center;
+    overflow: hidden;
+  }
 
-.name {
-  font-size: 34px;
-  color: #17346D;
-  font-weight: bold;
-}
+  .corner {
+    position: absolute;
+    width: 75px;
+    height: 75px;
+  }
 
-.gold {
-  color: #D9A529;
-}
+  .corner.gold-top    { top: 0; left: 0; background: #F5B93E;
+    clip-path: polygon(0 0, 100% 0, 0 100%); }
+  .corner.blue-top     { top: 0; left: 28px; background: #0B3091;
+    clip-path: polygon(38% 0, 100% 0, 0 100%, 0 62%); }
+  .corner.blue-bottom  { bottom: 0; right: 0; background: #0B3091;
+    clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+  .corner.gold-bottom  { bottom: 0; right: 0; width: 38px; background: #F5B93E;
+    clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+
+  .company {
+    color: #0B3091;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin-top: 4px;
+  }
+
+  h1 {
+    color: #17346D;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 36px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    margin: 16px 0 2px;
+  }
+
+  .sub {
+    color: #9CA3AF;
+    font-size: 10px;
+    letter-spacing: 4px;
+    margin: 0;
+  }
+
+  .gold-line {
+    width: 110px;
+    height: 2px;
+    background: #D9B24C;
+    margin: 18px auto 20px;
+  }
+
+  p.muted {
+    color: #6B7280;
+    font-size: 11px;
+    margin: 4px 0;
+  }
+
+  .name {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-style: italic;
+    font-size: 30px;
+    font-weight: bold;
+    color: #17346D;
+    margin: 8px 0;
+  }
+
+  .role {
+    color: #17346D;
+    font-size: 14px;
+    font-weight: bold;
+    margin: 4px 0;
+  }
+
+  .desc {
+    color: #7B8494;
+    font-size: 10px;
+    line-height: 1.5;
+    margin: 20px 40px 0;
+  }
+
+  .signature-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 40px;
+    padding: 0 40px;
+  }
+
+  .sig-block { width: 100px; text-align: center; }
+  .sig-line { border-top: 1px solid #A7A7A7; margin-top: 6px; padding-top: 4px; }
+  .sig-label { color: #9CA3AF; font-size: 8px; margin-top: 2px; }
+  .sig-value { color: #17346D; font-size: 10px; margin: 0; }
+  .sig-name { color: #17346D; font-family: Georgia, serif; font-style: italic;
+    font-weight: 600; font-size: 16px; margin: 0; }
+
+  .seal {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: #F5B93E;
+    border: 4px solid #D9A529;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .seal-inner {
+    width: 39px;
+    height: 39px;
+    border-radius: 50%;
+    border: 2px solid #B47D13;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #B47D13;
+    font-size: 16px;
+  }
 
 </style>
 
@@ -261,53 +289,51 @@ h1 {
 
 <div class="certificate">
 
-  <h2 class="gold">
-    ABC TECHNOLOGIES
-  </h2>
+  <div class="corner gold-top"></div>
+  <div class="corner blue-top"></div>
+  <div class="corner blue-bottom"></div>
+  <div class="corner gold-bottom"></div>
 
-  <h1>
-    CERTIFICATE
-  </h1>
+  <p class="company">ABC TECHNOLOGIES</p>
 
-  <p>
-    OF INTERNSHIP
+  <h1>CERTIFICATE</h1>
+  <p class="sub">OF INTERNSHIP</p>
+
+  <div class="gold-line"></div>
+
+  <p class="muted">This is to certify that</p>
+  <div class="name">${student.name}</div>
+
+  <p class="muted">has successfully completed the</p>
+  <p class="role">${student.role}</p>
+
+  <p class="muted">Department: ${student.dept}</p>
+  <p class="muted">Completion Date: ${student.date}</p>
+
+  <p class="desc">
+    During this internship, the student has demonstrated dedication,
+    hard work and excellent performance.
   </p>
 
-  <p>
-    This is to certify that
-  </p>
+  <div class="signature-row">
 
-  <div class="name">
-    ${student.name}
+    <div class="sig-block">
+      <p class="sig-value">16 July 2025</p>
+      <div class="sig-line"></div>
+      <p class="sig-label">Date</p>
+    </div>
+
+    <div class="seal">
+      <div class="seal-inner">&#9733;</div>
+    </div>
+
+    <div class="sig-block" style="width:130px;">
+      <p class="sig-name">Jordan</p>
+      <div class="sig-line"></div>
+      <p class="sig-label">Mentor, ABC Technologies</p>
+    </div>
+
   </div>
-
-  <p>
-    has successfully completed the
-  </p>
-
-  <h3>
-    ${student.role}
-  </h3>
-
-  <p>
-    Department: ${student.dept}
-  </p>
-
-  <p>
-    Completion Date: ${student.date}
-  </p>
-
-  <br />
-
-  <p>
-    Certificate ID: ${student.id}
-  </p>
-
-  <br />
-
-  <p>
-    Mentor, ABC Technologies
-  </p>
 
 </div>
 
@@ -1004,7 +1030,10 @@ h1 {
       )}
 
 
-      {/* ================= VIEW POPUP ================= */}
+      {/* ================= VIEW POPUP =================
+          Rebuilt to match CertificatePreview.jsx exactly: gold/blue clip-path
+          corners, gold divider line, serif "CERTIFICATE" title, gold seal,
+          "Jordan" mentor signature — instead of the old plain blue-border box. */}
 
       {viewStudent && (
 
@@ -1026,7 +1055,7 @@ h1 {
               bg-white
               rounded-[12px]
               shadow-2xl
-              w-[650px]
+              w-[720px]
               max-h-[90vh]
               overflow-auto
               relative
@@ -1041,6 +1070,7 @@ h1 {
                 absolute
                 right-4
                 top-4
+                z-20
                 text-[#64748B]
                 hover:text-[#111827]
               "
@@ -1056,67 +1086,128 @@ h1 {
 
             <div
               className="
-                border-[5px]
-                border-[#0B3091]
+                relative
+                mx-auto
+                w-[650px]
+                max-w-full
+                min-h-[430px]
                 bg-white
-                p-10
+                border
+                border-[#D9D9D9]
+                shadow-md
                 text-center
+                px-12
+                py-10
+                overflow-hidden
               "
             >
 
-              <p className="text-[12px] font-bold text-[#0B3091]">
+              {/* TOP LEFT GOLD */}
+              <div
+                className="absolute top-0 left-0 w-[75px] h-[75px] bg-[#F5B93E]"
+                style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
+              />
+
+              {/* TOP LEFT BLUE */}
+              <div
+                className="absolute top-0 left-[28px] w-[75px] h-[75px] bg-[#0B3091]"
+                style={{ clipPath: "polygon(38% 0, 100% 0, 0 100%, 0 62%)" }}
+              />
+
+              {/* BOTTOM RIGHT BLUE */}
+              <div
+                className="absolute bottom-0 right-0 w-[75px] h-[75px] bg-[#0B3091]"
+                style={{ clipPath: "polygon(100% 0, 100% 100%, 0 100%)" }}
+              />
+
+              {/* BOTTOM RIGHT GOLD */}
+              <div
+                className="absolute bottom-0 right-0 w-[38px] h-[75px] bg-[#F5B93E]"
+                style={{ clipPath: "polygon(100% 0, 100% 100%, 0 100%)" }}
+              />
+
+              <p className="text-[#0B3091] text-[12px] font-bold tracking-wider mt-1 relative z-10">
                 ABC TECHNOLOGIES
               </p>
 
-              <h1 className="text-[34px] font-serif font-bold text-[#17346D] mt-5">
+              <h1 className="text-[#17346D] text-[36px] font-serif font-bold tracking-wide mt-4">
                 CERTIFICATE
               </h1>
 
-              <p className="text-[9px] tracking-[0.3em] text-[#9CA3AF]">
+              <p className="text-[#9CA3AF] text-[10px] tracking-[0.35em] mt-1">
                 OF INTERNSHIP
               </p>
 
-              <div className="w-[80px] h-px bg-[#D9B24C] mx-auto my-5" />
+              <div className="w-[110px] h-[2px] bg-[#D9B24C] mx-auto mt-4 mb-5" />
 
-              <p className="text-[10px] text-[#64748B]">
+              <p className="text-[#6B7280] text-[11px]">
                 This is to certify that
               </p>
 
-              <p className="text-[30px] font-serif italic font-bold text-[#17346D] mt-2">
+              <p className="text-[#17346D] text-[30px] font-serif italic font-bold mt-2">
                 {viewStudent.name}
               </p>
 
-              <p className="text-[10px] text-[#64748B] mt-4">
+              <p className="text-[#6B7280] text-[11px] mt-3">
                 has successfully completed the
               </p>
 
-              <p className="text-[13px] font-bold text-[#17346D] mt-1">
+              <p className="text-[#17346D] text-[14px] font-bold mt-1">
                 {viewStudent.role}
               </p>
 
-              <p className="text-[10px] text-[#64748B] mt-2">
+              <p className="text-[#6B7280] text-[11px] mt-1">
                 Department: {viewStudent.dept}
               </p>
 
-              <p className="text-[10px] text-[#64748B] mt-1">
+              <p className="text-[#6B7280] text-[11px] mt-1">
                 Completion Date: {viewStudent.date}
               </p>
 
-              <p className="text-[9px] text-[#94A3B8] mt-6">
-                Certificate ID: {viewStudent.id}
+              <p className="text-[#7B8494] text-[10px] leading-5 mt-5 px-10">
+                During this internship, the student has demonstrated
+                dedication, hard work and excellent performance.
               </p>
 
-              <div className="flex justify-between mt-12">
 
-                <div className="w-[120px] border-t border-[#999] pt-1">
-                  <p className="text-[8px] text-[#64748B]">
+              {/* SIGNATURE */}
+
+              <div className="mt-10 px-10 flex items-end justify-between">
+
+                <div className="w-[100px] text-center">
+                  <p className="text-[#17346D] text-[10px] mb-1">
+                    16 July 2025
+                  </p>
+                  <div className="w-full h-px bg-[#A7A7A7]" />
+                  <p className="text-[#9CA3AF] text-[8px] mt-1">
                     Date
                   </p>
                 </div>
 
-                <div className="w-[120px] border-t border-[#999] pt-1">
-                  <p className="text-[8px] text-[#64748B]">
-                    Mentor
+                <div
+                  className="
+                    w-[55px] h-[55px] rounded-full bg-[#F5B93E]
+                    border-[4px] border-[#D9A529]
+                    flex items-center justify-center
+                  "
+                >
+                  <div
+                    className="
+                      w-[39px] h-[39px] rounded-full border-2 border-[#B47D13]
+                      flex items-center justify-center text-[#B47D13] text-[16px]
+                    "
+                  >
+                    ★
+                  </div>
+                </div>
+
+                <div className="w-[130px] text-center">
+                  <p className="text-[#17346D] text-[16px] font-serif italic font-semibold mb-1">
+                    Jordan
+                  </p>
+                  <div className="w-full h-px bg-[#A7A7A7]" />
+                  <p className="text-[#9CA3AF] text-[8px] mt-1">
+                    Mentor, ABC Technologies
                   </p>
                 </div>
 
