@@ -1,14 +1,19 @@
 const mongoose = require("mongoose");
 
-const assignOjtSchema = new mongoose.Schema(
+const assignedOjtSchema = new mongoose.Schema(
   {
+    _id: {
+      type: String,
+      required: true,
+    },
+
     applicationId: {
       type: String,
+      required: true,
     },
 
     facultyId: {
       type: String,
-      ref: "Faculty",
     },
 
     assignedByCoordinatorId: {
@@ -27,7 +32,11 @@ const assignOjtSchema = new mongoose.Schema(
       type: String,
     },
   },
-  { collection: "assignojt" }
+  {
+    collection: "assignojt",
+  }
 );
 
-module.exports = mongoose.model("AssignOjt", assignOjtSchema);
+const AssignedOjt = mongoose.model("AssignedOjt", assignedOjtSchema);
+
+module.exports = AssignedOjt;

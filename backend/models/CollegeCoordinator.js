@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const facultySchema = new mongoose.Schema(
+const collegeCoordinatorSchema = new mongoose.Schema(
   {
     _id: {
       type: String,
@@ -18,16 +18,15 @@ const facultySchema = new mongoose.Schema(
     department: {
       type: String,
     },
-
-    designation: {
-      type: String,
-    },
   },
   {
-    collection: "faculty",
+    collection: "collagecoordinator",
   }
 );
 
-const Faculty = mongoose.model("Faculty", facultySchema);
+const CollegeCoordinator = mongoose.model(
+  "CollegeCoordinator",
+  collegeCoordinatorSchema
+);
 
-module.exports = Faculty;
+module.exports = CollegeCoordinator;

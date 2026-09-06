@@ -2,13 +2,44 @@ const mongoose = require("mongoose");
 
 const applicationSchema = new mongoose.Schema(
   {
-    studentId: { type: mongoose.Schema.Types.ObjectId, ref: "Student" },
-    opportunityId: { type: mongoose.Schema.Types.ObjectId },
-    status: { type: String },
-    appliedOn: { type: Date },
-    reviewedOn: { type: Date },
+    _id: {
+      type: String,
+      required: true,
+    },
+
+    studentId: {
+      type: String,
+      required: true,
+    },
+
+    opportunityId: {
+      type: String,
+      required: true,
+    },
+
+    status: {
+      type: String,
+      default: "Applied",
+    },
+
+    appliedOn: {
+      type: String,
+      default: "",
+    },
+
+    reviewedOn: {
+      type: String,
+      default: null,
+    },
   },
-  { collection: "application" }
+  {
+    collection: "application",
+  }
 );
 
-module.exports = mongoose.model("Application", applicationSchema);
+const Application = mongoose.model(
+  "Application",
+  applicationSchema
+);
+
+module.exports = Application;

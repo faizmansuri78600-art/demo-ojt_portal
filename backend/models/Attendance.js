@@ -2,21 +2,28 @@ const mongoose = require("mongoose");
 
 const attendanceSchema = new mongoose.Schema(
   {
+    _id: {
+      type: mongoose.Schema.Types.ObjectId,
+    },
+
     assignedOjtId: {
       type: String,
-      ref: "AssignOjt",
+      required: true,
     },
 
     date: {
-      type: Date,
+      type: String,
+      required: true,
     },
 
     status: {
-      type: String, // e.g. "Present", "Absent"
+      type: String,
+      required: true,
     },
 
     hoursLogged: {
       type: Number,
+      default: 0,
     },
   },
   {
@@ -24,4 +31,9 @@ const attendanceSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Attendance", attendanceSchema);
+const Attendance = mongoose.model(
+  "Attendance",
+  attendanceSchema
+);
+
+module.exports = Attendance;
