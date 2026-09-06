@@ -2,18 +2,22 @@ const mongoose = require("mongoose");
 
 const evaluationSchema = new mongoose.Schema(
   {
+    _id: {
+      type: String,
+      required: true,
+    },
+
     assignedOjtId: {
       type: String,
-      ref: "AssignOjt",
+      required: true,
     },
 
     evaluatedByFacultyId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Faculty",
+      type: String,
     },
 
     evaluatedByCoordinatorId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
     },
 
     hoursMarks: {
@@ -45,7 +49,7 @@ const evaluationSchema = new mongoose.Schema(
     },
 
     evaluatedOn: {
-      type: Date,
+      type: String,
     },
   },
   {
@@ -53,4 +57,6 @@ const evaluationSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Evaluation", evaluationSchema);
+const Evaluation = mongoose.model("Evaluation", evaluationSchema);
+
+module.exports = Evaluation;

@@ -1,42 +1,42 @@
 const mongoose = require("mongoose");
 
-const studentSchema = new mongoose.Schema(
+const companySchema = new mongoose.Schema(
   {
     _id: {
       type: String,
       required: true,
     },
 
-    userId: {
-      type: String,
-    },
-
     verifiedByCoordinatorId: {
       type: String,
-      default: null,
     },
 
-    rollNumber: {
+    companyName: {
+      type: String,
+      required: true,
+    },
+
+    street: {
       type: String,
     },
 
-    name: {
+    city: {
       type: String,
     },
 
-    department: {
+    state: {
       type: String,
     },
 
-    cgpa: {
-      type: Number,
-    },
-
-    profilePhotoUrl: {
+    zipCode: {
       type: String,
     },
 
-    resumeUrl: {
+    website: {
+      type: String,
+    },
+
+    description: {
       type: String,
     },
 
@@ -46,10 +46,10 @@ const studentSchema = new mongoose.Schema(
     },
   },
   {
-    collection: "student",
+    collection: "companies",
   }
 );
 
-const Student = mongoose.model("Student", studentSchema);
+const Company = mongoose.model("Company", companySchema);
 
-module.exports = Student;
+module.exports = Company;
