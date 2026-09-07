@@ -3,12 +3,12 @@ import { Plus, FileDown, X, Download } from "lucide-react";
 
 import CompanySidebar from "../../components/common/CompanySidebar";
 import CompanyHeader from "../../components/common/CompanyHeader";
-import CompanyFooter from "../../components/common/CompanyFooter";
+import Footer from "../../components/common/CompanyFooter";
 
-import EvaluationStatsCards from "../../components/Company/EvaluationStatsCards";
-import EvaluationFiltersBar from "../../components12/Company/EvaluationFiltersBar";
-import EvaluationTable from "../../components12/Company/EvaluationTable";
-import StudentEvaluationPanel from "../../components12/Company/StudentEvaluationPanel";
+import EvaluationStatsCards from "../../components/company/EvaluationStatsCards";
+import EvaluationFiltersBar from "../../components/company/EvaluationFiltersBar";
+import EvaluationTable from "../../components/company/EvaluationTable";
+import StudentEvaluationPanel from "../../components/company/StudentEvaluationPanel";
 
 import {
   evaluationStats,
@@ -16,7 +16,7 @@ import {
   opportunityOptions,
   departmentOptions,
   statusOptions,
-} from "../../Components12/company2/evaluationData";
+} from "../../components/company/evaluationData";
 
 const PER_PAGE_DEFAULT = 10;
 const STORAGE_KEY = "ojt_evaluation_students";
@@ -502,7 +502,7 @@ const Evaluation = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <CompznySidebar />
+      <CompanySidebar />
 
       <div className="flex-1 flex flex-col min-w-0">
         <CompanyHeader />

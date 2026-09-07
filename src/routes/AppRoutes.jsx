@@ -9,13 +9,13 @@ import Contact from "../pages/Contact";
 // ============================================================
 // COMPANY
 // ============================================================
-import AttendancePage from "./pages/Company/AttendancePage";
+import AttendancePage from "../pages/Company/AttendancePage";
 import CompanyDashboard from "../pages/Company/CompanyDashboard";
 import CompanyProfile from "../pages/Company/CompanyProfile";
 import ManageOjtOpportunities from "../pages/Company/ManageOjtOpportunities";
 import Certificate from "../pages/Company/Certificate";
 import NotificationsSettings from "../pages/Company/NotificationsSettings";
-import Evaluation from "../pages/Company/Evaluation";
+import CompanyEvaluation from "../pages/Company/Evaluation";
 import Applications from "../pages/Company/Applications";
 
 
@@ -30,7 +30,7 @@ import Analytics from "../pages/admin/Analytics";
 import Settings from "../pages/admin/Settings";
 
 // student
-import AssignedOJT from "./pages/Student/AssignedOJT";
+import AssignedOJT from "../pages/Student/AssignedOJT";
 import Attendance from "../pages/Student/Attendance";
 import MarkAttendance from "../pages/Student/MarkAttendance"; // ADDED
 import Certificates from "../pages/Student/Certificates";
@@ -111,7 +111,7 @@ function AppRoutes() {
           path="/company/notifications-settings"
           element={<NotificationsSettings />}
         />
-        <Route path="/company/evaluation" element={<Evaluation />} />
+        <Route path="/company/evaluation" element={<CompanyEvaluation />} />
       <Route path="/company/applications-students" element={<Applications />} />
       <Route path="/company/attendance" element={<AttendancePage />} />
 //Admin
