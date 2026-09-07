@@ -15,7 +15,7 @@ const actions = [
     label: 'Add New Opportunity',
     color: 'text-blue-600',
     bg: 'bg-blue-100',
-    path: '/company/manage-ojt-opportunity',
+    path: '/company/ManageOjtOpportunities',
   },
   {
     icon: Eye,

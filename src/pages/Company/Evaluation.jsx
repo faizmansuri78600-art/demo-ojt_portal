@@ -6,9 +6,9 @@ import CompanyHeader from "../../components/common/CompanyHeader";
 import Footer from "../../components/common/CompanyFooter";
 
 import EvaluationStatsCards from "../../components/Company/EvaluationStatsCards";
-import EvaluationFiltersBar from "../../components12/Company/EvaluationFiltersBar";
-import EvaluationTable from "../../components12/Company/EvaluationTable";
-import StudentEvaluationPanel from "../../components12/Company/StudentEvaluationPanel";
+import EvaluationFiltersBar from "../../components/Company/EvaluationFiltersBar";
+import EvaluationTable from "../../components/company/EvaluationTable";
+import StudentEvaluationPanel from "../../components/company/StudentEvaluationPanel";
 
 import {
   evaluationStats,
@@ -16,7 +16,7 @@ import {
   opportunityOptions,
   departmentOptions,
   statusOptions,
-} from "../../components/companyevaluationData";
+} from "../../components/company/evaluationData";
 
 const PER_PAGE_DEFAULT = 10;
 const STORAGE_KEY = "ojt_evaluation_students";
