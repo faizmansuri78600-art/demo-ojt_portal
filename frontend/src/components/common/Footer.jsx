@@ -19,11 +19,12 @@ function Footer() {
           {/* College */}
           <div className="flex items-center gap-3">
 
-            <img
-              src={logo}
-              alt="AISC Logo"
-              className="h-12 w-12 object-contain"
-            />
+            <img 
+  src={logo} 
+  alt="AISC OJT Portal" 
+  className="h-12 w-12 object-cover rounded-full ring-2 ring-indigo-500/20 shadow-md" 
+/>
+
 
             <div>
               <h3 className="text-[12px] font-bold">

@@ -260,11 +260,18 @@ function Navbar() {
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3">
 
-          <img
+          {/* <img
             src={logo}
             alt="AISC OJT Portal"
             className="h-12 w-12 object-contain"
-          />
+          /> */}
+          <img 
+  src={logo} 
+  alt="AISC OJT Portal" 
+  className="h-12 w-12 object-cover rounded-full ring-2 ring-indigo-500/20 shadow-md" 
+/>
+
+
 
           <div>
             <h1 className="text-lg font-bold leading-tight">
@@ -272,7 +279,7 @@ function Navbar() {
             </h1>
 
             <p className="text-[10px] text-blue-100">
-              On-the-Job Training Management System
+              On Job Training Management System
             </p>
           </div>
 
