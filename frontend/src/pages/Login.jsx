@@ -74,7 +74,7 @@ function Login() {
         break;
 
       case "collegecoordinator":
-        navigate("/college-coordinator/dashboard");
+        navigate("/coordinator/dashboard");
         break;
 
       case "companycoordinator":
