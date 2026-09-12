@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FaUsers,
   FaGraduationCap,
@@ -16,12 +16,25 @@ import {
 
 function ManageUsers() {
   // =====================================================
+  // API URL
+  // =====================================================
+
+  const API_URL = "http://localhost:5000";
+
+  // =====================================================
   // SEARCH AND FILTER STATES
   // =====================================================
 
   const [search, setSearch] = useState("");
   const [role, setRole] = useState("All Roles");
   const [status, setStatus] = useState("All Status");
+
+  // =====================================================
+  // LOADING AND ERROR STATES
+  // =====================================================
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   // =====================================================
   // MODAL STATES
@@ -31,7 +44,18 @@ function ManageUsers() {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  // Selected user for View/Edit
+  // =====================================================
+  // BUTTON LOADING STATES
+  // =====================================================
+
+  const [addingUser, setAddingUser] = useState(false);
+  const [updatingUser, setUpdatingUser] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState(null);
+
+  // =====================================================
+  // SELECTED USER
+  // =====================================================
+
   const [selectedUser, setSelectedUser] = useState(null);
 
   // =====================================================
@@ -41,6 +65,7 @@ function ManageUsers() {
   const [newUser, setNewUser] = useState({
     name: "",
     email: "",
+    password: "",
     role: "Student",
     phone: "",
     status: "Active",
@@ -50,80 +75,121 @@ function ManageUsers() {
   // USERS DATA
   // =====================================================
 
-  const [users, setUsers] = useState([
-    {
-      id: "USR001",
-      name: "John Doe",
-      email: "john.doe@student.aisc.edu",
-      role: "Student",
-      phone: "+91 98765 43210",
-      status: "Active",
-      date: "May 17, 2025",
-    },
-    {
-      id: "USR002",
-      name: "Aisha Shaikh",
-      email: "aisha.shaikh@student.aisc.edu",
-      role: "Student",
-      phone: "+91 98765 43211",
-      status: "Active",
-      date: "May 16, 2025",
-    },
-    {
-      id: "USR003",
-      name: "Rahul Kumar",
-      email: "rahul.kumar@aisc.edu",
-      role: "Faculty",
-      phone: "+91 87654 32109",
-      status: "Active",
-      date: "May 15, 2025",
-    },
-    {
-      id: "USR004",
-      name: "Priya Sharma",
-      email: "priya.sharma@aisc.edu",
-      role: "Faculty",
-      phone: "+91 87654 32110",
-      status: "Active",
-      date: "May 14, 2025",
-    },
-    {
-      id: "USR005",
-      name: "TechSoft Solutions",
-      email: "hr@techsoft.com",
-      role: "Company",
-      phone: "+91 98765 40001",
-      status: "Active",
-      date: "May 12, 2025",
-    },
-    {
-      id: "USR006",
-      name: "InnovateX Pvt. Ltd.",
-      email: "contact@innovatex.com",
-      role: "Company",
-      phone: "+91 98765 40002",
-      status: "Inactive",
-      date: "May 10, 2025",
-    },
-    {
-      id: "USR007",
-      name: "OJT Coordinator",
-      email: "coordinator@aisc.edu",
-      role: "Coordinator",
-      phone: "+91 76543 21098",
-      status: "Active",
-      date: "May 09, 2025",
-    },
-    {
-      id: "USR008",
-      name: "Admin User",
-      email: "admin@aisc.edu",
-      role: "Admin",
-      phone: "+91 70000 00001",
-      status: "Active",
-      date: "May 01, 2025",
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+
+  // =====================================================
+  // DASHBOARD STATISTICS
+  // =====================================================
+
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalStudents: 0,
+    totalFaculty: 0,
+    totalCompanies: 0,
+    totalCoordinators: 0,
+  });
+
+  // =====================================================
+  // FETCH USERS
+  // =====================================================
+
+  useEffect(() => {
+    fetchUsers();
+    fetchStatistics();
+  }, []);
+
+  const getToken = () => {
+    return localStorage.getItem("token");
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const token = getToken();
+
+      if (!token) {
+        setError("Admin token not found. Please login again.");
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/api/admin/users`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to fetch users");
+      }
+
+      setUsers(data.users || []);
+    } catch (error) {
+      console.error("Fetch Users Error:", error);
+      setError(error.message || "Failed to load users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================================
+  // FETCH STATISTICS
+  // =====================================================
+
+  const fetchStatistics = async () => {
+    try {
+      const token = getToken();
+
+      if (!token) {
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/admin/dashboard/full`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to fetch statistics"
+        );
+      }
+
+      const dashboard = data.dashboard;
+
+      setStats({
+        totalUsers: dashboard.users?.total || 0,
+        totalStudents: dashboard.users?.students || 0,
+        totalFaculty: dashboard.users?.faculty || 0,
+        totalCompanies: dashboard.companies?.total || 0,
+        totalCoordinators:
+          (dashboard.users?.companyCoordinators || 0) +
+          (dashboard.users?.collegeCoordinators || 0),
+      });
+    } catch (error) {
+      console.error("Fetch Statistics Error:", error);
+    }
+  };
+
+  // =====================================================
+  // REFRESH DATA
+  // =====================================================
+
+  const refreshData = () => {
+    fetchUsers();
+    fetchStatistics();
+  };
 
   // =====================================================
   // FILTER USERS
@@ -132,10 +198,14 @@ function ManageUsers() {
   const filteredUsers = users.filter((user) => {
     const searchText = search.toLowerCase();
 
+    const userName = (user.name || "").toLowerCase();
+    const userEmail = (user.email || "").toLowerCase();
+    const userPhone = (user.phone || "").toLowerCase();
+
     const searchMatch =
-      user.name.toLowerCase().includes(searchText) ||
-      user.email.toLowerCase().includes(searchText) ||
-      user.phone.toLowerCase().includes(searchText);
+      userName.includes(searchText) ||
+      userEmail.includes(searchText) ||
+      userPhone.includes(searchText);
 
     const roleMatch =
       role === "All Roles" || user.role === role;
@@ -157,44 +227,88 @@ function ManageUsers() {
   };
 
   // =====================================================
-  // ADD USER
+  // RESET NEW USER FORM
   // =====================================================
 
-  const handleAddUser = () => {
-    if (
-      newUser.name.trim() === "" ||
-      newUser.email.trim() === "" ||
-      newUser.phone.trim() === ""
-    ) {
-      alert("Please fill all fields");
-      return;
-    }
-
-    const newUserData = {
-      id: `USR${String(users.length + 1).padStart(3, "0")}`,
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      phone: newUser.phone,
-      status: newUser.status,
-      date: new Date().toLocaleDateString("en-US", {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-      }),
-    };
-
-    setUsers([newUserData, ...users]);
-
+  const resetNewUserForm = () => {
     setNewUser({
       name: "",
       email: "",
+      password: "",
       role: "Student",
       phone: "",
       status: "Active",
     });
+  };
 
-    setShowAddModal(false);
+  // =====================================================
+  // ADD USER
+  // =====================================================
+
+  const handleAddUser = async () => {
+    if (
+      newUser.name.trim() === "" ||
+      newUser.email.trim() === "" ||
+      newUser.password.trim() === ""
+    ) {
+      alert("Please fill name, email and password.");
+      return;
+    }
+
+    try {
+      setAddingUser(true);
+
+      const token = getToken();
+
+      if (!token) {
+        alert("Admin token not found. Please login again.");
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/admin/users`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: newUser.name.trim(),
+            email: newUser.email.trim(),
+            password: newUser.password,
+            role: newUser.role,
+            phone: newUser.phone.trim(),
+            status: newUser.status,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to create user"
+        );
+      }
+
+      alert("User created successfully.");
+
+      setUsers((prevUsers) => [
+        data.user,
+        ...prevUsers,
+      ]);
+
+      resetNewUserForm();
+      setShowAddModal(false);
+
+      fetchStatistics();
+    } catch (error) {
+      console.error("Add User Error:", error);
+      alert(error.message || "Failed to create user.");
+    } finally {
+      setAddingUser(false);
+    }
   };
 
   // =====================================================
@@ -211,38 +325,156 @@ function ManageUsers() {
   // =====================================================
 
   const handleEdit = (user) => {
-    setSelectedUser({ ...user });
+    setSelectedUser({
+      ...user,
+      password: "",
+    });
+
     setShowEditModal(true);
   };
 
   // =====================================================
-  // SAVE EDITED USER
+  // UPDATE USER
   // =====================================================
 
-  const handleUpdateUser = () => {
-    setUsers(
-      users.map((user) =>
-        user.id === selectedUser.id ? selectedUser : user
-      )
-    );
+  const handleUpdateUser = async () => {
+    if (!selectedUser) {
+      return;
+    }
 
-    setShowEditModal(false);
-    setSelectedUser(null);
+    if (
+      !selectedUser.name?.trim() ||
+      !selectedUser.email?.trim()
+    ) {
+      alert("Name and email are required.");
+      return;
+    }
+
+    try {
+      setUpdatingUser(true);
+
+      const token = getToken();
+
+      if (!token) {
+        alert("Admin token not found. Please login again.");
+        return;
+      }
+
+      const updateData = {
+        name: selectedUser.name.trim(),
+        email: selectedUser.email.trim(),
+        role: selectedUser.role,
+        phone: selectedUser.phone || "",
+        status: selectedUser.status,
+      };
+
+      // Password is optional during edit
+      if (selectedUser.password?.trim()) {
+        updateData.password =
+          selectedUser.password.trim();
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/admin/users/${selectedUser.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updateData),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to update user"
+        );
+      }
+
+      alert("User updated successfully.");
+
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === selectedUser.id
+            ? data.user
+            : user
+        )
+      );
+
+      setShowEditModal(false);
+      setSelectedUser(null);
+
+      fetchStatistics();
+    } catch (error) {
+      console.error("Update User Error:", error);
+      alert(
+        error.message || "Failed to update user."
+      );
+    } finally {
+      setUpdatingUser(false);
+    }
   };
 
   // =====================================================
   // DELETE USER
   // =====================================================
 
-  const handleDelete = (user) => {
+  const handleDelete = async (user) => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete ${user.name}?`
     );
 
-    if (confirmDelete) {
-      setUsers(
-        users.filter((item) => item.id !== user.id)
+    if (!confirmDelete) {
+      return;
+    }
+
+    try {
+      setDeletingUserId(user.id);
+
+      const token = getToken();
+
+      if (!token) {
+        alert("Admin token not found. Please login again.");
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/admin/users/${user.id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || "Failed to delete user"
+        );
+      }
+
+      alert("User deleted successfully.");
+
+      setUsers((prevUsers) =>
+        prevUsers.filter(
+          (item) => item.id !== user.id
+        )
+      );
+
+      fetchStatistics();
+    } catch (error) {
+      console.error("Delete User Error:", error);
+      alert(
+        error.message || "Failed to delete user."
+      );
+    } finally {
+      setDeletingUserId(null);
     }
   };
 
@@ -253,9 +485,73 @@ function ManageUsers() {
   const roleColors = {
     Student: "bg-blue-100 text-blue-700",
     Faculty: "bg-purple-100 text-purple-700",
-    Company: "bg-orange-100 text-orange-700",
-    Coordinator: "bg-cyan-100 text-cyan-700",
-    Admin: "bg-gray-100 text-gray-700",
+    CompanyCoordinator:
+      "bg-orange-100 text-orange-700",
+    CollegeCoordinator:
+      "bg-cyan-100 text-cyan-700",
+    Administrator:
+      "bg-gray-100 text-gray-700",
+  };
+
+  // =====================================================
+  // ROLE DISPLAY NAME
+  // =====================================================
+
+  const getRoleDisplayName = (userRole) => {
+    const roleNames = {
+      Student: "Student",
+      Faculty: "Faculty",
+      CompanyCoordinator:
+        "Company Coordinator",
+      CollegeCoordinator:
+        "College Coordinator",
+      Administrator: "Administrator",
+    };
+
+    return roleNames[userRole] || userRole;
+  };
+
+  // =====================================================
+  // FORMAT DATE
+  // =====================================================
+
+  const formatDate = (date) => {
+    if (!date) {
+      return "—";
+    }
+
+    const parsedDate = new Date(date);
+
+    if (isNaN(parsedDate.getTime())) {
+      return date;
+    }
+
+    return parsedDate.toLocaleDateString(
+      "en-US",
+      {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      }
+    );
+  };
+
+  // =====================================================
+  // USER INITIALS
+  // =====================================================
+
+  const getInitials = (name) => {
+    if (!name) {
+      return "U";
+    }
+
+    return name
+      .split(" ")
+      .filter(Boolean)
+      .map((word) => word[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
   };
 
   // =====================================================
@@ -291,16 +587,43 @@ function ManageUsers() {
           </div>
         </div>
 
-        <button
-          onClick={() => setShowAddModal(true)}
-          className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg text-sm font-medium transition"
-        >
-          <FaPlus />
-          Add New User
-        </button>
+        <div className="flex gap-3">
+
+          <button
+            onClick={refreshData}
+            disabled={loading}
+            className="flex items-center justify-center gap-2 border border-gray-300 bg-white hover:bg-gray-50 text-gray-700 px-5 py-3 rounded-lg text-sm font-medium transition disabled:opacity-50"
+          >
+            <FaRedo
+              className={loading ? "animate-spin" : ""}
+            />
+            Refresh
+          </button>
+
+          <button
+            onClick={() => {
+              resetNewUserForm();
+              setShowAddModal(true);
+            }}
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg text-sm font-medium transition"
+          >
+            <FaPlus />
+            Add New User
+          </button>
+
+        </div>
 
       </div>
 
+      {/* ================================================= */}
+      {/* ERROR MESSAGE */}
+      {/* ================================================= */}
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
+          {error}
+        </div>
+      )}
 
       {/* ================================================= */}
       {/* STATISTICS */}
@@ -323,17 +646,16 @@ function ManageUsers() {
               </p>
 
               <h2 className="text-2xl font-bold text-gray-800">
-                524
+                {stats.totalUsers}
               </h2>
 
-              <p className="text-xs text-green-600">
-                ↑ 12% from last month
+              <p className="text-xs text-gray-500">
+                Registered users
               </p>
             </div>
 
           </div>
         </div>
-
 
         {/* Students */}
 
@@ -350,17 +672,16 @@ function ManageUsers() {
               </p>
 
               <h2 className="text-2xl font-bold text-gray-800">
-                312
+                {stats.totalStudents}
               </h2>
 
-              <p className="text-xs text-green-600">
-                ↑ 10% from last month
+              <p className="text-xs text-gray-500">
+                Student accounts
               </p>
             </div>
 
           </div>
         </div>
-
 
         {/* Faculty */}
 
@@ -377,17 +698,16 @@ function ManageUsers() {
               </p>
 
               <h2 className="text-2xl font-bold text-gray-800">
-                86
+                {stats.totalFaculty}
               </h2>
 
-              <p className="text-xs text-green-600">
-                ↑ 8% from last month
+              <p className="text-xs text-gray-500">
+                Faculty accounts
               </p>
             </div>
 
           </div>
         </div>
-
 
         {/* Companies */}
 
@@ -404,17 +724,16 @@ function ManageUsers() {
               </p>
 
               <h2 className="text-2xl font-bold text-gray-800">
-                104
+                {stats.totalCompanies}
               </h2>
 
-              <p className="text-xs text-green-600">
-                ↑ 15% from last month
+              <p className="text-xs text-gray-500">
+                Registered companies
               </p>
             </div>
 
           </div>
         </div>
-
 
         {/* Coordinators */}
 
@@ -431,11 +750,11 @@ function ManageUsers() {
               </p>
 
               <h2 className="text-2xl font-bold text-gray-800">
-                22
+                {stats.totalCoordinators}
               </h2>
 
-              <p className="text-xs text-green-600">
-                ↑ 5% from last month
+              <p className="text-xs text-gray-500">
+                College + Company
               </p>
             </div>
 
@@ -443,7 +762,6 @@ function ManageUsers() {
         </div>
 
       </div>
-
 
       {/* ================================================= */}
       {/* USERS TABLE */}
@@ -465,49 +783,79 @@ function ManageUsers() {
               type="text"
               placeholder="Search by name, email or phone..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) =>
+                setSearch(e.target.value)
+              }
               className="w-full border border-gray-300 rounded-lg pl-11 pr-4 py-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
 
           </div>
 
-
           {/* Role */}
 
           <select
             value={role}
-            onChange={(e) => setRole(e.target.value)}
-            className="border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white outline-none min-w-[150px]"
+            onChange={(e) =>
+              setRole(e.target.value)
+            }
+            className="border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white outline-none min-w-[190px]"
           >
-            <option>All Roles</option>
-            <option>Student</option>
-            <option>Faculty</option>
-            <option>Company</option>
-            <option>Coordinator</option>
-            <option>Admin</option>
-          </select>
+            <option value="All Roles">
+              All Roles
+            </option>
 
+            <option value="Student">
+              Student
+            </option>
+
+            <option value="Faculty">
+              Faculty
+            </option>
+
+            <option value="CompanyCoordinator">
+              Company Coordinator
+            </option>
+
+            <option value="CollegeCoordinator">
+              College Coordinator
+            </option>
+
+            <option value="Administrator">
+              Administrator
+            </option>
+          </select>
 
           {/* Status */}
 
           <select
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(e) =>
+              setStatus(e.target.value)
+            }
             className="border border-gray-300 rounded-lg px-4 py-3 text-sm bg-white outline-none min-w-[150px]"
           >
-            <option>All Status</option>
-            <option>Active</option>
-            <option>Inactive</option>
-          </select>
+            <option value="All Status">
+              All Status
+            </option>
 
+            <option value="Active">
+              Active
+            </option>
+
+            <option value="Inactive">
+              Inactive
+            </option>
+          </select>
 
           {/* Filter */}
 
-          <button className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-5 py-3 text-sm text-gray-700 hover:bg-gray-50">
+          <button
+            onClick={() => {}}
+            className="flex items-center justify-center gap-2 border border-gray-300 rounded-lg px-5 py-3 text-sm text-gray-700 hover:bg-gray-50"
+          >
             <FaFilter />
             Filter
           </button>
-
 
           {/* Reset */}
 
@@ -521,241 +869,253 @@ function ManageUsers() {
 
         </div>
 
+        {/* ================================================= */}
+        {/* LOADING */}
+        {/* ================================================= */}
 
-        {/* TABLE */}
+        {loading ? (
+          <div className="py-16 text-center">
 
-        <div className="overflow-x-auto">
+            <div className="inline-block w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
 
-          <table className="w-full min-w-[1100px]">
+            <p className="text-sm text-gray-500">
+              Loading users...
+            </p>
 
-            <thead>
+          </div>
+        ) : (
 
-              <tr className="bg-gray-50 border-y border-gray-200">
+          /* ================================================= */
+          /* TABLE */
+          /* ================================================= */
 
-                <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
-                  User ID
-                </th>
+          <div className="overflow-x-auto">
 
-                <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
-                  Name
-                </th>
+            <table className="w-full min-w-[1200px]">
 
-                <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
-                  Email
-                </th>
+              <thead>
 
-                <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
-                  Role
-                </th>
+                <tr className="bg-gray-50 border-y border-gray-200">
 
-                <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
-                  Phone
-                </th>
+                  <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
+                    User ID
+                  </th>
 
-                <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
-                  Status
-                </th>
+                  <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
+                    Name
+                  </th>
 
-                <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
-                  Registered On
-                </th>
+                  <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
+                    Email
+                  </th>
 
-                <th className="text-center px-4 py-4 text-xs font-semibold text-gray-600">
-                  Actions
-                </th>
+                  <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
+                    Role
+                  </th>
 
-              </tr>
+                  <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
+                    Phone
+                  </th>
 
-            </thead>
+                  <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
+                    Status
+                  </th>
 
+                  <th className="text-left px-4 py-4 text-xs font-semibold text-gray-600">
+                    Registered On
+                  </th>
 
-            <tbody>
-
-              {filteredUsers.map((user) => (
-
-                <tr
-                  key={user.id}
-                  className="border-b border-gray-100 hover:bg-gray-50"
-                >
-
-                  {/* ID */}
-
-                  <td className="px-4 py-4 text-sm text-gray-700">
-                    {user.id}
-                  </td>
-
-
-                  {/* NAME */}
-
-                  <td className="px-4 py-4">
-
-                    <div className="flex items-center gap-3">
-
-                      <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-semibold">
-                        {user.name
-                          .split(" ")
-                          .map((word) => word[0])
-                          .join("")
-                          .slice(0, 2)}
-                      </div>
-
-                      <span className="text-sm font-medium text-gray-800">
-                        {user.name}
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  {/* EMAIL */}
-
-                  <td className="px-4 py-4 text-sm text-gray-600">
-                    {user.email}
-                  </td>
-
-
-                  {/* ROLE */}
-
-                  <td className="px-4 py-4">
-
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${roleColors[user.role]}`}
-                    >
-                      {user.role}
-                    </span>
-
-                  </td>
-
-
-                  {/* PHONE */}
-
-                  <td className="px-4 py-4 text-sm text-gray-600">
-                    {user.phone}
-                  </td>
-
-
-                  {/* STATUS */}
-
-                  <td className="px-4 py-4">
-
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                        user.status === "Active"
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-600"
-                      }`}
-                    >
-                      {user.status}
-                    </span>
-
-                  </td>
-
-
-                  {/* DATE */}
-
-                  <td className="px-4 py-4 text-sm text-gray-600">
-                    {user.date}
-                  </td>
-
-
-                  {/* ACTIONS */}
-
-                  <td className="px-4 py-4">
-
-                    <div className="flex justify-center gap-2">
-
-                      {/* VIEW */}
-
-                      <button
-                        onClick={() => handleView(user)}
-                        title="View"
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-                      >
-                        <FaEye size={13} />
-                      </button>
-
-
-                      {/* EDIT */}
-
-                      <button
-                        onClick={() => handleEdit(user)}
-                        title="Edit"
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-blue-600 hover:bg-blue-50"
-                      >
-                        <FaEdit size={13} />
-                      </button>
-
-
-                      {/* DELETE */}
-
-                      <button
-                        onClick={() => handleDelete(user)}
-                        title="Delete"
-                        className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-red-500 hover:bg-red-50"
-                      >
-                        <FaTrash size={13} />
-                      </button>
-
-                    </div>
-
-                  </td>
+                  <th className="text-center px-4 py-4 text-xs font-semibold text-gray-600">
+                    Actions
+                  </th>
 
                 </tr>
 
-              ))}
+              </thead>
 
-            </tbody>
+              <tbody>
 
-          </table>
+                {filteredUsers.length === 0 ? (
 
-        </div>
+                  <tr>
+                    <td
+                      colSpan="8"
+                      className="text-center py-12 text-gray-500 text-sm"
+                    >
+                      No users found.
+                    </td>
+                  </tr>
 
+                ) : (
 
+                  filteredUsers.map((user) => (
+
+                    <tr
+                      key={user.id}
+                      className="border-b border-gray-100 hover:bg-gray-50"
+                    >
+
+                      {/* ID */}
+
+                      <td className="px-4 py-4 text-sm text-gray-700">
+                        {user.id}
+                      </td>
+
+                      {/* NAME */}
+
+                      <td className="px-4 py-4">
+
+                        <div className="flex items-center gap-3">
+
+                          <div className="w-9 h-9 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-semibold">
+                            {getInitials(user.name)}
+                          </div>
+
+                          <span className="text-sm font-medium text-gray-800">
+                            {user.name || "—"}
+                          </span>
+
+                        </div>
+
+                      </td>
+
+                      {/* EMAIL */}
+
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {user.email}
+                      </td>
+
+                      {/* ROLE */}
+
+                      <td className="px-4 py-4">
+
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                            roleColors[user.role] ||
+                            "bg-gray-100 text-gray-700"
+                          }`}
+                        >
+                          {getRoleDisplayName(
+                            user.role
+                          )}
+                        </span>
+
+                      </td>
+
+                      {/* PHONE */}
+
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {user.phone || "—"}
+                      </td>
+
+                      {/* STATUS */}
+
+                      <td className="px-4 py-4">
+
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                            user.status === "Active"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-600"
+                          }`}
+                        >
+                          {user.status}
+                        </span>
+
+                      </td>
+
+                      {/* DATE */}
+
+                      <td className="px-4 py-4 text-sm text-gray-600">
+                        {formatDate(user.date)}
+                      </td>
+
+                      {/* ACTIONS */}
+
+                      <td className="px-4 py-4">
+
+                        <div className="flex justify-center gap-2">
+
+                          {/* VIEW */}
+
+                          <button
+                            onClick={() =>
+                              handleView(user)
+                            }
+                            title="View"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-blue-50 hover:text-blue-600"
+                          >
+                            <FaEye size={13} />
+                          </button>
+
+                          {/* EDIT */}
+
+                          <button
+                            onClick={() =>
+                              handleEdit(user)
+                            }
+                            title="Edit"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-blue-600 hover:bg-blue-50"
+                          >
+                            <FaEdit size={13} />
+                          </button>
+
+                          {/* DELETE */}
+
+                          <button
+                            onClick={() =>
+                              handleDelete(user)
+                            }
+                            disabled={
+                              deletingUserId === user.id
+                            }
+                            title="Delete"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-red-500 hover:bg-red-50 disabled:opacity-50"
+                          >
+                            {deletingUserId ===
+                            user.id ? (
+                              <div className="w-3 h-3 border-2 border-red-300 border-t-red-600 rounded-full animate-spin"></div>
+                            ) : (
+                              <FaTrash size={13} />
+                            )}
+                          </button>
+
+                        </div>
+
+                      </td>
+
+                    </tr>
+
+                  ))
+
+                )}
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        )}
+
+        {/* ================================================= */}
         {/* TABLE FOOTER */}
+        {/* ================================================= */}
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mt-5">
 
           <p className="text-sm text-gray-500">
-            Showing {filteredUsers.length} of {users.length} users
+            Showing {filteredUsers.length} of{" "}
+            {users.length} users
           </p>
 
-          <div className="flex items-center gap-2">
-
-            <button className="px-3 py-2 border rounded-lg text-sm">
-              ‹
-            </button>
-
-            <button className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm">
-              1
-            </button>
-
-            <button className="px-3 py-2 border rounded-lg text-sm">
-              2
-            </button>
-
-            <button className="px-3 py-2 border rounded-lg text-sm">
-              3
-            </button>
-
-            <span className="px-2 text-gray-500">
-              ...
-            </span>
-
-            <button className="px-3 py-2 border rounded-lg text-sm">
-              66
-            </button>
-
-            <button className="px-3 py-2 border rounded-lg text-sm">
-              ›
-            </button>
-
+          <div className="text-sm text-gray-500">
+            Page 1
           </div>
 
         </div>
 
       </div>
-
 
       {/* ================================================= */}
       {/* ADD USER MODAL */}
@@ -767,9 +1127,12 @@ function ManageUsers() {
 
           <div className="bg-white w-full max-w-lg rounded-xl shadow-xl">
 
+            {/* HEADER */}
+
             <div className="flex items-center justify-between px-6 py-4 border-b">
 
               <div>
+
                 <h2 className="text-lg font-semibold text-gray-800">
                   Add New User
                 </h2>
@@ -777,10 +1140,13 @@ function ManageUsers() {
                 <p className="text-sm text-gray-500 mt-1">
                   Enter user details below
                 </p>
+
               </div>
 
               <button
-                onClick={() => setShowAddModal(false)}
+                onClick={() =>
+                  setShowAddModal(false)
+                }
                 className="text-gray-400 hover:text-gray-700 text-2xl"
               >
                 ×
@@ -788,12 +1154,14 @@ function ManageUsers() {
 
             </div>
 
+            {/* FORM */}
 
             <div className="p-6 space-y-4">
 
               {/* NAME */}
 
               <div>
+
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Full Name
                 </label>
@@ -810,12 +1178,13 @@ function ManageUsers() {
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-blue-500"
                 />
-              </div>
 
+              </div>
 
               {/* EMAIL */}
 
               <div>
+
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Email
                 </label>
@@ -832,12 +1201,36 @@ function ManageUsers() {
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-blue-500"
                 />
+
               </div>
 
+              {/* PASSWORD */}
+
+              <div>
+
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password
+                </label>
+
+                <input
+                  type="password"
+                  placeholder="Enter password"
+                  value={newUser.password}
+                  onChange={(e) =>
+                    setNewUser({
+                      ...newUser,
+                      password: e.target.value,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+                />
+
+              </div>
 
               {/* PHONE */}
 
               <div>
+
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Phone
                 </label>
@@ -854,12 +1247,13 @@ function ManageUsers() {
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-blue-500"
                 />
-              </div>
 
+              </div>
 
               {/* ROLE */}
 
               <div>
+
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Role
                 </label>
@@ -874,18 +1268,35 @@ function ManageUsers() {
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-white"
                 >
-                  <option>Student</option>
-                  <option>Faculty</option>
-                  <option>Company</option>
-                  <option>Coordinator</option>
-                  <option>Admin</option>
-                </select>
-              </div>
 
+                  <option value="Student">
+                    Student
+                  </option>
+
+                  <option value="Faculty">
+                    Faculty
+                  </option>
+
+                  <option value="CompanyCoordinator">
+                    Company Coordinator
+                  </option>
+
+                  <option value="CollegeCoordinator">
+                    College Coordinator
+                  </option>
+
+                  <option value="Administrator">
+                    Administrator
+                  </option>
+
+                </select>
+
+              </div>
 
               {/* STATUS */}
 
               <div>
+
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status
                 </label>
@@ -900,28 +1311,43 @@ function ManageUsers() {
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-white"
                 >
-                  <option>Active</option>
-                  <option>Inactive</option>
+
+                  <option value="Active">
+                    Active
+                  </option>
+
+                  <option value="Inactive">
+                    Inactive
+                  </option>
+
                 </select>
+
               </div>
 
             </div>
 
+            {/* FOOTER */}
 
             <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
 
               <button
-                onClick={() => setShowAddModal(false)}
-                className="px-5 py-2.5 border border-gray-300 rounded-lg text-sm"
+                onClick={() =>
+                  setShowAddModal(false)
+                }
+                disabled={addingUser}
+                className="px-5 py-2.5 border border-gray-300 rounded-lg text-sm disabled:opacity-50"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleAddUser}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                disabled={addingUser}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm disabled:opacity-50"
               >
-                Add User
+                {addingUser
+                  ? "Adding..."
+                  : "Add User"}
               </button>
 
             </div>
@@ -931,7 +1357,6 @@ function ManageUsers() {
         </div>
 
       )}
-
 
       {/* ================================================= */}
       {/* VIEW USER MODAL */}
@@ -943,6 +1368,8 @@ function ManageUsers() {
 
           <div className="bg-white w-full max-w-md rounded-xl shadow-xl">
 
+            {/* HEADER */}
+
             <div className="flex items-center justify-between px-6 py-4 border-b">
 
               <h2 className="text-lg font-semibold text-gray-800">
@@ -950,7 +1377,9 @@ function ManageUsers() {
               </h2>
 
               <button
-                onClick={() => setShowViewModal(false)}
+                onClick={() =>
+                  setShowViewModal(false)
+                }
                 className="text-gray-400 hover:text-gray-700 text-2xl"
               >
                 ×
@@ -958,6 +1387,7 @@ function ManageUsers() {
 
             </div>
 
+            {/* DETAILS */}
 
             <div className="p-6">
 
@@ -966,11 +1396,9 @@ function ManageUsers() {
               <div className="flex flex-col items-center mb-6">
 
                 <div className="w-20 h-20 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-bold">
-                  {selectedUser.name
-                    .split(" ")
-                    .map((word) => word[0])
-                    .join("")
-                    .slice(0, 2)}
+                  {getInitials(
+                    selectedUser.name
+                  )}
                 </div>
 
                 <h3 className="text-lg font-semibold text-gray-800 mt-3">
@@ -978,19 +1406,26 @@ function ManageUsers() {
                 </h3>
 
                 <span
-                  className={`mt-2 px-3 py-1 rounded-full text-xs ${roleColors[selectedUser.role]}`}
+                  className={`mt-2 px-3 py-1 rounded-full text-xs ${
+                    roleColors[
+                      selectedUser.role
+                    ] ||
+                    "bg-gray-100 text-gray-700"
+                  }`}
                 >
-                  {selectedUser.role}
+                  {getRoleDisplayName(
+                    selectedUser.role
+                  )}
                 </span>
 
               </div>
-
 
               {/* DETAILS */}
 
               <div className="space-y-4">
 
                 <div>
+
                   <p className="text-xs text-gray-500">
                     User ID
                   </p>
@@ -998,10 +1433,11 @@ function ManageUsers() {
                   <p className="text-sm font-medium text-gray-800">
                     {selectedUser.id}
                   </p>
+
                 </div>
 
-
                 <div>
+
                   <p className="text-xs text-gray-500">
                     Email
                   </p>
@@ -1009,56 +1445,67 @@ function ManageUsers() {
                   <p className="text-sm font-medium text-gray-800">
                     {selectedUser.email}
                   </p>
+
                 </div>
 
-
                 <div>
+
                   <p className="text-xs text-gray-500">
                     Phone
                   </p>
 
                   <p className="text-sm font-medium text-gray-800">
-                    {selectedUser.phone}
+                    {selectedUser.phone ||
+                      "—"}
                   </p>
+
                 </div>
 
-
                 <div>
+
                   <p className="text-xs text-gray-500">
                     Status
                   </p>
 
                   <span
                     className={`inline-block mt-1 px-3 py-1 rounded-full text-xs ${
-                      selectedUser.status === "Active"
+                      selectedUser.status ===
+                      "Active"
                         ? "bg-green-100 text-green-700"
                         : "bg-red-100 text-red-600"
                     }`}
                   >
                     {selectedUser.status}
                   </span>
+
                 </div>
 
-
                 <div>
+
                   <p className="text-xs text-gray-500">
                     Registered On
                   </p>
 
                   <p className="text-sm font-medium text-gray-800">
-                    {selectedUser.date}
+                    {formatDate(
+                      selectedUser.date
+                    )}
                   </p>
+
                 </div>
 
               </div>
 
             </div>
 
+            {/* FOOTER */}
 
             <div className="flex justify-end px-6 py-4 border-t bg-gray-50">
 
               <button
-                onClick={() => setShowViewModal(false)}
+                onClick={() =>
+                  setShowViewModal(false)
+                }
                 className="px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm"
               >
                 Close
@@ -1072,7 +1519,6 @@ function ManageUsers() {
 
       )}
 
-
       {/* ================================================= */}
       {/* EDIT USER MODAL */}
       {/* ================================================= */}
@@ -1083,9 +1529,12 @@ function ManageUsers() {
 
           <div className="bg-white w-full max-w-lg rounded-xl shadow-xl">
 
+            {/* HEADER */}
+
             <div className="flex items-center justify-between px-6 py-4 border-b">
 
               <div>
+
                 <h2 className="text-lg font-semibold text-gray-800">
                   Edit User
                 </h2>
@@ -1093,10 +1542,13 @@ function ManageUsers() {
                 <p className="text-sm text-gray-500 mt-1">
                   Update user information
                 </p>
+
               </div>
 
               <button
-                onClick={() => setShowEditModal(false)}
+                onClick={() =>
+                  setShowEditModal(false)
+                }
                 className="text-gray-400 hover:text-gray-700 text-2xl"
               >
                 ×
@@ -1104,6 +1556,7 @@ function ManageUsers() {
 
             </div>
 
+            {/* FORM */}
 
             <div className="p-6 space-y-4">
 
@@ -1129,7 +1582,6 @@ function ManageUsers() {
 
               </div>
 
-
               {/* EMAIL */}
 
               <div>
@@ -1152,6 +1604,34 @@ function ManageUsers() {
 
               </div>
 
+              {/* PASSWORD */}
+
+              <div>
+
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  New Password
+                  <span className="text-gray-400 font-normal">
+                    {" "}
+                    (optional)
+                  </span>
+                </label>
+
+                <input
+                  type="password"
+                  placeholder="Leave blank to keep current password"
+                  value={
+                    selectedUser.password || ""
+                  }
+                  onChange={(e) =>
+                    setSelectedUser({
+                      ...selectedUser,
+                      password: e.target.value,
+                    })
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-blue-500"
+                />
+
+              </div>
 
               {/* PHONE */}
 
@@ -1163,7 +1643,7 @@ function ManageUsers() {
 
                 <input
                   type="text"
-                  value={selectedUser.phone}
+                  value={selectedUser.phone || ""}
                   onChange={(e) =>
                     setSelectedUser({
                       ...selectedUser,
@@ -1174,7 +1654,6 @@ function ManageUsers() {
                 />
 
               </div>
-
 
               {/* ROLE */}
 
@@ -1194,15 +1673,30 @@ function ManageUsers() {
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-white"
                 >
-                  <option>Student</option>
-                  <option>Faculty</option>
-                  <option>Company</option>
-                  <option>Coordinator</option>
-                  <option>Admin</option>
+
+                  <option value="Student">
+                    Student
+                  </option>
+
+                  <option value="Faculty">
+                    Faculty
+                  </option>
+
+                  <option value="CompanyCoordinator">
+                    Company Coordinator
+                  </option>
+
+                  <option value="CollegeCoordinator">
+                    College Coordinator
+                  </option>
+
+                  <option value="Administrator">
+                    Administrator
+                  </option>
+
                 </select>
 
               </div>
-
 
               {/* STATUS */}
 
@@ -1222,29 +1716,43 @@ function ManageUsers() {
                   }
                   className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-sm bg-white"
                 >
-                  <option>Active</option>
-                  <option>Inactive</option>
+
+                  <option value="Active">
+                    Active
+                  </option>
+
+                  <option value="Inactive">
+                    Inactive
+                  </option>
+
                 </select>
 
               </div>
 
             </div>
 
+            {/* FOOTER */}
 
             <div className="flex justify-end gap-3 px-6 py-4 border-t bg-gray-50">
 
               <button
-                onClick={() => setShowEditModal(false)}
-                className="px-5 py-2.5 border border-gray-300 rounded-lg text-sm"
+                onClick={() =>
+                  setShowEditModal(false)
+                }
+                disabled={updatingUser}
+                className="px-5 py-2.5 border border-gray-300 rounded-lg text-sm disabled:opacity-50"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleUpdateUser}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm"
+                disabled={updatingUser}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm disabled:opacity-50"
               >
-                Save Changes
+                {updatingUser
+                  ? "Saving..."
+                  : "Save Changes"}
               </button>
 
             </div>
