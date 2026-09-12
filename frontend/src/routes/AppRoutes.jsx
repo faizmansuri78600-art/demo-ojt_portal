@@ -1098,64 +1098,44 @@ function AppRoutes() {
       ====================================================== */}
 
       <Route
-        path="/coordinator"
-        element={<CoordinatorLayout />}
-      >
+  path="/coordinator"
+  element={<CoordinatorLayout />}
+>
+  <Route
+    path="dashboard"
+    element={<CoordinatorDashboard />}
+  />
 
-        {/* /coordinator → /coordinator/dashboard */}
-        <Route
-          index
-          element={
-            <Navigate
-              to="dashboard"
-              replace
-            />
-          }
-        />
+  <Route
+    path="students"
+    element={<StudentManagement />}
+  />
 
-        {/* Coordinator Dashboard */}
-        <Route
-          path="dashboard"
-          element={<CoordinatorDashboard />}
-        />
+  <Route
+    path="companies"
+    element={<CompanyManagement />}
+  />
 
-        {/* Students */}
-        <Route
-          path="students"
-          element={<StudentManagement />}
-        />
+  <Route
+    path="mentors"
+    element={<MentorAssignment />}
+  />
 
-        {/* Companies */}
-        <Route
-          path="companies"
-          element={<CompanyManagement />}
-        />
+  <Route
+    path="tracking"
+    element={<OJTTracking />}
+  />
 
-        {/* Mentors */}
-        <Route
-          path="mentors"
-          element={<MentorAssignment />}
-        />
+  <Route
+    path="announcements"
+    element={<Announcements />}
+  />
 
-        {/* OJT Tracking */}
-        <Route
-          path="tracking"
-          element={<OJTTracking />}
-        />
-
-        {/* Announcements */}
-        <Route
-          path="announcements"
-          element={<Announcements />}
-        />
-
-        {/* Reports */}
-        <Route
-          path="reports"
-          element={<OJTReports />}
-        />
-
-      </Route>
+  <Route
+    path="reports"
+    element={<OJTReports />}
+  />
+</Route>
 
 
       {/* IMPORTANT:
@@ -1164,10 +1144,6 @@ function AppRoutes() {
 
           So this route is added separately.
       */}
-      <Route
-        path="/college-coordinator/dashboard"
-        element={<CoordinatorDashboard />}
-      />
 
       {/* Optional alternative routes for College Coordinator */}
       <Route

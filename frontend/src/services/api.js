@@ -28,4 +28,32 @@ export const api = {
 
     return response.json();
   },
+
+  async put(endpoint, data) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error("Something went wrong");
+    }
+
+    return response.json();
+  },
+
+  async delete(endpoint) {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error("Something went wrong");
+    }
+
+    return response.json();
+  },
 };
