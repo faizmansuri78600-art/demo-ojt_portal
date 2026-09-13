@@ -477,7 +477,7 @@ function Analytics() {
 
         {/* TOTAL */}
 
-        <div className="bg-white border rounded-xl p-5 shadow-sm flex items-center gap-4">
+        <div className="bg-white border border-gray-200   rounded-xl p-5 shadow-sm flex items-center gap-4">
 
           <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl">
             <FaFileAlt />
@@ -505,7 +505,7 @@ function Analytics() {
 
         {/* APPROVED */}
 
-        <div className="bg-white border rounded-xl p-5 shadow-sm flex items-center gap-4">
+        <div className="bg-white border border-gray-200   rounded-xl p-5 shadow-sm flex items-center gap-4">
 
           <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-2xl">
             <FaCheckCircle />
@@ -533,7 +533,7 @@ function Analytics() {
 
         {/* PENDING */}
 
-        <div className="bg-white border rounded-xl p-5 shadow-sm flex items-center gap-4">
+        <div className="bg-white border border-gray-200   rounded-xl p-5 shadow-sm flex items-center gap-4">
 
           <div className="w-14 h-14 rounded-full bg-orange-100 flex items-center justify-center text-orange-500 text-2xl">
             <FaClock />
@@ -561,7 +561,7 @@ function Analytics() {
 
         {/* REJECTED */}
 
-        <div className="bg-white border rounded-xl p-5 shadow-sm flex items-center gap-4">
+        <div className="bg-white border border-gray-200   rounded-xl p-5 shadow-sm flex items-center gap-4">
 
           <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center text-red-500 text-2xl">
             <FaTimesCircle />
@@ -597,7 +597,7 @@ function Analytics() {
 
         {/* APPLICATION STATUS */}
 
-        <div className="bg-white border rounded-xl p-5 shadow-sm">
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
 
           <h2 className="text-lg font-semibold text-blue-950 mb-6">
             Application Status Distribution
@@ -712,7 +712,7 @@ function Analytics() {
 
         {/* MONTHLY TREND */}
 
-        <div className="bg-white border rounded-xl p-5 shadow-sm">
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
 
           <h2 className="text-lg font-semibold text-blue-950 mb-5">
             Monthly Applications Trend
@@ -741,7 +741,7 @@ function Analytics() {
 
         {/* KEY INSIGHTS */}
 
-        <div className="bg-white border rounded-xl p-5 shadow-sm">
+        <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
 
           <h2 className="text-lg font-semibold text-blue-950 mb-6 flex items-center gap-2">
 
@@ -825,7 +825,7 @@ function Analytics() {
       {/* FILTER SECTION */}
       {/* ================================================= */}
 
-      <div className="bg-white border rounded-xl p-4 shadow-sm mb-5">
+      <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm mb-5">
 
         <div className="flex flex-col lg:flex-row gap-3">
 
@@ -966,9 +966,9 @@ function Analytics() {
 
         {/* TABLE */}
 
-        <div className="lg:col-span-3 bg-white border rounded-xl shadow-sm overflow-hidden">
+        <div className="lg:col-span-3 bg-white border  border-gray-200 rounded-xl shadow-sm overflow-hidden">
 
-          <div className="flex justify-between items-center p-5 border-b">
+          <div className="flex justify-between items-center p-5 border-b border-gray-200 ">
 
             <h2 className="text-lg font-semibold text-blue-950">
               Recent Applications
@@ -1180,7 +1180,7 @@ function Analytics() {
         {/* TOP COMPANIES */}
         {/* ================================================= */}
 
-        <div className="bg-white border rounded-xl shadow-sm p-5">
+        <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
 
           <h2 className="text-lg font-semibold text-blue-950 mb-5 flex items-center gap-2">
 
