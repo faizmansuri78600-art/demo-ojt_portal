@@ -260,44 +260,6 @@ function AppRoutes() {
       ====================================================== */}
 
       <Route
-  path="/coordinator"
-  element={<CoordinatorLayout />}
->
-  <Route
-    path="dashboard"
-    element={<CoordinatorDashboard />}
-  />
-
-  <Route
-    path="students"
-    element={<StudentManagement />}
-  />
-
-  <Route
-    path="companies"
-    element={<CompanyManagement />}
-  />
-
-  <Route
-    path="mentors"
-    element={<MentorAssignment />}
-  />
-
-  <Route
-    path="tracking"
-    element={<OJTTracking />}
-  />
-
-  <Route
-    path="announcements"
-    element={<Announcements />}
-  />
-
-  <Route
-    path="reports"
-    element={<OJTReports />}
-  />
-</Route>
         element={
           <ProtectedRoute allowedRole="Student" />
         }
@@ -376,8 +338,6 @@ function AppRoutes() {
           Protected: College Coordinator only
       ====================================================== */}
 
-          So this route is added separately.
-      */}
       <Route
         element={
           <ProtectedRoute allowedRole="CollegeCoordinator" />
