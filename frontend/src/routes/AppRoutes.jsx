@@ -150,6 +150,8 @@ function AppRoutes() {
         path="/company/application"
         element={<Applications />}
       />
+      <Route path="/company/attendance" element={<AttendancePage/>}/>
+      <Route path="/company/evaluation" element={<CompanyEvaluation/>}/>
 
 
       {/* ======================================================
