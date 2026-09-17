@@ -7,6 +7,11 @@ const {
   addFaculty,
   updateFaculty,
   deleteFaculty,
+  getFacultyDashboard,
+  getAssignedStudents,
+  getStudentWeeklyReports,
+  getStudentEvaluation,
+  getStudentDetails,
 } = require("../controllers/facultyController");
 
 const router = express.Router();
@@ -16,6 +21,19 @@ router.get("/", getAllFaculty);
 
 // Get faculty by department
 router.get("/department/:department", getFacultyByDepartment);
+
+//Get faculty dashboard
+router.get("/dashboard/:facultyId",getFacultyDashboard);
+
+//Get assigned students
+router.get("/assigned-students/:facultyId",getAssignedStudents);
+
+//Get Student Details
+router.get("/student-details/:studentId", getStudentDetails);
+
+router.get("/student-weekly-reports/:studentId", getStudentWeeklyReports);
+
+router.get("/student-evaluation/:studentId", getStudentEvaluation);
 
 // Get faculty by ID
 router.get("/:id", getFacultyById);

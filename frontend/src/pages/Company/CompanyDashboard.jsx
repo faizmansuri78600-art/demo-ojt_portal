@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { Briefcase, Users, UserCheck, Award } from 'lucide-react';
 
 import CompanySidebar from "../../components/common/CompanySidebar";
@@ -11,43 +12,98 @@ import QuickAction from "../../components/common/Quickaction";
 import NotificationCard from "../../components/common/NotificationCard";
 
 
-const stats = [
-  {
-    icon: Briefcase,
-    label: 'Total OJT Opportunities',
-    value: 12,
-    growth: '4 Active',
-    bg: 'bg-blue-50',
-    color: 'text-blue-600'
-  },
-  {
-    icon: Users,
-    label: 'Applications Received',
-    value: 48,
-    growth: '+12 this month',
-    bg: 'bg-green-50',
-    color: 'text-green-600'
-  },
-  {
-    icon: UserCheck,
-    label: 'Students Selected',
-    value: 16,
-    growth: '+3 this month',
-    bg: 'bg-purple-50',
-    color: 'text-purple-600'
-  },
-  {
-    icon: Award,
-    label: 'Certificates Issued',
-    value: 8,
-    growth: '+2 this month',
-    bg: 'bg-orange-50',
-    color: 'text-orange-600'
-  }
-];
-
-
 export default function CompanyDashboard() {
+
+  // =====================================================
+  // Company ID
+  // =====================================================
+
+  const companyId = "C001";
+
+
+  // =====================================================
+  // Dashboard Statistics
+  // =====================================================
+
+  const [stats, setStats] = useState({
+    totalOpportunities: 0,
+    activeOpportunities: 0,
+    totalApplications: 0,
+    selectedStudents: 0,
+  });
+
+
+  // =====================================================
+  // Get Dashboard Statistics
+  // =====================================================
+
+  useEffect(() => {
+    const fetchDashboardStats = async () => {
+      try {
+
+        const response = await fetch(
+          `http://localhost:5000/api/companies/${companyId}/dashboard/stats`
+        );
+
+        const data = await response.json();
+
+        if (data.success) {
+          setStats(data.stats);
+        }
+
+      } catch (error) {
+        console.error(
+          "Failed to fetch dashboard statistics:",
+          error
+        );
+      }
+    };
+
+    fetchDashboardStats();
+
+  }, []);
+
+
+  // =====================================================
+  // Stat Cards
+  // =====================================================
+
+  const statCards = [
+    {
+      icon: Briefcase,
+      label: 'Total OJT Opportunities',
+      value: stats.totalOpportunities,
+      growth: `${stats.activeOpportunities} Active`,
+      bg: 'bg-blue-50',
+      color: 'text-blue-600'
+    },
+    {
+      icon: Users,
+      label: 'Applications Received',
+      value: stats.totalApplications,
+      growth: 'From database',
+      bg: 'bg-green-50',
+      color: 'text-green-600'
+    },
+    {
+      icon: UserCheck,
+      label: 'Students Selected',
+      value: stats.selectedStudents,
+      growth: 'From database',
+      bg: 'bg-purple-50',
+      color: 'text-purple-600'
+    },
+    {
+      icon: Award,
+      label: 'Certificates Issued',
+      value: 8,
+      growth: '+2 this month',
+      bg: 'bg-orange-50',
+      color: 'text-orange-600'
+    }
+  ];
+
+
   return (
     <div className="flex min-h-screen w-full bg-slate-50">
 
@@ -79,7 +135,7 @@ export default function CompanyDashboard() {
 
           {/* STAT CARDS */}
           <div className="grid grid-cols-4 gap-4 mb-5">
-            {stats.map((s) => (
+            {statCards.map((s) => (
               <StatCard
                 key={s.label}
                 {...s}
@@ -89,34 +145,31 @@ export default function CompanyDashboard() {
 
 
           {/* TOP + BOTTOM DASHBOARD AREA */}
-         {/* TOP + BOTTOM DASHBOARD AREA */}
-{/* TOP + BOTTOM DASHBOARD AREA */}
-{/* TOP + BOTTOM DASHBOARD AREA */}
-{/* TOP + BOTTOM DASHBOARD AREA */}
-<div className="flex gap-4 items-stretch">
+          <div className="flex gap-4 items-stretch">
 
-  <div className="flex-1 min-w-0 flex flex-col gap-4">
+            <div className="flex-1 min-w-0 flex flex-col gap-4">
 
-    {/* CHARTS ROW */}
-    <div className="grid grid-cols-[7fr_3fr] gap-4 items-start">
-      <ApplicationsChart />
-      <DepartmentChart />
-    </div>
+              {/* CHARTS ROW */}
+              <div className="grid grid-cols-[7fr_3fr] gap-4 items-start">
+                <ApplicationsChart />
+                <DepartmentChart />
+              </div>
 
-    {/* TABLE + NOTIFICATIONS */}
-    <div className="grid grid-cols-[5fr_3fr] gap-4">
-      <RecentApplications />
-      <NotificationCard />
-    </div>
+              {/* TABLE + NOTIFICATIONS */}
+              <div className="grid grid-cols-[5fr_3fr] gap-4">
+                <RecentApplications />
+                <NotificationCard />
+              </div>
 
-  </div>
+            </div>
 
-  {/* QUICK ACTIONS */}
-  <div className="w-[260px] shrink-0">
-    <QuickAction />
-  </div>
+            {/* QUICK ACTIONS */}
+            <div className="w-[260px] shrink-0">
+              <QuickAction />
+            </div>
 
-</div>
+          </div>
+
         </main>
 
 

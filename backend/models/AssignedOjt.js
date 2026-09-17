@@ -1,65 +1,42 @@
 const mongoose = require("mongoose");
 
-const assignedOjtSchema =
-  new mongoose.Schema(
-    {
-      _id: {
-        type: String,
-        required: true,
-      },
-
-      applicationId: {
-        type: String,
-        required: true,
-      },
-
-      studentId: {
-        type: String,
-        default: "",
-      },
-
-      facultyId: {
-        type: String,
-        default: "",
-      },
-
-      assignedByCoordinatorId: {
-        type: String,
-        default: "",
-      },
-
-      startDate: {
-        type: String,
-        default: "",
-      },
-
-      endDate: {
-        type: String,
-        default: "",
-      },
-
-      progress: {
-        type: Number,
-        min: 0,
-        max: 100,
-        default: null,
-      },
-
-      status: {
-        type: String,
-        default: "Assigned",
-      },
+const assignedOjtSchema = new mongoose.Schema(
+  {
+    _id: {
+      type: String,
+      required: true,
     },
-    {
-      collection: "assignojt",
-      timestamps: true,
-    }
-  );
 
-const AssignedOjt =
-  mongoose.model(
-    "AssignedOjt",
-    assignedOjtSchema
-  );
+    applicationId: {
+      type: String,
+      required: true,
+    },
+
+    facultyId: {
+      type: String,
+    },
+
+    assignedByCoordinatorId: {
+      type: String,
+    },
+
+    startDate: {
+      type: String,
+    },
+
+    endDate: {
+      type: String,
+    },
+
+    status: {
+      type: String,
+    },
+  },
+  {
+    collection: "assignojt",
+  }
+);
+
+const AssignedOjt = mongoose.model("AssignedOjt", assignedOjtSchema);
 
 module.exports = AssignedOjt;

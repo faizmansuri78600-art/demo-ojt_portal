@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import CompanySidebar from "../../components/common/CompanySidebar";
 import CompanyHeader from "../../components/common/CompanyHeader";
@@ -8,147 +8,143 @@ import OpportunityFilters from "../../components/company/OpportunityFilters";
 import OpportunityTable from "../../components/company/OpportunityTable";
 import OpportunityForm from "../../components/company/OpportunityForm";
 
+/*
+  TEMPORARY COMPANY ID
 
-/* ================= INITIAL OPPORTUNITIES ================= */
+  We are using C001 for now because your current logged-in user
+  does not yet have a matching CompanyCoordinator record.
 
-const initialOpportunities = [
-  {
-    id: 1,
-    title: "Web Development Intern",
-    description: "Build and maintain web apps",
-    department: "Computer Science",
-    duration: "2 Months",
-    location: "Pune (Hybrid)",
-    stipend: "₹9,000 / month",
-    vacancies: "5",
-    lastDate: "31/07/2025",
-    skills: ["HTML", "CSS", "JavaScript", "React.js"],
-    eligibility: "e.g. BCA, MCA, B.Tech, Any Graduate",
-    status: "Active",
-    posted: "15 Jul 2025",
-  },
+  Later this can be replaced with the actual logged-in company ID.
+*/
+const COMPANY_ID = "C001";
 
-  {
-    id: 2,
-    title: "Data Science Intern",
-    description: "Work on ML and data projects",
-    department: "Data Science",
-    duration: "3 Months",
-    location: "Pune (On-site)",
-    stipend: "₹10,000 / month",
-    vacancies: "4",
-    lastDate: "05/08/2025",
-    skills: ["Python", "Pandas", "Machine Learning"],
-    eligibility: "BCA, BSc, B.Tech, Any Graduate",
-    status: "Active",
-    posted: "12 Jul 2025",
-  },
 
-  {
-    id: 3,
-    title: "UI/UX Design Intern",
-    description: "Design user interfaces",
-    department: "IT / Design",
-    duration: "2 Months",
-    location: "Remote",
-    stipend: "₹7,000 / month",
-    vacancies: "3",
-    lastDate: "10/08/2025",
-    skills: ["Figma", "UI Design", "UX"],
-    eligibility: "Any Design Graduate",
-    status: "Active",
-    posted: "10 Jul 2025",
-  },
+// =====================================================
+// Convert MongoDB opportunity → UI opportunity
+// =====================================================
 
-  {
-    id: 4,
-    title: "Android App Developer",
-    description: "Develop Android applications",
-    department: "Computer Science",
-    duration: "3 Months",
-    location: "Pune (Hybrid)",
-    stipend: "₹9,000 / month",
-    vacancies: "5",
-    lastDate: "15/08/2025",
-    skills: ["Java", "Android", "XML"],
-    eligibility: "BCA, BSc CS, B.Tech",
-    status: "Draft",
-    posted: "08 Jul 2025",
-  },
+const convertToUI = (item) => {
+  return {
+    id: item._id,
 
-  {
-    id: 5,
-    title: "Digital Marketing Intern",
-    description: "Social media & marketing tasks",
-    department: "Marketing",
-    duration: "2 Months",
-    location: "Remote",
-    stipend: "₹6,000 / month",
-    vacancies: "2",
-    lastDate: "20/08/2025",
-    skills: ["SEO", "Social Media", "Content"],
-    eligibility: "Any Graduate",
-    status: "Closed",
-    posted: "05 Jul 2025",
-  },
+    title: item.title || "",
 
-  {
-    id: 6,
-    title: "Cybersecurity Intern",
-    description: "Security analysis & testing",
-    department: "Information Tech.",
-    duration: "3 Months",
-    location: "Pune (On-site)",
-    stipend: "₹9,000 / month",
-    vacancies: "4",
-    lastDate: "25/08/2025",
-    skills: ["Networking", "Security", "Linux"],
-    eligibility: "BCA, BSc CS, B.Tech",
-    status: "Active",
-    posted: "01 Jul 2025",
-  },
+    description: item.description || "",
 
-  {
-    id: 7,
-    title: "Frontend Developer Intern",
-    description: "React, HTML, CSS, JS",
-    department: "Computer Science",
-    duration: "2 Months",
-    location: "Remote",
-    stipend: "₹7,500 / month",
-    vacancies: "3",
-    lastDate: "28/08/2025",
-    skills: ["React.js", "HTML", "CSS", "JavaScript"],
-    eligibility: "BCA, BSc CS, B.Tech",
-    status: "Active",
-    posted: "28 Jun 2025",
-  },
+    department: item.department || "Computer Science",
 
-  {
-    id: 8,
-    title: "Business Analyst Intern",
-    description: "Work on business analysis",
-    department: "Management",
-    duration: "2 Months",
-    location: "Pune (Hybrid)",
-    stipend: "₹7,000 / month",
-    vacancies: "2",
-    lastDate: "30/08/2025",
-    skills: ["Excel", "Analysis", "Documentation"],
-    eligibility: "BBA, BCA, Any Graduate",
-    status: "Closed",
-    posted: "25 Jun 2025",
-  },
-];
+    duration: item.duration || "2 Months",
+
+    location: item.location || "Pune (Hybrid)",
+
+    stipend:
+      item.stipend !== undefined &&
+      item.stipend !== null &&
+      item.stipend !== 0
+        ? `₹${Number(item.stipend).toLocaleString("en-IN")} / month`
+        : "",
+
+    vacancies:
+      item.vacancies !== undefined &&
+      item.vacancies !== null
+        ? String(item.vacancies)
+        : "",
+
+    lastDate: item.lastDate || "",
+
+    skills: item.skillsRequired
+      ? item.skillsRequired
+          .split(",")
+          .map((skill) => skill.trim())
+          .filter(Boolean)
+      : ["HTML", "CSS"],
+
+    eligibility: item.eligibility || "",
+
+    status: item.status || "Draft",
+
+    posted: item.postedOn || "",
+
+    companyId: item.companyId || COMPANY_ID,
+
+    createdByCoordinatorId:
+      item.createdByCoordinatorId || "",
+  };
+};
+
+
+// =====================================================
+// Convert UI opportunity → MongoDB opportunity
+// =====================================================
+
+const convertToMongo = (formData) => {
+  let stipendValue = 0;
+
+  if (formData.stipend) {
+    const cleanedStipend = String(formData.stipend)
+      .replace(/[₹,\s]/g, "")
+      .replace("/month", "");
+
+    stipendValue = Number(cleanedStipend) || 0;
+  }
+
+  const skillsValue = Array.isArray(formData.skills)
+    ? formData.skills.join(", ")
+    : formData.skills || "";
+
+  return {
+    companyId: COMPANY_ID,
+
+    createdByCoordinatorId:
+      formData.createdByCoordinatorId || "",
+
+    title: formData.title || "",
+
+    description: formData.description || "",
+
+    department: formData.department || "",
+
+    duration: formData.duration || "",
+
+    location: formData.location || "",
+
+    stipend: stipendValue,
+
+    vacancies:
+      formData.vacancies === "" ||
+      formData.vacancies === null ||
+      formData.vacancies === undefined
+        ? 0
+        : Number(formData.vacancies),
+
+    lastDate: formData.lastDate || "",
+
+    skillsRequired: skillsValue,
+
+    eligibility: formData.eligibility || "",
+
+    /*
+      The form does not currently have an isPaid field.
+      We derive it from whether a stipend is entered.
+    */
+    isPaid: stipendValue > 0,
+
+    status: formData.status || "Draft",
+
+    postedOn:
+      formData.postedOn ||
+      new Date().toISOString().split("T")[0],
+  };
+};
 
 
 export default function ManageOjtOpportunities() {
 
-  /* ================= STATES ================= */
+  // =====================================================
+  // STATES
+  // =====================================================
 
-  const [opportunities, setOpportunities] = useState(
-    initialOpportunities
-  );
+  const [opportunities, setOpportunities] = useState([]);
 
   const [search, setSearch] = useState("");
 
@@ -171,10 +167,63 @@ export default function ManageOjtOpportunities() {
     useState(null);
 
 
-  /* ================= FILTER ================= */
+  // =====================================================
+  // LOAD OPPORTUNITIES FROM MONGODB
+  // =====================================================
 
-  const filteredOpportunities = opportunities.filter(
-    (item) => {
+  useEffect(() => {
+
+    const fetchOpportunities = async () => {
+
+      try {
+
+        const response = await fetch(
+          `http://localhost:5000/api/opportunities/company/${COMPANY_ID}`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            "Failed to fetch opportunities"
+          );
+        }
+
+        const data = await response.json();
+
+        if (data.success) {
+
+          const uiOpportunities =
+            data.opportunities.map(convertToUI);
+
+          setOpportunities(uiOpportunities);
+
+        }
+
+      } catch (error) {
+
+        console.error(
+          "Failed to load opportunities:",
+          error
+        );
+
+        window.alert(
+          "Failed to load opportunities from database."
+        );
+
+      }
+
+    };
+
+    fetchOpportunities();
+
+  }, []);
+
+
+  // =====================================================
+  // FILTER
+  // =====================================================
+
+  const filteredOpportunities =
+    opportunities.filter((item) => {
 
       const searchText =
         search.toLowerCase();
@@ -202,45 +251,67 @@ export default function ManageOjtOpportunities() {
         matchesStatus &&
         matchesDuration
       );
-    }
-  );
+
+    });
 
 
-  /* ================= ADD ================= */
+  // =====================================================
+  // ADD
+  // =====================================================
 
   const handleAdd = () => {
 
     setSelectedOpportunity({
+
       id: null,
+
       title: "",
+
       description: "",
+
       department: "Computer Science",
+
       duration: "2 Months",
+
       location: "Pune (Hybrid)",
+
       stipend: "",
+
       vacancies: "",
+
       lastDate: "",
+
       skills: ["HTML", "CSS"],
+
       eligibility: "",
+
       status: "Draft",
-      posted: "15 Aug 2026",
+
+      posted: new Date()
+        .toISOString()
+        .split("T")[0],
+
     });
 
   };
 
 
-  /* ================= EDIT ================= */
+  // =====================================================
+  // EDIT
+  // =====================================================
 
   const handleEdit = (opportunity) => {
 
     setSelectedOpportunity({
-      ...opportunity
+      ...opportunity,
     });
 
   };
 
 
-  /* ================= VIEW ================= */
+  // =====================================================
+  // VIEW
+  // =====================================================
 
   const handleView = (opportunity) => {
 
@@ -249,9 +320,11 @@ export default function ManageOjtOpportunities() {
   };
 
 
-  /* ================= DELETE ================= */
+  // =====================================================
+  // DELETE
+  // =====================================================
 
-  const handleDelete = (opportunity) => {
+  const handleDelete = async (opportunity) => {
 
     const confirmed = window.confirm(
       `Are you sure you want to delete "${opportunity.title}"?`
@@ -261,86 +334,239 @@ export default function ManageOjtOpportunities() {
       return;
     }
 
-    setOpportunities((previous) =>
-      previous.filter(
-        (item) => item.id !== opportunity.id
-      )
-    );
+    try {
 
-    window.alert("Opportunity deleted successfully.");
+      const response = await fetch(
+        `http://localhost:5000/api/opportunities/${opportunity.id}`,
+        {
+          method: "DELETE",
+        }
+      );
 
-    if (
-      selectedOpportunity &&
-      selectedOpportunity.id === opportunity.id
-    ) {
-      setSelectedOpportunity(null);
-    }
+      const data = await response.json();
 
-  };
-
-
-  /* ================= SAVE ================= */
-
-  const handleSave = (formData) => {
-
-    if (!formData.title.trim()) {
-      window.alert("Please enter opportunity title.");
-      return;
-    }
-
-    if (!formData.description.trim()) {
-      window.alert("Please enter description.");
-      return;
-    }
-
-    /* EDIT EXISTING */
-
-    if (formData.id) {
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message ||
+          "Failed to delete opportunity"
+        );
+      }
 
       setOpportunities((previous) =>
-        previous.map((item) =>
-          item.id === formData.id
-            ? {
-                ...item,
-                ...formData,
-              }
-            : item
+        previous.filter(
+          (item) =>
+            item.id !== opportunity.id
         )
       );
 
       window.alert(
-        "Opportunity updated successfully."
+        "Opportunity deleted successfully."
       );
 
-    }
+      if (
+        selectedOpportunity &&
+        selectedOpportunity.id === opportunity.id
+      ) {
+        setSelectedOpportunity(null);
+      }
 
-    /* ADD NEW */
+    } catch (error) {
 
-    else {
-
-      const newOpportunity = {
-        ...formData,
-        id: Date.now(),
-        posted: "15 Aug 2026",
-      };
-
-      setOpportunities((previous) => [
-        newOpportunity,
-        ...previous,
-      ]);
+      console.error(
+        "Delete Opportunity Error:",
+        error
+      );
 
       window.alert(
-        "Opportunity added successfully."
+        "Failed to delete opportunity."
       );
 
     }
-
-    setSelectedOpportunity(null);
 
   };
 
 
-  /* ================= CANCEL ================= */
+  // =====================================================
+  // SAVE
+  // =====================================================
+
+  const handleSave = async (formData) => {
+
+    if (!formData.title.trim()) {
+
+      window.alert(
+        "Please enter opportunity title."
+      );
+
+      return;
+    }
+
+    if (!formData.description.trim()) {
+
+      window.alert(
+        "Please enter description."
+      );
+
+      return;
+    }
+
+
+    // ---------------------------------------------------
+    // Convert UI data to MongoDB format
+    // ---------------------------------------------------
+
+    const mongoData =
+      convertToMongo(formData);
+
+
+    try {
+
+      // =================================================
+      // EDIT EXISTING
+      // =================================================
+
+      if (formData.id) {
+
+        const response = await fetch(
+          `http://localhost:5000/api/opportunities/${formData.id}`,
+          {
+            method: "PUT",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify(
+              mongoData
+            ),
+          }
+        );
+
+        const data =
+          await response.json();
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
+          throw new Error(
+            data.message ||
+            "Failed to update opportunity"
+          );
+        }
+
+
+        // Convert saved MongoDB data
+        // back to UI format
+
+        const updatedOpportunity =
+          convertToUI(
+            data.opportunity
+          );
+
+
+        setOpportunities(
+          (previous) =>
+            previous.map((item) =>
+              item.id === formData.id
+                ? updatedOpportunity
+                : item
+            )
+        );
+
+
+        window.alert(
+          "Opportunity updated successfully."
+        );
+
+      }
+
+
+      // =================================================
+      // ADD NEW
+      // =================================================
+
+      else {
+
+        const response = await fetch(
+          "http://localhost:5000/api/opportunities/",
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify(
+              mongoData
+            ),
+          }
+        );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          !response.ok ||
+          !data.success
+        ) {
+          throw new Error(
+            data.message ||
+            "Failed to add opportunity"
+          );
+        }
+
+
+        // Convert saved MongoDB data
+        // back to UI format
+
+        const newOpportunity =
+          convertToUI(
+            data.opportunity
+          );
+
+
+        setOpportunities(
+          (previous) => [
+            newOpportunity,
+            ...previous,
+          ]
+        );
+
+
+        window.alert(
+          "Opportunity added successfully."
+        );
+
+      }
+
+
+      setSelectedOpportunity(null);
+
+    } catch (error) {
+
+      console.error(
+        "Save Opportunity Error:",
+        error
+      );
+
+      window.alert(
+        error.message ||
+        "Failed to save opportunity."
+      );
+
+    }
+
+  };
+
+
+  // =====================================================
+  // CANCEL
+  // =====================================================
 
   const handleCancel = () => {
 
@@ -349,19 +575,35 @@ export default function ManageOjtOpportunities() {
   };
 
 
-  /* ================= RESET FILTERS ================= */
+  // =====================================================
+  // RESET FILTERS
+  // =====================================================
 
   const handleReset = () => {
 
     setSearch("");
-    setDepartment("All Departments");
-    setStatus("All Status");
-    setDuration("All Duration");
+
+    setDepartment(
+      "All Departments"
+    );
+
+    setStatus(
+      "All Status"
+    );
+
+    setDuration(
+      "All Duration"
+    );
 
   };
 
 
+  // =====================================================
+  // UI
+  // =====================================================
+
   return (
+
     <div className="flex min-h-screen w-full bg-[#F8FAFC]">
 
       {/* SIDEBAR */}
@@ -380,7 +622,7 @@ export default function ManageOjtOpportunities() {
 
         <main className="flex-1 px-5 py-6">
 
-          {/* ================= PAGE HEADER ================= */}
+          {/* PAGE HEADER */}
 
           <div className="flex items-center justify-between mb-5">
 
@@ -432,12 +674,12 @@ export default function ManageOjtOpportunities() {
           </div>
 
 
-          {/* ================= MAIN AREA ================= */}
+          {/* MAIN AREA */}
 
           <div className="flex gap-4 items-stretch">
 
 
-            {/* ================= LEFT ================= */}
+            {/* LEFT */}
 
             <div
               className="
@@ -486,7 +728,9 @@ export default function ManageOjtOpportunities() {
               {/* TABLE */}
 
               <OpportunityTable
-                opportunities={filteredOpportunities}
+                opportunities={
+                  filteredOpportunities
+                }
                 onEdit={handleEdit}
                 onView={handleView}
                 onDelete={handleDelete}
@@ -495,10 +739,12 @@ export default function ManageOjtOpportunities() {
             </div>
 
 
-            {/* ================= RIGHT FORM ================= */}
+            {/* RIGHT FORM */}
 
             <OpportunityForm
-              opportunity={selectedOpportunity}
+              opportunity={
+                selectedOpportunity
+              }
               onSave={handleSave}
               onCancel={handleCancel}
             />
@@ -513,7 +759,7 @@ export default function ManageOjtOpportunities() {
       </div>
 
 
-      {/* ================= VIEW POPUP ================= */}
+      {/* VIEW POPUP */}
 
       {viewOpportunity && (
 
@@ -550,7 +796,9 @@ export default function ManageOjtOpportunities() {
 
               <button
                 type="button"
-                onClick={() => setViewOpportunity(null)}
+                onClick={() =>
+                  setViewOpportunity(null)
+                }
                 className="text-[#64748B] text-xl"
               >
                 ×
@@ -563,57 +811,81 @@ export default function ManageOjtOpportunities() {
 
               <Detail
                 label="Opportunity Title"
-                value={viewOpportunity.title}
+                value={
+                  viewOpportunity.title
+                }
               />
 
               <Detail
                 label="Department"
-                value={viewOpportunity.department}
+                value={
+                  viewOpportunity.department
+                }
               />
 
               <Detail
                 label="Duration"
-                value={viewOpportunity.duration}
+                value={
+                  viewOpportunity.duration
+                }
               />
 
               <Detail
                 label="Location"
-                value={viewOpportunity.location}
+                value={
+                  viewOpportunity.location
+                }
               />
 
               <Detail
                 label="Stipend"
-                value={viewOpportunity.stipend}
+                value={
+                  viewOpportunity.stipend
+                }
               />
 
               <Detail
                 label="Vacancies"
-                value={viewOpportunity.vacancies}
+                value={
+                  viewOpportunity.vacancies
+                }
               />
 
               <Detail
                 label="Last Date to Apply"
-                value={viewOpportunity.lastDate}
+                value={
+                  viewOpportunity.lastDate
+                }
               />
 
               <Detail
                 label="Status"
-                value={viewOpportunity.status}
+                value={
+                  viewOpportunity.status
+                }
               />
 
               <Detail
                 label="Description"
-                value={viewOpportunity.description}
+                value={
+                  viewOpportunity.description
+                }
               />
 
               <Detail
                 label="Eligibility Criteria"
-                value={viewOpportunity.eligibility}
+                value={
+                  viewOpportunity.eligibility
+                }
               />
 
               <Detail
                 label="Required Skills"
-                value={viewOpportunity.skills.join(", ")}
+                value={
+                  viewOpportunity.skills.join(
+                    ", "
+                  )
+                }
               />
 
             </div>
@@ -621,7 +893,9 @@ export default function ManageOjtOpportunities() {
 
             <button
               type="button"
-              onClick={() => setViewOpportunity(null)}
+              onClick={() =>
+                setViewOpportunity(null)
+              }
               className="
                 mt-5
                 w-full
@@ -647,11 +921,14 @@ export default function ManageOjtOpportunities() {
 }
 
 
-/* ================= DETAIL ================= */
+// =====================================================
+// DETAIL
+// =====================================================
 
 function Detail({ label, value }) {
 
   return (
+
     <div>
 
       <p className="font-semibold text-[#111827]">
@@ -663,5 +940,6 @@ function Detail({ label, value }) {
       </p>
 
     </div>
+
   );
 }

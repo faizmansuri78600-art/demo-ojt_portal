@@ -1,32 +1,75 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Icon, EyeIcon, DotsIcon } from "./facultyIcons";
 import DiaryStatusBadge from "./DiaryStatusBadge";
 
-const DiaryTable = ({ diaries, onView, selectedDiaryId, onApprove, onRequestRevision }) => {
-  const [activeTab, setActiveTab] = useState("Pending Review");
+const DiaryTable = ({
+  diaries,
+  onView,
+  selectedDiaryId,
+  onApprove,
+  onRequestRevision,
+  selectedFilter,
+}) => {
+  const [activeTab, setActiveTab] = useState("All Diaries");
   const [searchTerm, setSearchTerm] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
 
+  useEffect(() => {
+    if (selectedFilter) {
+      setActiveTab(selectedFilter);
+    }
+  }, [selectedFilter]);
+
   const counts = useMemo(
     () => ({
-      "Pending Review": diaries.filter((d) => d.status === "Pending Review").length,
-      Approved: diaries.filter((d) => d.status === "Approved").length,
-      "Revision Requested": diaries.filter((d) => d.status === "Revision Requested").length,
+      "Pending Review": diaries.filter(
+        (d) => d.status === "Pending Review"
+      ).length,
+
+      Approved: diaries.filter(
+        (d) => d.status === "Approved"
+      ).length,
+
+      "Revision Requested": diaries.filter(
+        (d) => d.status === "Revision Requested"
+      ).length,
     }),
     [diaries]
   );
 
   const tabs = [
-    { id: "Pending Review", label: `Pending (${counts["Pending Review"]})` },
-    { id: "Approved", label: `Approved (${counts["Approved"]})` },
-    { id: "Revision Requested", label: `Revision Requested (${counts["Revision Requested"]})` },
-  ];
+  {
+    id: "All Diaries",
+    label: `All Diaries (${diaries.length})`,
+  },
+  {
+    id: "Pending Review",
+    label: `Pending (${counts["Pending Review"]})`,
+  },
+  {
+    id: "Approved",
+    label: `Approved (${counts["Approved"]})`,
+  },
+  {
+    id: "Revision Requested",
+    label: `Revision Requested (${counts["Revision Requested"]})`,
+  },
+];
 
-  const filteredDiaries = useMemo(() => {
-    return diaries.filter(
-      (d) => d.status === activeTab && d.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [diaries, activeTab, searchTerm]);
+ const filteredDiaries = useMemo(() => {
+  return diaries.filter((d) => {
+    const matchesSearch = (d.name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const matchesTab =
+      activeTab === "All Diaries"
+        ? true
+        : d.status === activeTab;
+
+    return matchesSearch && matchesTab;
+  });
+}, [diaries, activeTab, searchTerm]);
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">

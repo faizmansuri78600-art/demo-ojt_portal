@@ -7,13 +7,11 @@ import {
   Save,
 } from "lucide-react";
 
-
 export default function OpportunityForm({
   opportunity,
   onSave,
   onCancel,
 }) {
-
   /* ================= FORM STATE ================= */
 
   const [formData, setFormData] = useState({
@@ -31,24 +29,57 @@ export default function OpportunityForm({
     status: "Active",
   });
 
+  /* ================= EDITING STATE ================= */
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  /* ================= SKILLS DROPDOWN ================= */
+
+  const [showSkills, setShowSkills] = useState(false);
+
+  const availableSkills = [
+    "HTML",
+    "CSS",
+    "JavaScript",
+    "React.js",
+    "Node.js",
+    "Python",
+    "Pandas",
+    "NumPy",
+    "Machine Learning",
+    "Java",
+    "PHP",
+    "MySQL",
+    "PostgreSQL",
+    "MongoDB",
+    "SQL",
+    "Git",
+    "GitHub",
+    "Figma",
+    "Cybersecurity",
+    "Data Analysis",
+  ];
 
   /* ================= LOAD OPPORTUNITY ================= */
 
   useEffect(() => {
-
     if (opportunity) {
-
       setFormData({
         id: opportunity.id || null,
+
         title: opportunity.title || "",
+
         department:
           opportunity.department ||
           "Computer Science",
+
         vacancies:
           opportunity.vacancies || "",
+
         duration:
           opportunity.duration ||
           "2 Months",
+
         stipend:
           opportunity.stipend
             ? opportunity.stipend
@@ -56,41 +87,88 @@ export default function OpportunityForm({
                 .replace("/ month", "")
                 .trim()
             : "",
+
         location:
           opportunity.location ||
           "Pune (Hybrid)",
+
         lastDate:
           opportunity.lastDate || "",
+
         skills:
           opportunity.skills || ["HTML", "CSS"],
+
         description:
           opportunity.description || "",
+
         eligibility:
           opportunity.eligibility || "",
+
         status:
           opportunity.status || "Active",
       });
 
+      setIsEditing(true);
+      setShowSkills(false);
+    } else {
+      setIsEditing(false);
+      setShowSkills(false);
     }
-
   }, [opportunity]);
-
 
   /* ================= CHANGE VALUE ================= */
 
   const updateField = (field, value) => {
+    if (!isEditing) return;
 
     setFormData((previous) => ({
       ...previous,
       [field]: value,
     }));
-
   };
 
+  /* ================= TOGGLE SKILL ================= */
+
+  const toggleSkill = (skill) => {
+    if (!isEditing) return;
+
+    setFormData((previous) => {
+      const alreadySelected =
+        previous.skills.includes(skill);
+
+      if (alreadySelected) {
+        return {
+          ...previous,
+          skills: previous.skills.filter(
+            (item) => item !== skill
+          ),
+        };
+      }
+
+      return {
+        ...previous,
+        skills: [...previous.skills, skill],
+      };
+    });
+  };
+
+  /* ================= REMOVE SKILL ================= */
+
+  const removeSkill = (skill) => {
+    if (!isEditing) return;
+
+    setFormData((previous) => ({
+      ...previous,
+      skills: previous.skills.filter(
+        (item) => item !== skill
+      ),
+    }));
+  };
 
   /* ================= SAVE ================= */
 
   const handleSave = () => {
+    if (!isEditing) return;
 
     const finalData = {
       ...formData,
@@ -102,12 +180,14 @@ export default function OpportunityForm({
 
     onSave(finalData);
 
+    setIsEditing(false);
+    setShowSkills(false);
   };
-
 
   /* ================= CLEAR ================= */
 
   const handleClear = () => {
+    if (!isEditing) return;
 
     setFormData({
       id: null,
@@ -124,11 +204,10 @@ export default function OpportunityForm({
       status: "Draft",
     });
 
+    setShowSkills(false);
   };
 
-
   return (
-
     <div
       className="
         w-[380px]
@@ -141,7 +220,6 @@ export default function OpportunityForm({
         overflow-hidden
       "
     >
-
 
       {/* ================= HEADER ================= */}
 
@@ -165,34 +243,32 @@ export default function OpportunityForm({
 
           </div>
 
-
           <button
             type="button"
             onClick={onCancel}
             className="text-[#94A3B8] hover:text-[#475569]"
           >
-
             <X size={16} />
-
           </button>
 
         </div>
 
       </div>
 
-
       {/* ================= FORM ================= */}
 
       <div className="p-5 space-y-4">
-
 
         {/* TITLE */}
 
         <div>
 
           <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
+
             Opportunity Title{" "}
+
             <span className="text-red-500">*</span>
+
           </label>
 
           <input
@@ -204,6 +280,7 @@ export default function OpportunityForm({
                 e.target.value
               )
             }
+            disabled={!isEditing}
             className="
               w-full
               h-[38px]
@@ -243,8 +320,8 @@ export default function OpportunityForm({
               "IT / Design",
             ]}
             required
+            disabled={!isEditing}
           />
-
 
           <InputField
             label="Vacancies"
@@ -256,6 +333,7 @@ export default function OpportunityForm({
               )
             }
             required
+            disabled={!isEditing}
           />
 
         </div>
@@ -280,8 +358,8 @@ export default function OpportunityForm({
               "6 Months",
             ]}
             required
+            disabled={!isEditing}
           />
-
 
           <InputField
             label="Stipend (per month)"
@@ -292,6 +370,7 @@ export default function OpportunityForm({
                 value
               )
             }
+            disabled={!isEditing}
           />
 
         </div>
@@ -316,20 +395,23 @@ export default function OpportunityForm({
               "Remote",
             ]}
             required
+            disabled={!isEditing}
           />
-
 
           <div>
 
             <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
+
               Last Date to Apply{" "}
+
               <span className="text-red-500">*</span>
+
             </label>
 
             <div className="relative">
 
               <input
-                type="text"
+                type="date"
                 value={formData.lastDate}
                 onChange={(e) =>
                   updateField(
@@ -337,15 +419,15 @@ export default function OpportunityForm({
                     e.target.value
                   )
                 }
-                placeholder="31/07/2025"
+                disabled={!isEditing}
                 className="
                   w-full
                   h-[38px]
                   border
                   border-[#E5E7EB]
                   rounded-[8px]
-                  pl-8
-                  pr-2
+                  pl-3
+                  pr-8
                   text-[10px]
                   text-[#111827]
                   outline-none
@@ -353,15 +435,15 @@ export default function OpportunityForm({
                 "
               />
 
-
               <Calendar
                 size={13}
                 className="
                   absolute
-                  left-2.5
+                  right-2.5
                   top-1/2
                   -translate-y-1/2
                   text-[#1E5EFF]
+                  pointer-events-none
                 "
               />
 
@@ -372,17 +454,28 @@ export default function OpportunityForm({
         </div>
 
 
-        {/* REQUIRED SKILLS */}
+        {/* ================= REQUIRED SKILLS ================= */}
 
-        <div>
+        <div className="relative">
 
           <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
+
             Required Skills{" "}
+
             <span className="text-red-500">*</span>
+
           </label>
 
-          <div
-            className="
+          {/* SKILL BOX */}
+
+          <button
+            type="button"
+            disabled={!isEditing}
+            onClick={() =>
+              setShowSkills((previous) => !previous)
+            }
+            className={`
+              w-full
               min-h-[38px]
               border
               border-[#E5E7EB]
@@ -394,29 +487,164 @@ export default function OpportunityForm({
               gap-1.5
               flex-wrap
               bg-white
-            "
+              text-left
+              ${isEditing
+                ? "cursor-pointer hover:border-[#1E5EFF]"
+                : "cursor-not-allowed"
+              }
+            `}
           >
 
-            {formData.skills.map(
-              (skill, index) => (
+            {formData.skills.length > 0 ? (
 
-                <Skill
-                  key={index}
-                  text={skill}
-                />
+              formData.skills.map(
+                (skill, index) => (
 
+                  <span
+                    key={index}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                    }}
+                    className="
+                      inline-flex
+                      items-center
+                      gap-1
+                      px-2
+                      py-1
+                      rounded-[5px]
+                      bg-[#EFF6FF]
+                      text-[#1E5EFF]
+                      text-[9px]
+                      font-medium
+                    "
+                  >
+
+                    {skill}
+
+                    {isEditing && (
+                      <span
+                        role="button"
+                        tabIndex={0}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeSkill(skill);
+                        }}
+                        className="
+                          flex
+                          items-center
+                          justify-center
+                          text-[#1E5EFF]
+                          hover:text-[#DC2626]
+                          cursor-pointer
+                        "
+                      >
+                        <X size={10} />
+                      </span>
+                    )}
+
+                  </span>
+
+                )
               )
+
+            ) : (
+
+              <span className="text-[9px] text-[#94A3B8]">
+                Select required skills
+              </span>
+
             )}
-
-
-            {/* SAME CHEVRON */}
 
             <ChevronDown
               size={13}
-              className="ml-auto text-[#1E5EFF]"
+              className={`
+                ml-auto
+                shrink-0
+                text-[#1E5EFF]
+                transition-transform
+                ${showSkills ? "rotate-180" : ""}
+              `}
             />
 
-          </div>
+          </button>
+
+
+          {/* ================= SKILLS DROPDOWN ================= */}
+
+          {showSkills && isEditing && (
+
+            <div
+              className="
+                absolute
+                z-50
+                left-0
+                right-0
+                mt-1
+                bg-white
+                border
+                border-[#E5E7EB]
+                rounded-[8px]
+                shadow-[0_4px_12px_rgba(15,23,42,0.12)]
+                max-h-[180px]
+                overflow-y-auto
+                p-1.5
+              "
+            >
+
+              {availableSkills.map((skill) => {
+
+                const selected =
+                  formData.skills.includes(skill);
+
+                return (
+                  <button
+                    key={skill}
+                    type="button"
+                    onClick={() =>
+                      toggleSkill(skill)
+                    }
+                    className={`
+                      w-full
+                      flex
+                      items-center
+                      justify-between
+                      px-2.5
+                      py-2
+                      rounded-[6px]
+                      text-left
+                      text-[10px]
+                      transition
+                      ${
+                        selected
+                          ? "bg-[#EFF6FF] text-[#1E5EFF]"
+                          : "text-[#475569] hover:bg-[#F8FAFC]"
+                      }
+                    `}
+                  >
+
+                    <span>
+                      {skill}
+                    </span>
+
+                    {selected && (
+                      <span
+                        className="
+                          text-[9px]
+                          font-semibold
+                          text-[#1E5EFF]
+                        "
+                      >
+                        ✓
+                      </span>
+                    )}
+
+                  </button>
+                );
+              })}
+
+            </div>
+
+          )}
 
         </div>
 
@@ -426,8 +654,11 @@ export default function OpportunityForm({
         <div>
 
           <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
+
             Description{" "}
+
             <span className="text-red-500">*</span>
+
           </label>
 
           <textarea
@@ -441,6 +672,7 @@ export default function OpportunityForm({
                 )
               )
             }
+            disabled={!isEditing}
             className="
               w-full
               h-[88px]
@@ -473,7 +705,9 @@ export default function OpportunityForm({
         <div>
 
           <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
+
             Eligibility Criteria
+
           </label>
 
           <textarea
@@ -484,6 +718,7 @@ export default function OpportunityForm({
                 e.target.value
               )
             }
+            disabled={!isEditing}
             placeholder="e.g. BCA, MCA, B.Tech, Any Graduate"
             className="
               w-full
@@ -520,6 +755,7 @@ export default function OpportunityForm({
             "Closed",
           ]}
           required
+          disabled={!isEditing}
         />
 
       </div>
@@ -554,6 +790,7 @@ export default function OpportunityForm({
           <button
             type="button"
             onClick={handleSave}
+            disabled={!isEditing}
             className="
               flex-1
               h-[40px]
@@ -584,6 +821,7 @@ export default function OpportunityForm({
         <button
           type="button"
           onClick={handleClear}
+          disabled={!isEditing}
           className="
             w-full
             mt-2
@@ -602,17 +840,18 @@ export default function OpportunityForm({
 }
 
 
-/* ================= INPUT FIELD ================= */
+/* =========================================================
+   INPUT FIELD
+========================================================= */
 
 function InputField({
   label,
   value,
   onChange,
   required = false,
+  disabled = false,
 }) {
-
   return (
-
     <div>
 
       <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
@@ -634,6 +873,7 @@ function InputField({
         onChange={(e) =>
           onChange(e.target.value)
         }
+        disabled={disabled}
         className="
           w-full
           h-[38px]
@@ -653,7 +893,9 @@ function InputField({
 }
 
 
-/* ================= SELECT FIELD ================= */
+/* =========================================================
+   SELECT FIELD
+========================================================= */
 
 function SelectField({
   label,
@@ -661,10 +903,9 @@ function SelectField({
   onChange,
   options,
   required = false,
+  disabled = false,
 }) {
-
   return (
-
     <div>
 
       <label className="block text-[10px] font-medium text-[#111827] mb-1.5">
@@ -687,6 +928,7 @@ function SelectField({
           onChange={(e) =>
             onChange(e.target.value)
           }
+          disabled={disabled}
           className="
             appearance-none
             w-full
@@ -721,8 +963,6 @@ function SelectField({
         </select>
 
 
-        {/* CHEVRON UNTOUCHED */}
-
         <ChevronDown
           size={13}
           className="
@@ -738,29 +978,5 @@ function SelectField({
       </div>
 
     </div>
-  );
-}
-
-
-/* ================= SKILL ================= */
-
-function Skill({ text }) {
-
-  return (
-
-    <span
-      className="
-        px-2
-        py-1
-        rounded-[5px]
-        bg-[#EFF6FF]
-        text-[#1E5EFF]
-        text-[9px]
-        font-medium
-      "
-    >
-      {text}
-    </span>
-
   );
 }

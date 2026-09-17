@@ -9,7 +9,6 @@ const companySchema = new mongoose.Schema(
 
     verifiedByCoordinatorId: {
       type: String,
-      default: "",
     },
 
     companyName: {
@@ -18,62 +17,85 @@ const companySchema = new mongoose.Schema(
       trim: true,
     },
 
-    industry: {
+    yearOfEstablishment: {
       type: String,
-      default: "Other",
-      trim: true,
     },
 
-    email: {
+    registrationNumber: {
       type: String,
-      default: "",
-      trim: true,
+    },
+
+    companySize: {
+      type: String,
     },
 
     companyPhone: {
       type: String,
-      default: "",
-      trim: true,
     },
+    logoUrl: {
+  type: String,
+  default: "",
+},
 
     street: {
       type: String,
-      default: "",
-      trim: true,
+    },
+
+    city: {
+      type: String,
+    },
+
+    state: {
+      type: String,
     },
 
     zipCode: {
       type: String,
-      default: "",
-      trim: true,
+    },
+
+    country: {
+      type: String,
     },
 
     website: {
       type: String,
-      default: "",
-      trim: true,
+    },
+
+    contactPerson: {
+      type: String,
+    },
+
+    alternateEmail: {
+      type: String,
+    },
+
+    email: {
+      type: String,
+    },
+
+    mobileNumber: {
+      type: String,
+    },
+
+    phoneNumber: {
+      type: String,
     },
 
     description: {
       type: String,
-      default: "",
-      trim: true,
+    },
+
+    logoUrl: {
+      type: String,
     },
 
     isVerified: {
       type: Boolean,
       default: false,
     },
-
-    status: {
-      type: String,
-      enum: ["Pending", "Approved", "Rejected"],
-      default: "Pending",
-    },
   },
   {
     collection: "companies",
-    timestamps: true,
   }
 );
 

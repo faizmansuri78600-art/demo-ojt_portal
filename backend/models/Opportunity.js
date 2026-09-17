@@ -23,7 +23,7 @@ const opportunitySchema = new mongoose.Schema(
       type: String,
     },
 
-    skillsRequired: {
+    department: {
       type: String,
     },
 
@@ -32,6 +32,26 @@ const opportunitySchema = new mongoose.Schema(
     },
 
     location: {
+      type: String,
+    },
+
+    stipend: {
+      type: Number,
+    },
+
+    vacancies: {
+      type: Number,
+    },
+
+    lastDate: {
+      type: String,
+    },
+
+    skillsRequired: {
+      type: String,
+    },
+
+    eligibility: {
       type: String,
     },
 

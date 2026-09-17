@@ -1,11 +1,9 @@
 const dns = require("dns");
 
-dns.setServers([
-  "8.8.8.8",
-  "1.1.1.1",
-]);
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 const express = require("express");
+const taskRoutes = require("./routes/taskRoutes");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
@@ -34,6 +32,9 @@ app.use(cors());
 
 app.use(express.json());
 
+// resume uploads
+app.use("/uploads", express.static("uploads"));
+
 app.use(
   express.urlencoded({
     extended: true,
@@ -44,12 +45,8 @@ app.use(
 // Routes
 // ======================================
 
-// ======================================
-// Authentication Routes
-// ======================================
-
-const authRoutes =
-  require("./routes/authRoutes");
+// Authentication routes
+const authRoutes = require("./routes/authRoutes");
 
 app.use(
   "/api/auth",
@@ -60,13 +57,13 @@ app.use(
 // Admin Routes
 // ======================================
 
-const adminRoutes =
-  require("./routes/adminRoutes");
+// Admin routes
+// const adminRoutes = require("./routes/adminRoutes");
 
-app.use(
-  "/api/admin",
-  adminRoutes
-);
+// app.use(
+//   "/api/admin",
+//   adminRoutes
+// );
 
 // ======================================
 // Application Routes
@@ -129,6 +126,16 @@ app.use(
 );
 
 // ======================================
+// Task routes
+// ======================================
+
+app.use(
+  "/api/tasks",
+  taskRoutes
+);
+
+
+// ======================================
 // Attendance Routes
 // ======================================
 
@@ -151,6 +158,10 @@ app.use(
   "/api/weekly-reports",
   weeklyReportRoutes
 );
+
+// ======================================
+// Certificate Routes
+// ======================================
 
 // ======================================
 // Certificate Routes
@@ -180,12 +191,21 @@ app.use(
 // Assigned OJT Routes
 // ======================================
 
+// ======================================
+// Assigned OJT Routes
+// ======================================
+
 const assignedOjtRoutes =
   require("./routes/assignedOjtRoutes");
 
 app.use(
   "/api/assigned-ojt",
   assignedOjtRoutes
+);
+
+app.use(
+  "/api/evaluations",
+  evaluationRoutes
 );
 
 // ======================================
@@ -200,6 +220,7 @@ app.use(
   evaluationRoutes
 );
 
+
 // ======================================
 // Faculty Routes
 // ======================================
@@ -211,6 +232,7 @@ app.use(
   "/api/faculty",
   facultyRoutes
 );
+
 
 // ======================================
 // Company Coordinator Routes
@@ -225,18 +247,20 @@ app.use(
 );
 
 // ======================================
-// MENTOR ASSIGNMENT ROUTES
+// Company Coordinator Routes
 // ======================================
-// IMPORTANT:
-// This route MUST come before the general
-// College Coordinator route.
-//
-// Otherwise:
-// /mentor-assignment
-// gets treated as:
-// /:id
-// by collegeCoordinatorRoutes.
+
 // ======================================
+// College Coordinator Routes
+// ======================================
+
+const collegeCoordinatorRoutes =
+  require("./routes/collegeCoordinatorRoutes");
+
+app.use(
+  "/api/college-coordinators",
+  collegeCoordinatorRoutes
+);
 
 const mentorAssignmentRoutes =
   require("./routes/mentorAssignmentRoutes");

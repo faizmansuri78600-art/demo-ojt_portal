@@ -482,6 +482,7 @@ import ProtectedRoute from "./ProtectedRoute";
 
 import AdminLogin from "../pages/AdminLogin";
 
+
 // ================= PUBLIC =================
 import PublicLayout from "../layouts/PublicLayout";
 import Home from "../pages/Home";
@@ -526,6 +527,8 @@ import StudentDetails from "../pages/faculty/StudentDetails";
 import ReviewReports from "../pages/faculty/ReviewReports";
 import ApproveDiary from "../pages/faculty/ApproveDiary";
 import Evaluationfaculty from "../pages/faculty/Evaluation";
+import Notifications from "../pages/faculty/Notifications";
+import Reminders from "../pages/faculty/Reminders";
 
 // ================= COLLEGE COORDINATOR =================
 import CoordinatorLayout from "../layouts/CoordinatorLayout";
@@ -649,10 +652,17 @@ function AppRoutes() {
           element={<AssignedStudents />}
         />
 
-        <Route
-          path="/faculty/StudentDetails"
-          element={<StudentDetails />}
-        />
+        {/* Student Details - without ID */}
+<Route
+  path="/faculty/StudentDetails"
+  element={<StudentDetails />}
+/>
+
+{/* Student Details - with Student ID */}
+<Route
+  path="/faculty/StudentDetails/:studentId"
+  element={<StudentDetails />}
+/>
 
         <Route
           path="/faculty/ReviewReports"
@@ -669,6 +679,14 @@ function AppRoutes() {
           element={<Evaluationfaculty />}
         />
 
+<Route
+  path="/faculty/Notifications"
+  element={<Notifications />}
+/>
+<Route
+  path="/faculty/Reminders"
+  element={<Reminders />}
+/>
       </Route>
 
 

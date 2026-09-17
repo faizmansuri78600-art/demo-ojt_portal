@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "../../components/common/SHeader";
 import Sidebar from "../../components/common/SSidebar";
-import tcsLogo from "../../assets/logos/tcslogo.png";
 import MyAvtar from "../../assets/images/Myavtar.jpg";
+import {
+  getProfile,
+  updateProfile,
+  uploadResume,
+} from "../../services/StudentServices";
 
 import {
   ChevronRight,
@@ -32,222 +36,143 @@ import {
 
 import { FaGithub, FaLinkedin } from "react-icons/fa";
 
-export default function MyProfile() {
+const displayValue = (value) => {
+  if (value === null || value === undefined || value === "") {
+    return "Not set";
+  }
 
-  // ================= STUDENT DATA =================
+  return value;
+};
+
+export default function MyProfile() {
+  // =========================================================
+  // STUDENT DATA
+  // =========================================================
+const [documents, setDocuments] = useState({});
+const [ojtInfo, setOjtInfo] = useState({});
+
 
   const [student, setStudent] = useState({
-    name: "Ayesha Shaikh",
-    status: "Active Student",
-    rollNo: "BCA-2023-045",
-    department: "Bachelor of Computer Application",
-    semester: "Semester VI",
-    studentId: "AISC2023045",
-    email: "ayesha.shaikh@aisc.edu.in",
-    mobile: "+91 98765 43210",
-    address: "Pune, Maharashtra",
-    role: "Student",
-    skills:
-      "Python, Flask, PostgreSQL, HTML, CSS, JavaScript, Git, Java, DBMS, OOPs",
+    name: "",
+    email: "",
+    role: "",
+    status: "",
+    studentId: "",
+    rollNumber: "",
+    department: "",
+    semester: "",
+    college: "",
+    course: "",
+    academicYear: "",
+    admissionYear: "",
+    universityRegNo: "",
+    cgpa: "",
+    gender: "",
+    dateOfBirth: "",
+    address: "",
+    city: "",
+    state: "",
+    pinCode: "",
+    bloodGroup: "",
+    emergencyContact: "",
+    mobile: "",
+    skills: "",
+    linkedIn: "",
+    github: "",
+    portfolio: "",
+    profilePhotoUrl: "",
+    resumeUrl: "",
+    resumeFileName: "",
+    resumeUploadedOn: "",
+    resumeSize: "",
   });
 
-  // ================= EDIT PROFILE STATE =================
+// resume uploads
+
+const [resumeFile, setResumeFile] = useState(null);
+const [uploadingResume, setUploadingResume] = useState(false);
+
+
+  const [profileLoading, setProfileLoading] = useState(true);
+  const [profileError, setProfileError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+
+  // =========================================================
+  // LOAD PROFILE FROM BACKEND
+  // =========================================================
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setProfileLoading(true);
+        setProfileError("");
+
+        const response = await getProfile();
+        const data = response.student;
+
+        setDocuments(data.documents || {});
+        setOjtInfo(data.ojt || {});
+
+        setStudent({
+          name: data.name || "",
+          email: data.email || "",
+          role: data.role || "",
+          status: data.status || "",
+          studentId: data.studentId || "",
+          rollNumber: data.rollNumber || "",
+          department: data.department || "",
+          semester: data.semester || "",
+          college: data.college || "",
+          course: data.course || "",
+          academicYear: data.academicYear || "",
+          admissionYear: data.admissionYear || "",
+          universityRegNo: data.universityRegNo || "",
+          cgpa: data.cgpa ?? "",
+          gender: data.gender || "",
+          dateOfBirth: data.dateOfBirth || "",
+          address: data.address || "",
+          city: data.city || "",
+          state: data.state || "",
+          pinCode: data.pinCode || "",
+          bloodGroup: data.bloodGroup || "",
+          emergencyContact: data.emergencyContact || "",
+          mobile: data.mobile || data.phone || "",
+          skills: data.skills || "",
+          linkedIn: data.linkedIn || "",
+          github: data.github || "",
+          portfolio: data.portfolio || "",
+          profilePhotoUrl: data.profilePhotoUrl || "",
+          resumeUrl: data.resumeUrl || "",
+          resumeFileName: data.resumeFileName || "",
+          resumeUploadedOn: data.resumeUploadedOn || "",
+          resumeSize: data.resumeSize || "",
+        });
+      } catch (error) {
+        console.error("Profile loading error:", error);
+        setProfileError(
+          error.message || "Could not load profile from server."
+        );
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  // =========================================================
+  // EDIT PROFILE
+  // =========================================================
 
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const [editForm, setEditForm] = useState(student);
 
-  // ================= SETTINGS =================
-
-  const [settings, setSettings] = useState({
-    twoFactor: true,
-    emailNotifications: true,
-    smsNotifications: true,
-    privacySettings: false,
-  });
-
-  const toggleSetting = (key) =>
-    setSettings((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-
-  // ================= PROFILE COMPLETION =================
-
-  const profileCompletion = 90;
-
-  const completionChecklist = [
-    { label: "Personal Info", done: true },
-    { label: "Academic Info", done: true },
-    { label: "Skills", done: true },
-    { label: "Documents", done: true },
-    { label: "Resume Upload", done: false },
-  ];
-
-  // ================= PERSONAL INFORMATION =================
-
-  const personalInfo = [
-    { label: "Full Name", value: student.name },
-    { label: "Gender", value: "Female" },
-    { label: "Date of Birth", value: "15 Jun 2004" },
-    { label: "Address", value: student.address },
-    { label: "City", value: "Pune" },
-    { label: "State", value: "Maharashtra" },
-    { label: "PIN Code", value: "411034" },
-    { label: "Blood Group", value: "B+" },
-    {
-      label: "Emergency Contact",
-      value: "+91 87654 32109 (Father)",
-    },
-  ];
-
-  // ================= ACADEMIC INFORMATION =================
-
-  const academicInfo = [
-    {
-      label: "College Name",
-      value: "Abeda Inamdar Senior College",
-    },
-    {
-      label: "Course",
-      value: "Bachelor of Computer Application",
-    },
-    {
-      label: "Department",
-      value: "BCA",
-    },
-    {
-      label: "Roll Number",
-      value: student.rollNo,
-    },
-    {
-      label: "University Reg. No.",
-      value: "MU12345678910",
-    },
-    {
-      label: "Academic Year",
-      value: "2023 - 2026",
-    },
-    {
-      label: "Admission Year",
-      value: "2023",
-    },
-  ];
-
-  const cgpa = "8.45 / 10.00";
-
-  // ================= SKILLS =================
-
-  const skills = [
-    "Python",
-    "Flask",
-    "PostgreSQL",
-    "HTML",
-    "CSS",
-    "JavaScript",
-    "Git",
-    "Java",
-    "Problem Solving",
-    "DBMS",
-    "OOPs",
-    "Communication",
-    "Teamwork",
-    "Leadership",
-  ];
-
-  // ================= RESUME =================
-
-  const resume = {
-    fileName: "Ayesha_Shaikh_Resume.pdf",
-    uploadedOn: "15 May 2025",
-    size: "245 KB",
-  };
-
-  // ================= DOCUMENTS =================
-
-  const documents = [
-    {
-      label: "Aadhar Card",
-      sub: "aadhar.pdf",
-    },
-    {
-      label: "College ID Card",
-      sub: "idcard.pdf",
-    },
-    {
-      label: "Bonafide Certificate",
-      sub: "bonafide.pdf",
-    },
-    {
-      label: "10th Marksheet",
-      sub: "10th.pdf",
-    },
-    {
-      label: "12th Marksheet",
-      sub: "12th.pdf",
-    },
-  ];
-
-  // ================= OJT INFORMATION =================
-
-  const ojtInfo = {
-    company: "Tata Consultancy Services",
-    mentor: "Mr. Rahul Sharma",
-    joiningDate: "01 Apr 2025",
-    endDate: "30 Jun 2025",
-    location: "Pune, Maharashtra",
-    hoursCompleted: 85,
-    hoursTotal: 120,
-    attendance: 92,
-  };
-
-  // ================= SOCIAL LINKS =================
-
-  const socialLinks = [
-    {
-      label: "LinkedIn",
-      value: "linkedin.com/in/ayesha-shaikh",
-      icon: FaLinkedin,
-    },
-    {
-      label: "GitHub",
-      value: "github.com/ayesha-shaikh",
-      icon: FaGithub,
-    },
-    {
-      label: "Portfolio",
-      value: "ayesha-shaikh.dev",
-      icon: Globe,
-    },
-    {
-      label: "Email",
-      value: student.email,
-      icon: Mail,
-    },
-  ];
-
-  // ================= PROGRESS =================
-
-  const radius = 42;
-
-  const circumference = 2 * Math.PI * radius;
-
-  const dashOffset =
-    circumference -
-    (profileCompletion / 100) * circumference;
-
-  const hoursPercent = Math.round(
-    (ojtInfo.hoursCompleted / ojtInfo.hoursTotal) * 100
-  );
-
-  // ================= OPEN EDIT PROFILE =================
-
   const handleEditProfile = () => {
-    setEditForm(student);
+    setEditForm({ ...student });
     setIsEditOpen(true);
   };
-
-  // ================= FORM CHANGE =================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -258,53 +183,438 @@ export default function MyProfile() {
     }));
   };
 
-  // ================= SAVE PROFILE =================
+  // =========================================================
+  // SAVE PROFILE TO BACKEND
+  // =========================================================
 
-  const handleSaveProfile = () => {
-    setStudent(editForm);
-    setIsEditOpen(false);
+  const handleSaveProfile = async () => {
+    try {
+      setIsSaving(true);
 
-    alert("Profile updated successfully!");
-  };
+      const updates = {
+        name: editForm.name,
+        rollNumber: editForm.rollNumber,
+        department: editForm.department,
+        semester: editForm.semester,
+        college: editForm.college,
+        course: editForm.course,
+        academicYear: editForm.academicYear,
+        admissionYear: editForm.admissionYear,
+        universityRegNo: editForm.universityRegNo,
+        cgpa: editForm.cgpa === "" ? 0 : Number(editForm.cgpa),
+        gender: editForm.gender,
+        dateOfBirth: editForm.dateOfBirth,
+        address: editForm.address,
+        city: editForm.city,
+        state: editForm.state,
+        pinCode: editForm.pinCode,
+        bloodGroup: editForm.bloodGroup,
+        emergencyContact: editForm.emergencyContact,
+        mobile: editForm.mobile,
+        skills: editForm.skills,
+        linkedIn: editForm.linkedIn,
+        github: editForm.github,
+        portfolio: editForm.portfolio,
+      };
 
-  // ================= CANCEL =================
+      const response = await updateProfile(updates);
 
-  const handleCancelEdit = () => {
-    setEditForm(student);
-    setIsEditOpen(false);
-  };
+      const updatedStudent = response.student || response;
 
-  // ================= IMAGE CHANGE =================
+      setStudent((prev) => ({
+        ...prev,
+        ...editForm,
+        ...(updatedStudent || {}),
+        mobile:
+          updatedStudent?.mobile ||
+          updatedStudent?.phone ||
+          editForm.mobile ||
+          "",
+      }));
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
+      setIsEditOpen(false);
 
-    if (file) {
-      alert("Profile photo selected: " + file.name);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Profile update error:", error);
+      alert(
+        error.message ||
+          "Profile update failed. Please check the backend."
+      );
+    } finally {
+      setIsSaving(false);
     }
   };
+
+  const handleCancelEdit = () => {
+    setEditForm({ ...student });
+    setIsEditOpen(false);
+  };
+
+
+  //resum upload
+
+  const handleResumeUpload = async () => {
+  if (!resumeFile) {
+    alert("Please select a PDF resume first.");
+    return;
+  }
+
+  try {
+    setUploadingResume(true);
+
+    const formData = new FormData();
+    formData.append("resume", resumeFile);
+
+    const response = await uploadResume(formData);
+
+    alert("Resume uploaded successfully!");
+
+    if (response.resumeUrl) {
+  setStudent((prev) => ({
+    ...prev,
+    resumeUrl: response.resumeUrl,
+    resumeFileName: response.resumeUrl.split("/").pop(),
+  }));
+}
+    setResumeFile(null);
+  } catch (error) {
+    console.error("Resume Upload Error:", error);
+    alert(error.message || "Failed to upload resume");
+  } finally {
+    setUploadingResume(false);
+  }
+};
+
+  // =========================================================
+  // PROFILE PHOTO
+  // =========================================================
+
+  const [selectedPhoto, setSelectedPhoto] = useState(null);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Profile photo must be smaller than 2MB.");
+      return;
+    }
+
+    const imageUrl = URL.createObjectURL(file);
+
+    setSelectedPhoto(imageUrl);
+
+    setStudent((prev) => ({
+      ...prev,
+      profilePhotoUrl: imageUrl,
+    }));
+
+    alert(
+      "Photo selected. File upload to the server is not implemented yet."
+    );
+  };
+
+  // =========================================================
+  // SETTINGS
+  // =========================================================
+
+  const [settings, setSettings] = useState({
+    twoFactor: true,
+    emailNotifications: true,
+    smsNotifications: true,
+    privacySettings: false,
+  });
+
+  const toggleSetting = (key) => {
+    setSettings((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
+  };
+
+  // =========================================================
+  // PROFILE COMPLETION
+  // =========================================================
+
+  const completionFields = [
+    student.name,
+    student.email,
+    student.rollNumber,
+    student.department,
+    student.semester,
+    student.college,
+    student.course,
+    student.cgpa,
+    student.mobile,
+    student.address,
+    student.skills,
+    student.linkedIn,
+    student.github,
+    student.resumeFileName,
+  ];
+
+  const completedFields = completionFields.filter(
+    (field) =>
+      field !== null &&
+      field !== undefined &&
+      String(field).trim() !== "" &&
+      String(field) !== "0"
+  ).length;
+
+  const profileCompletion = Math.round(
+    (completedFields / completionFields.length) * 100
+  );
+
+  const completionChecklist = [
+    {
+      label: "Personal Info",
+      done: Boolean(
+        student.name &&
+          student.email &&
+          student.mobile &&
+          student.address
+      ),
+    },
+    {
+      label: "Academic Info",
+      done: Boolean(
+        student.college &&
+          student.course &&
+          student.department &&
+          student.rollNumber
+      ),
+    },
+    {
+      label: "Skills",
+      done: Boolean(student.skills),
+    },
+    {
+      label: "Documents",
+      done: false,
+    },
+    {
+      label: "Resume Upload",
+      done: Boolean(student.resumeFileName),
+    },
+  ];
+
+  // =========================================================
+  // PERSONAL INFORMATION
+  // =========================================================
+
+  const personalInfo = [
+    {
+      label: "Full Name",
+      value: displayValue(student.name),
+    },
+    {
+      label: "Gender",
+      value: displayValue(student.gender),
+    },
+    {
+      label: "Date of Birth",
+      value: displayValue(student.dateOfBirth),
+    },
+    {
+      label: "Address",
+      value: displayValue(student.address),
+    },
+    {
+      label: "City",
+      value: displayValue(student.city),
+    },
+    {
+      label: "State",
+      value: displayValue(student.state),
+    },
+    {
+      label: "PIN Code",
+      value: displayValue(student.pinCode),
+    },
+    {
+      label: "Blood Group",
+      value: displayValue(student.bloodGroup),
+    },
+    {
+      label: "Emergency Contact",
+      value: displayValue(student.emergencyContact),
+    },
+  ];
+
+  // =========================================================
+  // ACADEMIC INFORMATION
+  // =========================================================
+
+  const academicInfo = [
+    {
+      label: "College Name",
+      value: displayValue(student.college),
+    },
+    {
+      label: "Course",
+      value: displayValue(student.course),
+    },
+    {
+      label: "Department",
+      value: displayValue(student.department),
+    },
+    {
+      label: "Roll Number",
+      value: displayValue(student.rollNumber),
+    },
+    {
+      label: "University Reg. No.",
+      value: displayValue(student.universityRegNo),
+    },
+    {
+      label: "Academic Year",
+      value: displayValue(student.academicYear),
+    },
+    {
+      label: "Admission Year",
+      value: displayValue(student.admissionYear),
+    },
+  ];
+
+  const cgpa =
+    student.cgpa !== "" &&
+    student.cgpa !== null &&
+    student.cgpa !== undefined &&
+    Number(student.cgpa) > 0
+      ? `${student.cgpa} / 10.00`
+      : "Not set";
+
+  // =========================================================
+  // SKILLS
+  // =========================================================
+
+  const skills = student.skills
+    ? student.skills
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter(Boolean)
+    : [];
+
+  // =========================================================
+  // RESUME
+  // =========================================================
+
+  const resume = {
+  fileName: student.resumeUrl
+    ? student.resumeUrl.split("/").pop()
+    : "No resume uploaded",
+
+  uploadedOn: "Not available",
+
+  size: "Not available",
+
+  url: student.resumeUrl || "",
+};
+  // =========================================================
+  // SOCIAL LINKS
+  // =========================================================
+
+  const socialLinks = [
+    {
+      label: "LinkedIn",
+      value: displayValue(student.linkedIn),
+      icon: FaLinkedin,
+    },
+    {
+      label: "GitHub",
+      value: displayValue(student.github),
+      icon: FaGithub,
+    },
+    {
+      label: "Portfolio",
+      value: displayValue(student.portfolio),
+      icon: Globe,
+    },
+    {
+      label: "Email",
+      value: displayValue(student.email),
+      icon: Mail,
+    },
+  ];
+
+  // =========================================================
+  // OJT
+  // =========================================================
+
+  // These values are intentionally NOT hardcoded.
+  // They will be connected to OJT/Attendance backend data later.
+
+  
+  const hoursPercent =
+    ojtInfo.hoursTotal > 0
+      ? Math.round(
+          (ojtInfo.hoursCompleted / ojtInfo.hoursTotal) * 100
+        )
+      : 0;
+
+  // =========================================================
+  // CIRCLE PROGRESS
+  // =========================================================
+
+  const radius = 42;
+  const circumference = 2 * Math.PI * radius;
+
+  const dashOffset =
+    circumference -
+    (profileCompletion / 100) * circumference;
+
+  // =========================================================
+  // RESUME DOWNLOAD
+  // =========================================================
+
+ // =========================================================
+// RESUME DOWNLOAD
+// =========================================================
+
+const handleResumeDownload = () => {
+  if (!student.resumeUrl) {
+    alert("No resume is available in the database.");
+    return;
+  }
+
+  const resumeUrl = student.resumeUrl.startsWith("http")
+    ? student.resumeUrl
+    : `http://localhost:5000${student.resumeUrl}`;
+
+  window.open(resumeUrl, "_blank");
+};
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
 
-      {/* ================= HEADER ================= */}
+
+      {/* ================================================= */}
+      {/* HEADER */}
+      {/* ================================================= */}
 
       <Header />
 
       <div className="flex flex-1 overflow-hidden pt-16">
 
-        {/* ================= EXISTING SIDEBAR ================= */}
+        {/* ================================================= */}
+        {/* EXISTING SIDEBAR */}
+        {/* ================================================= */}
 
         <Sidebar activePage="My Profile" />
 
-        {/* ================= MAIN CONTENT ================= */}
+        {/* ================================================= */}
+        {/* MAIN CONTENT */}
+        {/* ================================================= */}
 
         <main className="flex-1 ml-64 overflow-y-auto p-6">
 
-          {/* ================= BREADCRUMB ================= */}
+          {/* ================================================= */}
+          {/* BREADCRUMB */}
+          {/* ================================================= */}
 
           <div className="flex items-center gap-1 text-xs text-gray-400 mb-3">
-
             <span>Dashboard</span>
 
             <ChevronRight size={12} />
@@ -312,15 +622,15 @@ export default function MyProfile() {
             <span className="text-gray-600 font-medium">
               My Profile
             </span>
-
           </div>
 
-          {/* ================= PAGE TITLE ================= */}
+          {/* ================================================= */}
+          {/* PAGE TITLE */}
+          {/* ================================================= */}
 
           <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
 
             <div>
-
               <h1 className="text-2xl font-bold text-gray-800">
                 My Profile
               </h1>
@@ -330,36 +640,43 @@ export default function MyProfile() {
                 information.
               </p>
 
+              {profileLoading && (
+                <p className="text-xs text-blue-500 mt-1">
+                  Loading profile from database...
+                </p>
+              )}
+
+              {profileError && (
+                <p className="text-xs text-red-500 mt-1">
+                  {profileError}
+                </p>
+              )}
             </div>
 
             <div className="flex gap-2">
 
-              {/* EDIT PROFILE BUTTON */}
+              {/* EDIT */}
 
               <button
                 onClick={handleEditProfile}
-                className="flex items-center gap-1.5 text-sm font-medium text-blue-600 border border-blue-200 bg-white px-4 py-2 rounded-md hover:bg-blue-50"
+                disabled={profileLoading}
+                className="flex items-center gap-1.5 text-sm font-medium text-blue-600 border border-blue-200 bg-white px-4 py-2 rounded-md hover:bg-blue-50 disabled:opacity-50"
               >
-
                 <Pencil size={14} />
-
                 Edit Profile
-
               </button>
 
-              {/* DOWNLOAD RESUME */}
-              
+              {/* DOWNLOAD */}
 
               <button
-  onClick={() => alert("Resume download started! 📄")}
-  className="flex items-center gap-1.5 text-sm font-medium text-white bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-700"
->
-  <Download size={14} />
-  Download Resume
-</button>
+                onClick={handleResumeDownload}
+                className="flex items-center gap-1.5 text-sm font-medium text-white bg-blue-600 px-4 py-2 rounded-md hover:bg-blue-700"
+              >
+                <Download size={14} />
+                Download Resume
+              </button>
 
             </div>
-
           </div>
 
           {/* ================================================= */}
@@ -370,13 +687,17 @@ export default function MyProfile() {
 
             <div className="flex items-center gap-5">
 
-              {/* PROFILE IMAGE */}
+              {/* PROFILE PHOTO */}
 
               <div className="relative shrink-0">
 
                 <img
-                  src={MyAvtar}
-                  alt={student.name}
+                  src={
+                    selectedPhoto ||
+                    student.profilePhotoUrl ||
+                    MyAvtar
+                  }
+                  alt={student.name || "Student"}
                   className="w-20 h-20 rounded-full object-cover border-4 border-gray-100"
                 />
 
@@ -384,12 +705,10 @@ export default function MyProfile() {
                   htmlFor="profilePhoto"
                   className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center border-2 border-white cursor-pointer"
                 >
-
                   <Camera
                     size={11}
                     className="text-white"
                   />
-
                 </label>
 
                 <input
@@ -409,12 +728,16 @@ export default function MyProfile() {
                 <div className="flex items-center gap-2">
 
                   <h2 className="text-lg font-bold text-gray-800">
-                    {student.name}
+                    {profileLoading
+                      ? "Loading..."
+                      : displayValue(student.name)}
                   </h2>
 
-                  <span className="text-[10px] font-medium text-green-600 bg-green-50 border border-green-200 rounded px-1.5 py-0.5">
-                    {student.status}
-                  </span>
+                  {student.status && (
+                    <span className="text-[10px] font-medium text-green-600 bg-green-50 border border-green-200 rounded px-1.5 py-0.5">
+                      {student.status}
+                    </span>
+                  )}
 
                 </div>
 
@@ -422,38 +745,36 @@ export default function MyProfile() {
 
                   <span className="flex items-center gap-1.5">
                     <User size={13} />
-                    Roll No: {student.rollNo}
+                    Roll No: {displayValue(student.rollNumber)}
                   </span>
 
                   <span className="flex items-center gap-1.5">
                     <Building2 size={13} />
-                    Department: {student.department}
+                    Department: {displayValue(student.department)}
                   </span>
 
                   <span className="flex items-center gap-1.5">
                     <User size={13} />
-                    Student ID: {student.studentId}
+                    Student ID: {displayValue(student.studentId)}
                   </span>
 
                   <span className="flex items-center gap-1.5">
                     <FileText size={13} />
-                    Semester: {student.semester}
+                    Semester: {displayValue(student.semester)}
                   </span>
 
                   <span className="flex items-center gap-1.5">
                     <Mail size={13} />
-                    Email: {student.email}
+                    Email: {displayValue(student.email)}
                   </span>
 
                   <span className="flex items-center gap-1.5">
                     <Phone size={13} />
-                    Mobile: {student.mobile}
+                    Mobile: {displayValue(student.mobile)}
                   </span>
 
                 </div>
-
               </div>
-
             </div>
 
             {/* PROFILE COMPLETION */}
@@ -501,14 +822,12 @@ export default function MyProfile() {
                   </span>
 
                 </div>
-
               </div>
 
               <ul className="space-y-1.5 text-xs">
 
                 {completionChecklist.map(
                   ({ label, done }) => (
-
                     <li
                       key={label}
                       className="flex items-center gap-1.5"
@@ -537,14 +856,11 @@ export default function MyProfile() {
                       </span>
 
                     </li>
-
                   )
                 )}
 
               </ul>
-
             </div>
-
           </div>
 
           {/* ================================================= */}
@@ -567,11 +883,8 @@ export default function MyProfile() {
                   onClick={handleEditProfile}
                   className="flex items-center gap-1 text-xs text-blue-600 font-medium"
                 >
-
                   <Pencil size={12} />
-
                   Edit
-
                 </button>
 
               </div>
@@ -580,7 +893,6 @@ export default function MyProfile() {
 
                 {personalInfo.map(
                   ({ label, value }) => (
-
                     <li
                       key={label}
                       className="flex justify-between gap-3"
@@ -595,12 +907,10 @@ export default function MyProfile() {
                       </span>
 
                     </li>
-
                   )
                 )}
 
               </ul>
-
             </div>
 
             {/* ACADEMIC INFORMATION */}
@@ -613,12 +923,12 @@ export default function MyProfile() {
                   Academic Information
                 </h3>
 
-                <button className="flex items-center gap-1 text-xs text-blue-600 font-medium">
-
+                <button
+                  onClick={handleEditProfile}
+                  className="flex items-center gap-1 text-xs text-blue-600 font-medium"
+                >
                   <Pencil size={12} />
-
                   Edit
-
                 </button>
 
               </div>
@@ -627,7 +937,6 @@ export default function MyProfile() {
 
                 {academicInfo.map(
                   ({ label, value }) => (
-
                     <li
                       key={label}
                       className="flex justify-between gap-3"
@@ -642,7 +951,6 @@ export default function MyProfile() {
                       </span>
 
                     </li>
-
                   )
                 )}
 
@@ -666,16 +974,15 @@ export default function MyProfile() {
                   </p>
 
                   <p className="text-sm font-bold text-gray-800">
-                    {cgpa}
+                    {profileLoading ? "..." : cgpa}
                   </p>
 
                 </div>
 
               </div>
-
             </div>
 
-            {/* SKILLS */}
+            {/* SKILLS + RESUME */}
 
             <div className="bg-white border border-gray-200 rounded-lg p-4">
 
@@ -689,27 +996,28 @@ export default function MyProfile() {
                   onClick={handleEditProfile}
                   className="flex items-center gap-1 text-xs text-blue-600 font-medium"
                 >
-
                   <Pencil size={12} />
-
                   Edit Skills
-
                 </button>
 
               </div>
 
               <div className="flex flex-wrap gap-2 mb-4">
 
-                {skills.map((skill) => (
-
-                  <span
-                    key={skill}
-                    className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"
-                  >
-                    {skill}
+                {skills.length > 0 ? (
+                  skills.map((skill) => (
+                    <span
+                      key={skill}
+                      className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"
+                    >
+                      {skill}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-xs text-gray-400">
+                    No skills added
                   </span>
-
-                ))}
+                )}
 
               </div>
 
@@ -741,30 +1049,63 @@ export default function MyProfile() {
 
                 </div>
 
-                <button className="text-gray-400 hover:text-blue-600">
-
+                <button
+                  onClick={() => {
+                    if (student.resumeUrl) {
+                      window.open(student.resumeUrl, "_blank");
+                    } else {
+                      alert("No resume uploaded.");
+                    }
+                  }}
+                  className="text-gray-400 hover:text-blue-600"
+                >
                   <Eye size={15} />
-
                 </button>
 
-                <button className="text-gray-400 hover:text-blue-600">
-
+                <button
+                  onClick={handleResumeDownload}
+                  className="text-gray-400 hover:text-blue-600"
+                >
                   <Download size={15} />
-
                 </button>
 
               </div>
 
-              <button className="w-full flex items-center justify-center gap-1.5 text-xs font-medium text-blue-600 border border-blue-100 bg-blue-50 py-2 rounded-md mt-2 hover:bg-blue-100">
+              <div className="mt-3">
+  <label
+    htmlFor="resume-upload"
+    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg cursor-pointer hover:bg-blue-100"
+  >
+    ↻ Replace Resume
+  </label>
 
-                <RefreshCw size={12} />
+  <input
+    id="resume-upload"
+    type="file"
+    accept=".pdf,application/pdf"
+    className="hidden"
+    onChange={(e) => setResumeFile(e.target.files[0])}
+  />
 
-                Replace
+  {resumeFile && (
+    <div className="mt-3">
+      <p className="text-sm text-gray-600 mb-2">
+        Selected: {resumeFile.name}
+      </p>
 
-              </button>
+      <button
+        type="button"
+        onClick={handleResumeUpload}
+        disabled={uploadingResume}
+        className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+      >
+        {uploadingResume ? "Uploading..." : "Upload Resume"}
+      </button>
+    </div>
+  )}
+</div>
 
             </div>
-
           </div>
 
           {/* ================================================= */}
@@ -783,55 +1124,113 @@ export default function MyProfile() {
                   Documents
                 </h3>
 
-                <button className="text-xs text-blue-600 font-medium">
+                <button
+                  onClick={() =>
+                    alert(
+                      "Documents backend connection will be added later."
+                    )
+                  }
+                  className="text-xs text-blue-600 font-medium"
+                >
                   View All
                 </button>
 
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+             <div className="grid grid-cols-2 gap-4">
 
-                {documents.map(
-                  ({ label, sub }) => (
+  {/* Aadhaar Card */}
+  <div className="border rounded-lg p-4 text-center">
+    <div className="text-gray-400 text-2xl mb-3">📄</div>
+    <h3 className="font-medium text-gray-800">Aadhar Card</h3>
 
-                    <div
-                      key={label}
-                      className="border border-gray-100 rounded-md p-2.5 flex flex-col items-center text-center"
-                    >
+    <p className="text-sm text-gray-500 mt-1">
+      {documents.aadhaarCard?.uploaded
+        ? documents.aadhaarCard.fileName
+        : "Not uploaded"}
+    </p>
 
-                      <div className="w-9 h-9 rounded-md bg-blue-50 flex items-center justify-center mb-2">
+    <p className="text-sm text-gray-400 mt-2">
+      ○ {documents.aadhaarCard?.uploaded
+        ? "Available"
+        : "Not available"}
+    </p>
+  </div>
 
-                        <FileText
-                          size={16}
-                          className="text-blue-600"
-                        />
+  {/* College ID */}
+  <div className="border rounded-lg p-4 text-center">
+    <div className="text-gray-400 text-2xl mb-3">📄</div>
+    <h3 className="font-medium text-gray-800">College ID Card</h3>
 
-                      </div>
+    <p className="text-sm text-gray-500 mt-1">
+      {documents.collegeIdCard?.uploaded
+        ? documents.collegeIdCard.fileName
+        : "Not uploaded"}
+    </p>
 
-                      <p className="text-xs font-medium text-gray-700 leading-tight">
-                        {label}
-                      </p>
+    <p className="text-sm text-gray-400 mt-2">
+      ○ {documents.collegeIdCard?.uploaded
+        ? "Available"
+        : "Not available"}
+    </p>
+  </div>
 
-                      <p className="text-[10px] text-gray-400 truncate w-full">
-                        {sub}
-                      </p>
+  {/* Bonafide */}
+  <div className="border rounded-lg p-4 text-center">
+    <div className="text-gray-400 text-2xl mb-3">📄</div>
+    <h3 className="font-medium text-gray-800">Bonafide Certificate</h3>
 
-                      <span className="flex items-center gap-1 text-[10px] text-green-600 font-medium mt-1">
+    <p className="text-sm text-gray-500 mt-1">
+      {documents.bonafideCertificate?.uploaded
+        ? documents.bonafideCertificate.fileName
+        : "Not uploaded"}
+    </p>
 
-                        <CheckCircle2 size={11} />
+    <p className="text-sm text-gray-400 mt-2">
+      ○ {documents.bonafideCertificate?.uploaded
+        ? "Available"
+        : "Not available"}
+    </p>
+  </div>
 
-                        Verified
+  {/* 10th Marksheet */}
+  <div className="border rounded-lg p-4 text-center">
+    <div className="text-gray-400 text-2xl mb-3">📄</div>
+    <h3 className="font-medium text-gray-800">10th Marksheet</h3>
 
-                      </span>
+    <p className="text-sm text-gray-500 mt-1">
+      {documents.tenthMarksheet?.uploaded
+        ? documents.tenthMarksheet.fileName
+        : "Not uploaded"}
+    </p>
 
-                    </div>
+    <p className="text-sm text-gray-400 mt-2">
+      ○ {documents.tenthMarksheet?.uploaded
+        ? "Available"
+        : "Not available"}
+    </p>
+  </div>
 
-                  )
-                )}
+  {/* 12th Marksheet */}
+  <div className="border rounded-lg p-4 text-center">
+    <div className="text-gray-400 text-2xl mb-3">📄</div>
+    <h3 className="font-medium text-gray-800">12th Marksheet</h3>
 
-              </div>
+    <p className="text-sm text-gray-500 mt-1">
+      {documents.twelfthMarksheet?.uploaded
+        ? documents.twelfthMarksheet.fileName
+        : "Not uploaded"}
+    </p>
 
-            </div>
+    <p className="text-sm text-gray-400 mt-2">
+      ○ {documents.twelfthMarksheet?.uploaded
+        ? "Available"
+        : "Not available"}
+    </p>
+  </div>
+</div>   {/* <-- ADD THIS LINE — closes the Documents card itself */}
+
+</div>
 
             {/* OJT INFORMATION */}
 
@@ -843,7 +1242,14 @@ export default function MyProfile() {
                   OJT Information
                 </h3>
 
-                <button className="text-xs text-blue-600 font-medium">
+                <button
+                  onClick={() =>
+                    alert(
+                      "OJT details will be connected to the OJT backend later."
+                    )
+                  }
+                  className="text-xs text-blue-600 font-medium"
+                >
                   View Details
                 </button>
 
@@ -851,12 +1257,11 @@ export default function MyProfile() {
 
               <div className="flex items-center gap-3 mb-3">
 
-                <div className="w-10 h-10 rounded-md border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+                <div className="w-10 h-10 rounded-md border border-gray-100 flex items-center justify-center shrink-0 bg-gray-50">
 
-                  <img
-                    src={tcsLogo}
-                    alt="Company"
-                    className="w-full h-full object-contain"
+                  <Building2
+                    size={18}
+                    className="text-gray-400"
                   />
 
                 </div>
@@ -929,7 +1334,7 @@ export default function MyProfile() {
 
                   <span className="font-medium text-gray-700">
                     {ojtInfo.hoursCompleted} /{" "}
-                    {ojtInfo.hoursTotal} ({hoursPercent}%)
+                    {ojtInfo.hoursTotal}
                   </span>
 
                 </div>
@@ -956,7 +1361,9 @@ export default function MyProfile() {
                   </span>
 
                   <span className="font-medium text-gray-700">
-                    {ojtInfo.attendance}%
+                    {ojtInfo.attendance > 0
+                      ? `${ojtInfo.attendance}%`
+                      : "Not set"}
                   </span>
 
                 </div>
@@ -973,7 +1380,6 @@ export default function MyProfile() {
                 </div>
 
               </div>
-
             </div>
 
             {/* SOCIAL LINKS */}
@@ -986,12 +1392,12 @@ export default function MyProfile() {
                   Social &amp; Professional Links
                 </h3>
 
-                <button className="flex items-center gap-1 text-xs text-blue-600 font-medium">
-
+                <button
+                  onClick={handleEditProfile}
+                  className="flex items-center gap-1 text-xs text-blue-600 font-medium"
+                >
                   <Pencil size={12} />
-
                   Edit
-
                 </button>
 
               </div>
@@ -1027,20 +1433,19 @@ export default function MyProfile() {
 
                       </div>
 
-                      <ExternalLink
-                        size={13}
-                        className="text-gray-300 shrink-0"
-                      />
+                      {value !== "Not set" && (
+                        <ExternalLink
+                          size={13}
+                          className="text-gray-300 shrink-0"
+                        />
+                      )}
 
                     </li>
-
                   )
                 )}
 
               </ul>
-
             </div>
-
           </div>
 
           {/* ================================================= */}
@@ -1158,9 +1563,7 @@ export default function MyProfile() {
             </button>
 
           </div>
-
         </main>
-
       </div>
 
       {/* ===================================================== */}
@@ -1171,7 +1574,7 @@ export default function MyProfile() {
 
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
 
-          <div className="bg-white w-full max-w-2xl rounded-xl shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white w-full max-w-3xl rounded-xl shadow-xl max-h-[90vh] overflow-y-auto">
 
             {/* MODAL HEADER */}
 
@@ -1184,7 +1587,7 @@ export default function MyProfile() {
                 </h2>
 
                 <p className="text-xs text-gray-400 mt-1">
-                  Update your personal and professional information.
+                  Update your information and save it to the database.
                 </p>
 
               </div>
@@ -1193,9 +1596,7 @@ export default function MyProfile() {
                 onClick={handleCancelEdit}
                 className="w-8 h-8 flex items-center justify-center rounded-md text-gray-400 hover:bg-gray-100"
               >
-
                 <X size={18} />
-
               </button>
 
             </div>
@@ -1210,22 +1611,19 @@ export default function MyProfile() {
 
                 <div className="relative">
 
-                  <img
-                    src={MyAvtar}
-                    alt="Profile"
-                    className="w-20 h-20 rounded-full object-cover border-4 border-gray-100"
-                  />
-
+              <img
+  src={selectedPhoto || student.profilePhotoUrl || MyAvtar}
+  alt="Profile"
+  className="w-20 h-20 rounded-full object-cover border-4 border-gray-100"
+/>
                   <label
                     htmlFor="editPhoto"
                     className="absolute bottom-0 right-0 w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center cursor-pointer border-2 border-white"
                   >
-
                     <Camera
                       size={13}
                       className="text-white"
                     />
-
                   </label>
 
                   <input
@@ -1258,138 +1656,179 @@ export default function MyProfile() {
 
                 {/* FULL NAME */}
 
-                <div>
+                <FormInput
+                  label="Full Name"
+                  name="name"
+                  value={editForm.name}
+                  onChange={handleChange}
+                  icon={User}
+                />
 
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Full Name
-                  </label>
+                {/* ROLL NUMBER */}
 
-                  <div className="relative">
-
-                    <User
-                      size={15}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    />
-
-                    <input
-                      type="text"
-                      name="name"
-                      value={editForm.name}
-                      onChange={handleChange}
-                      className="w-full border border-gray-200 rounded-md py-2.5 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-
-                  </div>
-
-                </div>
-
-                {/* ENROLLMENT / ROLL NUMBER */}
-
-                <div>
-
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Enrollment / Roll Number
-                  </label>
-
-                  <input
-                    type="text"
-                    name="rollNo"
-                    value={editForm.rollNo}
-                    onChange={handleChange}
-                    className="w-full border border-gray-200 rounded-md py-2.5 px-3 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                  />
-
-                </div>
+                <FormInput
+                  label="Enrollment / Roll Number"
+                  name="rollNumber"
+                  value={editForm.rollNumber}
+                  onChange={handleChange}
+                />
 
                 {/* EMAIL */}
 
-                <div>
+                <FormInput
+                  label="Email Address"
+                  name="email"
+                  value={editForm.email}
+                  onChange={handleChange}
+                  icon={Mail}
+                  disabled
+                />
 
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Email Address
-                  </label>
+                {/* MOBILE */}
 
-                  <div className="relative">
-
-                    <Mail
-                      size={15}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    />
-
-                    <input
-                      type="email"
-                      name="email"
-                      value={editForm.email}
-                      onChange={handleChange}
-                      className="w-full border border-gray-200 rounded-md py-2.5 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-
-                  </div>
-
-                </div>
-
-                {/* PHONE */}
-
-                <div>
-
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Phone Number
-                  </label>
-
-                  <div className="relative">
-
-                    <Phone
-                      size={15}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                    />
-
-                    <input
-                      type="text"
-                      name="mobile"
-                      value={editForm.mobile}
-                      onChange={handleChange}
-                      className="w-full border border-gray-200 rounded-md py-2.5 pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                    />
-
-                  </div>
-
-                </div>
+                <FormInput
+                  label="Phone Number"
+                  name="mobile"
+                  value={editForm.mobile}
+                  onChange={handleChange}
+                  icon={Phone}
+                />
 
                 {/* DEPARTMENT */}
 
-                <div>
+                <FormInput
+                  label="Department"
+                  name="department"
+                  value={editForm.department}
+                  onChange={handleChange}
+                />
 
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Department
-                  </label>
+                {/* SEMESTER */}
 
-                  <input
-                    type="text"
-                    name="department"
-                    value={editForm.department}
-                    onChange={handleChange}
-                    className="w-full border border-gray-200 rounded-md py-2.5 px-3 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                  />
+                <FormInput
+                  label="Semester"
+                  name="semester"
+                  value={editForm.semester}
+                  onChange={handleChange}
+                />
 
-                </div>
+                {/* COLLEGE */}
 
-                {/* ROLE */}
+                <FormInput
+                  label="College"
+                  name="college"
+                  value={editForm.college}
+                  onChange={handleChange}
+                />
 
-                <div>
+                {/* COURSE */}
 
-                  <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                    Role
-                  </label>
+                <FormInput
+                  label="Course"
+                  name="course"
+                  value={editForm.course}
+                  onChange={handleChange}
+                />
 
-                  <input
-                    type="text"
-                    name="role"
-                    value={editForm.role}
-                    onChange={handleChange}
-                    className="w-full border border-gray-200 rounded-md py-2.5 px-3 text-sm outline-none focus:ring-2 focus:ring-blue-400"
-                  />
+                {/* ACADEMIC YEAR */}
 
-                </div>
+                <FormInput
+                  label="Academic Year"
+                  name="academicYear"
+                  value={editForm.academicYear}
+                  onChange={handleChange}
+                />
+
+                {/* ADMISSION YEAR */}
+
+                <FormInput
+                  label="Admission Year"
+                  name="admissionYear"
+                  value={editForm.admissionYear}
+                  onChange={handleChange}
+                />
+
+                {/* UNIVERSITY REGISTRATION */}
+
+                <FormInput
+                  label="University Registration No."
+                  name="universityRegNo"
+                  value={editForm.universityRegNo}
+                  onChange={handleChange}
+                />
+
+                {/* CGPA */}
+
+                <FormInput
+                  label="CGPA"
+                  name="cgpa"
+                  type="number"
+                  value={editForm.cgpa}
+                  onChange={handleChange}
+                />
+
+                {/* GENDER */}
+
+                <FormInput
+                  label="Gender"
+                  name="gender"
+                  value={editForm.gender}
+                  onChange={handleChange}
+                />
+
+                {/* DOB */}
+
+                <FormInput
+                  label="Date of Birth"
+                  name="dateOfBirth"
+                  value={editForm.dateOfBirth}
+                  onChange={handleChange}
+                />
+
+                {/* CITY */}
+
+                <FormInput
+                  label="City"
+                  name="city"
+                  value={editForm.city}
+                  onChange={handleChange}
+                />
+
+                {/* STATE */}
+
+                <FormInput
+                  label="State"
+                  name="state"
+                  value={editForm.state}
+                  onChange={handleChange}
+                />
+
+                {/* PIN */}
+
+                <FormInput
+                  label="PIN Code"
+                  name="pinCode"
+                  value={editForm.pinCode}
+                  onChange={handleChange}
+                />
+
+                {/* BLOOD GROUP */}
+
+                <FormInput
+                  label="Blood Group"
+                  name="bloodGroup"
+                  value={editForm.bloodGroup}
+                  onChange={handleChange}
+                />
+
+                {/* EMERGENCY */}
+
+                <FormInput
+                  label="Emergency Contact"
+                  name="emergencyContact"
+                  value={editForm.emergencyContact}
+                  onChange={handleChange}
+                />
 
                 {/* ADDRESS */}
 
@@ -1415,7 +1854,6 @@ export default function MyProfile() {
                     />
 
                   </div>
-
                 </div>
 
                 {/* SKILLS */}
@@ -1436,13 +1874,42 @@ export default function MyProfile() {
                   />
 
                   <p className="text-[10px] text-gray-400 mt-1">
-                    Example: JavaScript, React, Python, SQL
+                    Example: JavaScript, Python, SQL, Java
                   </p>
 
                 </div>
 
-              </div>
+                {/* LINKEDIN */}
 
+                <FormInput
+                  label="LinkedIn"
+                  name="linkedIn"
+                  value={editForm.linkedIn}
+                  onChange={handleChange}
+                  icon={FaLinkedin}
+                />
+
+                {/* GITHUB */}
+
+                <FormInput
+                  label="GitHub"
+                  name="github"
+                  value={editForm.github}
+                  onChange={handleChange}
+                  icon={FaGithub}
+                />
+
+                {/* PORTFOLIO */}
+
+                <FormInput
+                  label="Portfolio"
+                  name="portfolio"
+                  value={editForm.portfolio}
+                  onChange={handleChange}
+                  icon={Globe}
+                />
+
+              </div>
             </div>
 
             {/* MODAL FOOTER */}
@@ -1451,34 +1918,77 @@ export default function MyProfile() {
 
               <button
                 onClick={handleCancelEdit}
-                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-100"
+                disabled={isSaving}
+                className="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-md hover:bg-gray-100 disabled:opacity-50"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleSaveProfile}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                disabled={isSaving}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
               >
 
                 <Save size={14} />
 
-                Save Changes
+                {isSaving ? "Saving..." : "Save Changes"}
 
               </button>
 
             </div>
-
           </div>
-
         </div>
-
       )}
-
     </div>
   );
 }
 
+// =========================================================
+// FORM INPUT COMPONENT
+// =========================================================
+
+function FormInput({
+  label,
+  name,
+  value,
+  onChange,
+  icon: Icon,
+  type = "text",
+  disabled = false,
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-medium text-gray-600 mb-1.5">
+        {label}
+      </label>
+
+      <div className="relative">
+
+        {Icon && (
+          <Icon
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+        )}
+
+        <input
+          type={type}
+          name={name}
+          value={value ?? ""}
+          onChange={onChange}
+          disabled={disabled}
+          className={`w-full border border-gray-200 rounded-md py-2.5 ${
+            Icon ? "pl-9" : "px-3"
+          } pr-3 text-sm outline-none focus:ring-2 focus:ring-blue-400 ${
+            disabled ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+          }`}
+        />
+
+      </div>
+    </div>
+  );
+}
 
 // =========================================================
 // SMALL TOGGLE COMPONENT
@@ -1491,9 +2001,7 @@ function SettingToggle({
   checked,
   onToggle,
 }) {
-
   return (
-
     <div className="flex items-center gap-3 py-3 lg:px-4">
 
       <div className="w-8 h-8 rounded-md bg-blue-50 flex items-center justify-center shrink-0">
@@ -1527,12 +2035,9 @@ function SettingToggle({
             : "bg-gray-200 justify-start"
         }`}
       >
-
         <span className="w-4 h-4 rounded-full bg-white block" />
-
       </button>
 
     </div>
-
   );
 }
