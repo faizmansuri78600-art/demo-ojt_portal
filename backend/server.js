@@ -1,6 +1,7 @@
 const dns=require("dns");
 dns.setServers(["8.8.8.8","1.1.1.1"]);
 const express = require("express");
+const taskRoutes = require("./routes/taskRoutes");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
@@ -28,6 +29,9 @@ const app = express();
 app.use(cors());
 
 app.use(express.json());
+
+// resume uploads
+app.use("/uploads", express.static("uploads"));
 
 app.use(
   express.urlencoded({
@@ -68,8 +72,10 @@ app.use(
   applicationRoutes
 );
 
+// ======================================
+// Announcement Routes
+// ======================================
 
-// Announcement routes
 const announcementRoutes =
   require("./routes/announcementRoutes");
 
@@ -78,8 +84,10 @@ app.use(
   announcementRoutes
 );
 
+// ======================================
+// Company Routes
+// ======================================
 
-// Company routes
 const companyRoutes =
   require("./routes/companyRoutes");
 
@@ -88,8 +96,10 @@ app.use(
   companyRoutes
 );
 
+// ======================================
+// Opportunity Routes
+// ======================================
 
-// Opportunity routes
 const opportunityRoutes =
   require("./routes/opportunityRoutes");
 
@@ -98,14 +108,25 @@ app.use(
   opportunityRoutes
 );
 
+// ======================================
+// Student Routes
+// ======================================
 
-// Student routes
 const studentRoutes =
   require("./routes/studentRoutes");
 
 app.use(
   "/api/students",
   studentRoutes
+);
+
+// ======================================
+// Task routes
+// ======================================
+
+app.use(
+  "/api/tasks",
+  taskRoutes
 );
 
 
@@ -121,6 +142,9 @@ app.use(
   attendanceRoutes
 );
 
+// ======================================
+// Weekly Report Routes
+// ======================================
 
 const weeklyReportRoutes =
   require("./routes/weeklyReportRoutes");

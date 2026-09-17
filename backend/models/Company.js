@@ -14,7 +14,32 @@ const companySchema = new mongoose.Schema(
     companyName: {
       type: String,
       required: true,
+      trim: true,
     },
+
+    yearOfEstablishment: {
+      type: String,
+    },
+
+    registrationNumber: {
+      type: String,
+    },
+
+    companySize: {
+      type: String,
+    },
+
+    industry: {
+      type: String,
+    },
+
+    headOffice: {
+      type: String,
+    },
+    logoUrl: {
+  type: String,
+  default: "",
+},
 
     street: {
       type: String,
@@ -32,11 +57,39 @@ const companySchema = new mongoose.Schema(
       type: String,
     },
 
+    country: {
+      type: String,
+    },
+
     website: {
       type: String,
     },
 
+    contactPerson: {
+      type: String,
+    },
+
+    alternateEmail: {
+      type: String,
+    },
+
+    email: {
+      type: String,
+    },
+
+    mobileNumber: {
+      type: String,
+    },
+
+    phoneNumber: {
+      type: String,
+    },
+
     description: {
+      type: String,
+    },
+
+    logoUrl: {
       type: String,
     },
 

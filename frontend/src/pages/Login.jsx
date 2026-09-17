@@ -962,6 +962,8 @@ function Login() {
 
   // ============================================================
   // ROLE BASED REDIRECT
+  // Backend provides the user's role.
+  // No role is selected on the public login page.
   // ============================================================
 
   function redirectUser(role) {
@@ -978,6 +980,7 @@ function Login() {
 
       case "collegecoordinator":
         navigate("/college-coordinator/dashboard");
+        navigate("/coordinator/dashboard");
         break;
 
       case "companycoordinator":
@@ -1016,6 +1019,21 @@ function Login() {
 
       if (response.data.success) {
         // ------------------------------------------------------
+        // Get role from backend
+        // ------------------------------------------------------
+
+        const userRole = response.data.user.role;
+
+        // ------------------------------------------------------
+        // Administrator must use Admin Login page
+        // ------------------------------------------------------
+
+        if (userRole.toLowerCase() === "administrator") {
+          setError("Administrators must use the Admin Login page.");
+          return;
+        }
+
+        // ------------------------------------------------------
         // Save JWT token
         // ------------------------------------------------------
 
@@ -1034,7 +1052,7 @@ function Login() {
         // Redirect according to backend role
         // ------------------------------------------------------
 
-        redirectUser(response.data.user.role);
+        redirectUser(userRole);
       } else {
         setError(
           response.data.message || "Login failed. Please try again."
@@ -1115,10 +1133,10 @@ function Login() {
 
               </h1>
 
-              <p className="mt-6 max-w-lg text-sm leading-7 text-gray-600">
+              {/* <p className="mt-6 max-w-lg text-sm leading-7 text-gray-600">
                 Access your personalized dashboard, manage opportunities,
                 track progress and stay updated with the OJT activities.
-              </p>
+              </p> */}
 
             </div>
 
@@ -1258,9 +1276,23 @@ function Login() {
                   LOGIN FORM
               ===================================================== */}
 
+              {/* =================================================
+                  ERROR MESSAGE
+              ================================================= */}
+
+              {error && (
+                <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+
+              {/* =================================================
+                  LOGIN FORM
+              ================================================= */}
+
               <form
                 onSubmit={handleSubmit}
-                className="mt-8 space-y-5"
+                className="mt-10 space-y-5"
               >
 
                 {/* Email */}

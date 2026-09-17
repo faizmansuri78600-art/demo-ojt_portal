@@ -1,5 +1,12 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
+import ProtectedRoute from "./ProtectedRoute";
+
+import AdminLogin from "../pages/AdminLogin";
+
+
+// ================= PUBLIC =================
+import PublicLayout from "../layouts/PublicLayout";
 import Home from "../pages/Home";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
@@ -31,6 +38,7 @@ import Settings from "../pages/admin/Settings";
 
 // student
 import AssignedOJT from "../pages/Student/AssignedOJT";
+// ================= STUDENT =================
 import Attendance from "../pages/Student/Attendance";
 import MarkAttendance from "../pages/Student/MarkAttendance"; // ADDED
 import Certificates from "../pages/Student/Certificates";
@@ -45,6 +53,7 @@ import SSettings from "../pages/Student/Settings";
 
 // Faculty
 
+// ================= FACULTY =================
 import FacultyDashboard from "../pages/faculty/FacultyDashboard";
 import AssignedStudents from "../pages/faculty/AssignedStudents";
 import StudentDetails from "../pages/faculty/StudentDetails";
@@ -56,6 +65,11 @@ import Evaluation from "../pages/faculty/Evaluation";
 // COORDINATOR
 // ============================================================
 
+import Evaluationfaculty from "../pages/faculty/Evaluation";
+import Notifications from "../pages/faculty/Notifications";
+import Reminders from "../pages/faculty/Reminders";
+
+// ================= COLLEGE COORDINATOR =================
 import CoordinatorLayout from "../layouts/CoordinatorLayout";
 import CoordinatorDashboard from "../pages/collegeCoordinator/CoordinatorDashboard";
 import StudentManagement from "../pages/collegeCoordinator/StudentManagement";
@@ -65,9 +79,6 @@ import OJTTracking from "../pages/collegeCoordinator/OJTTracking";
 import Announcements from "../pages/collegeCoordinator/Announcements";
 import OJTReports from "../pages/collegeCoordinator/OJTReports";
 
-// ============================================================
-// APP ROUTES
-// ============================================================
 
 function AppRoutes() {
   return (
@@ -157,49 +168,215 @@ function AppRoutes() {
       {/* ======================================================
           ADMIN ROUTES
       ======================================================= */}
+      {/* =====================================================
+          PUBLIC ROUTES
+      ====================================================== */}
+
+      <Route element={<PublicLayout />}>
+
+        <Route path="/" element={<Home />} />
+
+        <Route path="/login" element={<Login />} />
+
+        <Route path="/register" element={<Register />} />
+
+        <Route path="/about" element={<About />} />
+
+        <Route path="/contact" element={<Contact />} />
+
+      </Route>
+
+
+      {/* =====================================================
+          ADMIN LOGIN
+          Public
+      ====================================================== */}
 
       <Route
-        path="/admin"
-        element={<AdminLayout />}
+        path="/admin/login"
+        element={<AdminLogin />}
+      />
+
+
+      {/* =====================================================
+          ADMIN ROUTES
+          Protected: Administrator only
+      ====================================================== */}
+
+      <Route
+        element={
+          <ProtectedRoute allowedRole="Administrator" />
+        }
       >
         {/* /admin → /admin/dashboard */}
+
         <Route
-          index
-          element={
-            <Navigate
-              to="dashboard"
-              replace
-            />
-          }
+          path="/admin"
+          element={<AdminLayout />}
+        >
+
+          <Route
+            index
+            element={
+              <Navigate
+                to="/admin/dashboard"
+                replace
+              />
+            }
+          />
+
+          <Route
+            path="dashboard"
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="users"
+            element={<ManageUsers />}
+          />
+
+          <Route
+            path="analytics"
+            element={<Analytics />}
+          />
+
+          <Route
+            path="settings"
+            element={<Settings />}
+          />
+
+        </Route>
+
+      </Route>
+
+
+      {/* =====================================================
+          FACULTY ROUTES
+          Protected: Faculty only
+      ====================================================== */}
+
+      <Route
+        element={
+          <ProtectedRoute allowedRole="Faculty" />
+        }
+      >
+
+        <Route
+          path="/faculty"
+          element={<FacultyDashboard />}
         />
 
         {/* Dashboard */}
         <Route
-          path="dashboard"
-          element={<Dashboard />}
+          path="/faculty/dashboard"
+          element={<FacultyDashboard />}
         />
 
         {/* Manage Users */}
         <Route
-          path="users"
-          element={<ManageUsers />}
+          path="/faculty/AssignedStudents"
+          element={<AssignedStudents />}
         />
 
         {/* Analytics */}
+        {/* Student Details - without ID */}
+<Route
+  path="/faculty/StudentDetails"
+  element={<StudentDetails />}
+/>
+
+{/* Student Details - with Student ID */}
+<Route
+  path="/faculty/StudentDetails/:studentId"
+  element={<StudentDetails />}
+/>
+
         <Route
-          path="analytics"
-          element={<Analytics />}
+          path="/faculty/ReviewReports"
+          element={<ReviewReports />}
         />
 
         {/* Settings */}
         <Route
-          path="settings"
-          element={<Settings />}
+          path="/faculty/ApproveDiary"
+          element={<ApproveDiary />}
+        />
+
+        <Route
+          path="/faculty/Evaluation"
+          element={<Evaluationfaculty />}
+        />
+
+<Route
+  path="/faculty/Notifications"
+  element={<Notifications />}
+/>
+<Route
+  path="/faculty/Reminders"
+  element={<Reminders />}
+/>
+      </Route>
+
+
+      {/* =====================================================
+          COMPANY COORDINATOR ROUTES
+          Protected: Company Coordinator only
+      ====================================================== */}
+
+      <Route
+        element={
+          <ProtectedRoute allowedRole="CompanyCoordinator" />
+        }
+      >
+
+        <Route
+          path="/company"
+          element={<CompanyDashboard />}
+        />
+
+        <Route
+          path="/company-coordinator/dashboard"
+          element={<CompanyDashboard />}
+        />
+
+        <Route
+          path="/company/CompanyDashboard"
+          element={<CompanyDashboard />}
+        />
+
+        <Route
+          path="/company/company-profile"
+          element={<CompanyProfile />}
+        />
+
+        <Route
+          path="/company/manage-ojt-opportunities"
+          element={<ManageOjtOpportunities />}
+        />
+
+        <Route
+          path="/company/certificate"
+          element={<Certificate />}
+        />
+
+        <Route
+          path="/company/notifications-settings"
+          element={<NotificationsSettings />}
+        />
+
+        <Route
+          path="/company/evaluation"
+          element={<Evaluation />}
+        />
+
+        <Route
+          path="/company/applications-students"
+          element={<Applications />}
         />
       </Route>
 
 
-      {/* ======================================================
+      {/* =====================================================
           STUDENT ROUTES
       ======================================================= */}
 
@@ -266,65 +443,215 @@ function AppRoutes() {
       >
 
         {/* /coordinator → /coordinator/dashboard */}
+          Protected: Student only
+      ====================================================== */}
+
+      <Route
+        element={
+          <ProtectedRoute allowedRole="Student" />
+        }
+      >
+
         <Route
-          index
-          element={
-            <Navigate
-              to="dashboard"
-              replace
-            />
-          }
+          path="/student"
+          element={<StudentDashboard />}
         />
 
         {/* Coordinator Dashboard */}
         <Route
-          path="dashboard"
-          element={<CoordinatorDashboard />}
+          path="/student/dashboard"
+          element={<StudentDashboard />}
         />
 
         {/* Student Management */}
         <Route
-          path="students"
-          element={<StudentManagement />}
+          path="/student/browse-ojt"
+          element={<BrowseOJT />}
         />
 
         {/* Company Management */}
         <Route
-          path="companies"
-          element={<CompanyManagement />}
+          path="/student/profile"
+          element={<MyProfile />}
         />
 
         {/* Mentor Assignment */}
         <Route
-          path="mentors"
-          element={<MentorAssignment />}
+          path="/student/weekly-diary"
+          element={<WeeklyDiary />}
         />
 
         {/* OJT Tracking */}
         <Route
-          path="tracking"
-          element={<OJTTracking />}
+          path="/student/Myapplication"
+          element={<MyApplication />}
         />
 
         {/* Announcements */}
         <Route
-          path="announcements"
-          element={<Announcements />}
+          path="/student/Reports"
+          element={<Reports />}
         />
 
         {/* OJT Reports */}
         <Route
-          path="reports"
-          element={<OJTReports />}
+          path="/student/Feedback"
+          element={<Feedback />}
+        />
+
+        <Route
+          path="/student/Settings"
+          element={<SSettings />}
+        />
+
+        <Route
+          path="/student/attendance"
+          element={<Attendance />}
+        />
+
+        <Route
+          path="/student/attendance/mark"
+          element={<MarkAttendance />}
+        />
+
+        <Route
+          path="/student/certificates"
+          element={<Certificates />}
+        />
+
+        <Route
+          path="/certificates"
+          element={<Certificates />}
         />
 
 
       </Route>
 
 
-      {/* ======================================================
-          FALLBACK ROUTE
-      ======================================================= */}
+      {/* =====================================================
+          COLLEGE COORDINATOR ROUTES
+          Protected: College Coordinator only
+      ====================================================== */}
+
+      <Route
+        element={
+          <ProtectedRoute allowedRole="CollegeCoordinator" />
+        }
+      >
+
+        <Route
+          path="/coordinator"
+          element={<CoordinatorLayout />}
+        >
+
+          <Route
+            index
+            element={
+              <Navigate
+                to="dashboard"
+                replace
+              />
+            }
+          />
+
+          <Route
+            path="dashboard"
+            element={<CoordinatorDashboard />}
+          />
+
+          <Route
+            path="students"
+            element={<StudentManagement />}
+          />
+
+          <Route
+            path="companies"
+            element={<CompanyManagement />}
+          />
+
+          <Route
+            path="mentors"
+            element={<MentorAssignment />}
+          />
+
+          <Route
+            path="tracking"
+            element={<OJTTracking />}
+          />
+
+          <Route
+            path="announcements"
+            element={<Announcements />}
+          />
+
+          <Route
+            path="reports"
+            element={<OJTReports />}
+          />
+
+        </Route>
+
+
+        {/* Alternative coordinator URL */}
+
+        <Route
+          path="/college-coordinator"
+          element={<CoordinatorLayout />}
+        >
+
+          <Route
+            index
+            element={
+              <Navigate
+                to="dashboard"
+                replace
+              />
+            }
+          />
+
+          <Route
+            path="dashboard"
+            element={<CoordinatorDashboard />}
+          />
+
+          <Route
+            path="students"
+            element={<StudentManagement />}
+          />
+
+          <Route
+            path="companies"
+            element={<CompanyManagement />}
+          />
+
+          <Route
+            path="mentors"
+            element={<MentorAssignment />}
+          />
+
+          <Route
+            path="tracking"
+            element={<OJTTracking />}
+          />
+
+          <Route
+            path="announcements"
+            element={<Announcements />}
+          />
+
+          <Route
+            path="reports"
+            element={<OJTReports />}
+          />
+
+        </Route>
+
+      </Route>
+
+
+      {/* =====================================================
+          FALLBACK
+      ====================================================== */}
 
       <Route
         path="*"

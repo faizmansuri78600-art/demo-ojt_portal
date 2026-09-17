@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Icon, EyeIcon, DotsIcon } from "./facultyIcons";
 import StatusBadge from "./StatusBadge";
 
@@ -9,24 +9,60 @@ const tabs = [
   { id: "drafts", label: "Drafts" },
 ];
 
-const ReportsTable = ({ reports, onView, selectedReportId, totalCount = 18 }) => {
+const ReportsTable = ({
+  reports,
+  onView,
+  onReview,
+  selectedReportId,
+  totalCount,
+  selectedFilter,
+}) => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  useEffect(() => {
+    const filterToTab = {
+      "All Reports": "all",
+      "Weekly Diaries": "diary",
+      "Returned": "returned",
+      "Drafts": "drafts",
+    };
+
+    if (selectedFilter && filterToTab[selectedFilter]) {
+      setActiveTab(filterToTab[selectedFilter]);
+    }
+  }, [selectedFilter]);
 
   const filteredReports = useMemo(() => {
-    return reports.filter((report) => {
-      const matchesSearch = report.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesTab =
-        activeTab === "all"
-          ? true
-          : activeTab === "diary"
-          ? report.reportType === "Weekly Diary"
-          : activeTab === "returned"
-          ? report.status === "Returned"
-          : false; // "drafts" — no dummy data for this tab yet
-      return matchesSearch && matchesTab;
-    });
-  }, [reports, searchTerm, activeTab]);
+  return (reports || []).filter((report) => {
+    const matchesSearch = (report.name || "")
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    let matchesTab = true;
+
+    if (activeTab === "all") {
+      matchesTab = true;
+    }
+
+    if (activeTab === "diary") {
+      matchesTab = report.reportType === "Weekly Diary";
+    }
+
+    if (activeTab === "returned") {
+      matchesTab =
+        report.status === "Returned" ||
+        report.status === "Revision Requested";
+    }
+
+    if (activeTab === "drafts") {
+      matchesTab = report.status === "Draft";
+    }
+
+    return matchesSearch && matchesTab;
+  });
+}, [reports, searchTerm, activeTab]);
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -113,19 +149,57 @@ const ReportsTable = ({ reports, onView, selectedReportId, totalCount = 18 }) =>
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => onView(report)}
-                      className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50"
-                      aria-label={`View report from ${report.name}`}
-                    >
-                      <EyeIcon />
-                    </button>
-                    <button
-                      className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50"
-                      aria-label="More actions"
-                    >
-                      <DotsIcon />
-                    </button>
+<button
+  type="button"
+  onClick={() => {
+    console.log("VIEW CLICKED:", report);
+    onView(report);
+  }}
+  className="relative z-50 w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 cursor-pointer"
+  aria-label={`View report from ${report.name}`}
+>
+  <EyeIcon className="w-4 h-4 pointer-events-none" />
+</button>
+                    <div className="relative">
+  <button
+    type="button"
+    onClick={() =>
+      setOpenMenuId(
+        openMenuId === report.id ? null : report.id
+      )
+    }
+    className="w-8 h-8 rounded-lg border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50"
+    aria-label="More actions"
+  >
+    <DotsIcon />
+  </button>
+
+  {openMenuId === report.id && (
+    <div className="absolute right-0 top-9 z-50 w-36 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+      <button
+        type="button"
+        onClick={() => {
+          onView(report);
+          setOpenMenuId(null);
+        }}
+        className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+      >
+        View Report
+      </button>
+
+      <button
+  type="button"
+  onClick={() => {
+    onReview(report);
+    setOpenMenuId(null);
+  }}
+  className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+>
+  Review Report
+</button>
+    </div>
+  )}
+</div>
                   </div>
                 </td>
               </tr>

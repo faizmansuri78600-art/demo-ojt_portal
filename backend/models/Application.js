@@ -13,7 +13,14 @@ const applicationSchema = new mongoose.Schema(
     appliedOn: { type: String },
     reviewedOn: { type: String },
   },
-  { collection: "application" }
+  {
+    collection: "application",
+  }
 );
 
-module.exports = mongoose.model("Application", applicationSchema);
+const Application = mongoose.model(
+  "Application",
+  applicationSchema
+);
+
+module.exports = Application;

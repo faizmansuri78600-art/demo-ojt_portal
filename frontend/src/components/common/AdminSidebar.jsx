@@ -1,5 +1,6 @@
+
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import {
   FaHome,
@@ -10,12 +11,22 @@ import {
 } from "react-icons/fa";
 
 function AdminSidebar() {
+  const navigate = useNavigate();
+
   const menuStyle = ({ isActive }) =>
     `flex items-center gap-4 px-4 py-3 rounded-lg mb-2 transition ${
       isActive
         ? "bg-blue-600 text-white"
         : "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
     }`;
+
+  // Logout function
+function handleLogout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+
+  navigate("/login", { replace: true });
+}
 
   return (
     <aside className="w-64 min-h-screen bg-white border-r border-gray-200 fixed left-0 top-0">
@@ -73,7 +84,10 @@ function AdminSidebar() {
       {/* Logout */}
       <div className="absolute bottom-5 left-3 right-3">
 
-        <button className="flex items-center gap-4 px-4 py-3 text-gray-600 hover:text-blue-700 w-full">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-4 px-4 py-3 text-gray-600 hover:text-blue-700 w-full"
+        >
           <FaSignOutAlt />
           <span>Logout</span>
         </button>
