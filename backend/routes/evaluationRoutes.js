@@ -7,6 +7,7 @@ const {
   addEvaluation,
   updateEvaluation,
   deleteEvaluation,
+  getEvaluationStudentsByFacultyId,
 } = require("../controllers/evaluationController");
 
 const router = express.Router();
@@ -16,6 +17,10 @@ router.get("/", getAllEvaluations);
 
 // Get evaluations by OJT ID
 router.get("/ojt/:assignedOjtId", getEvaluationsByOjtId);
+
+// Get evaluation students by Faculty ID
+router.get("/faculty/:facultyId",getEvaluationStudentsByFacultyId
+);
 
 // Get evaluation by ID
 router.get("/:id", getEvaluationById);

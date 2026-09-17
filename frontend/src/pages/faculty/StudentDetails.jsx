@@ -1,113 +1,32 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState , useEffect} from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import FacultyLayout from "../../components/faculty/FacultyLayout";
 // ---- Student data ----
-const student = {
-  name: "Aman Khan",
-  degree: "BS Software Engineering (7th Semester)",
-  studentId: "2021-SE-45",
-  email: "aman.khan@aisc.edu.pk",
-  status: "On Going",
-  photo : "/students/ahmed.jpg",
-};
 
-const progressData = {
-  overall: 75,
-  segments: [
-    { label: "Completed", percent: 75, color: "#22c55e" },
-    { label: "In Progress", percent: 15, color: "#3b82f6" },
-    { label: "Yet to Start", percent: 10, color: "#f97316" },
-  ],
-};
 
-const personalInfo = [
-  { icon: "phone", label: "Phone", value: "8235679475" },
-  { icon: "calendar", label: "Date of Birth", value: "12 March 2002" },
-  { icon: "id", label: "CNIC", value: "61101-1234567-1" },
-  {
-    icon: "phone",
-    label: "Emergency Contact",
-    value: "9123456789 (Father)",
-  },
-  {
-    icon: "pin",
-    label: "Address",
-    value: "House # 25, Street 12, F-10/3, Islamabad",
-  },
-  {
-    icon: "mail",
-    label: "Email",
-    value: "aman.khan@aisc.edu.pk",
-  },
-];
-
-const ojtInfo = [
-  {
-    icon: "briefcase",
-    label: "Company",
-    value: "SoftGrid Technologies",
-  },
-  { icon: "calendar", label: "End Date", value: "20 Apr 2025" },
-  {
-    icon: "user",
-    label: "OJT Role",
-    value: "QA Engineer",
-  },
-  { icon: "clock", label: "Total Duration", value: "6 Months" },
-  { icon: "calendar", label: "Start Date", value: "	20 Apr 2025" },
-  { icon: "settings", label: "Working Days", value: "4 Days / Week" },
-];
-
-const timeline = [
-  {
-    step: 1,
-    label: "OJT Started",
-    date: "21 Mar 2025",
-    state: "done",
-  },
-  {
-    step: 2,
-    label: "Mid-Term Review",
-    date: "21 Apr 2025",
-    state: "done",
-  },
-  {
-    step: 3,
-    label: "Progress Review",
-    date: "21 May 2025",
-    state: "current",
-  },
-  {
-    step: 4,
-    label: "Final Evaluation",
-    date: "21 Aug 2025",
-    state: "upcoming",
-  },
-  {
-    step: 5,
-    label: "OJT Completion",
-    date: "21 Nov 2025",
-    state: "upcoming",
-  },
-];
-
-const mentorNote = {
-  text:
-    "Student is showing good progress and professionalism. Communication and technical skills are improving consistently. Keep up the good work.",
-  updated: "10 May 2024",
-  author: "Prof. Ayesha Khan",
-};
 
 const tabs = [
-  { id: "overview", label: "Overview", icon: "users" },
-  { id: "diaries", label: "Weekly Diaries", icon: "clipboard" },
-  { id: "reports", label: "Reports", icon: "file" },
-  { id: "evaluations", label: "Evaluations", icon: "doc" },
-  { id: "attendance", label: "Attendance", icon: "clock" },
-  { id: "feedback", label: "Feedback", icon: "chat" },
-  { id: "documents", label: "Documents", icon: "file2" },
+  {
+    id: "overview",
+    label: "Overview",
+    icon: "user",
+  },
+  {
+    id: "reports",
+    label: "Weekly Reports",
+    icon: "file",
+  },
+  {
+    id: "diary",
+    label: "Diary",
+    icon: "clipboard",
+  },
+  {
+    id: "evaluation",
+    label: "Evaluation",
+    icon: "check",
+  },
 ];
-
 // ---- Icons ----
 const Icon = ({ name, className = "w-4 h-4" }) => {
   const paths = {
@@ -286,13 +205,224 @@ const TimelineStep = ({ step, isLast }) => {
 };
 
 // ---- Main Page ----
-const StudentDetails =() => {
+const StudentDetails = () => {
   const [activeTab, setActiveTab] = useState("overview");
-const navigate = useNavigate();
+  const [studentData, setStudentData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [weeklyReports, setWeeklyReports] = useState([]);
+  const [evaluation, setEvaluation] = useState(null);
+  const [showMessageModal, setShowMessageModal] = useState(false);
+const [messageText, setMessageText] = useState("");
 
-const goBackToStudents = () => {
-  navigate("/students");
+  const navigate = useNavigate();
+  const { studentId } = useParams();
+
+  useEffect(() => {
+    fetch(`http://localhost:5000/api/faculty/student-details/${studentId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Student Details API:", data);
+
+        if (data.success) {
+          console.log("STUDENT DATA FROM API:", data.student);
+          console.log("PROGRESS FROM API:", data.student.progress);
+setStudentData({
+  ...data.student,
+  mentorNote: data.mentorNote,
+});
+        }
+
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Student Details API Error:", error);
+        setLoading(false);
+      });
+  }, [studentId]);
+useEffect(() => {
+  const fetchWeeklyReports = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/faculty/student-weekly-reports/${studentId}`
+      );
+
+      const data = await response.json();
+
+      console.log("Weekly Reports API:", data);
+
+      if (data.success) {
+        setWeeklyReports(data.weeklyReports);
+      }
+    } catch (error) {
+      console.error("Weekly Reports Error:", error);
+    }
+  };
+
+  if (studentId) {
+    fetchWeeklyReports();
+  }
+}, [studentId]);
+useEffect(() => {
+  const fetchEvaluation = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/faculty/student-evaluation/${studentId}`
+      );
+
+      const data = await response.json();
+
+      console.log("Evaluation API:", data);
+
+      if (data.success) {
+        setEvaluation(
+          data.evaluations.length > 0
+            ? data.evaluations[0]
+            : null
+        );
+      }
+    } catch (error) {
+      console.error("Evaluation Error:", error);
+    }
+  };
+
+  if (studentId) {
+    fetchEvaluation();
+  }
+}, [studentId]);
+const sendMessage = async () => {
+  if (!messageText.trim()) {
+    alert("Please enter a message");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "http://localhost:5000/api/notifications",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          _id: `MSG-${Date.now()}`,
+          userId: studentData.userId,
+          message: messageText,
+          isRead: false,
+          sentOn: new Date().toISOString(),
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (data.success) {
+      alert("Message sent successfully");
+      setMessageText("");
+      setShowMessageModal(false);
+    } else {
+      alert(data.message || "Failed to send message");
+    }
+  } catch (error) {
+    console.error("Send Message Error:", error);
+    alert("Failed to send message");
+  }
 };
+  const goBackToStudents = () => {
+    navigate("/faculty/AssignedStudents");
+  };
+  if (loading) {
+    return (
+      <FacultyLayout activeItem="studentDetails">
+        <div className="p-6 text-gray-500">
+          Loading student details...
+        </div>
+      </FacultyLayout>
+    );
+  }
+
+  if (!studentData) {
+    return (
+      <FacultyLayout activeItem="studentDetails">
+        <div className="p-6 text-red-500">
+          Student details not found.
+        </div>
+      </FacultyLayout>
+    );
+  }
+const progress = Number(studentData.progress || 0);
+
+const progressData = {
+  overall: progress,
+  segments: [
+    {
+      label: "Completed",
+      percent: progress,
+      color: "#22c55e",
+    },
+    {
+      label: "Remaining",
+      percent: 100 - progress,
+      color: "#e5e7eb",
+    },
+  ],
+};
+console.log("FINAL PROGRESS:", progress);
+console.log("PROGRESS DATA:", progressData);
+  const personalInfo = [
+  {
+    icon: "phone",
+    label: "Phone",
+    value: studentData.phone || "Not Available",
+  },
+  {
+    icon: "mail",
+    label: "Email",
+    value: studentData.email || "Not Available",
+  },
+  {
+    icon: "id",
+    label: "Student ID",
+    value: studentData.studentId || "Not Available",
+  },
+  {
+    icon: "id",
+    label: "Roll Number",
+    value: studentData.rollNumber || "Not Available",
+  },
+  {
+    icon: "users",
+    label: "Department",
+    value: studentData.department || "Not Available",
+  },
+];
+
+const ojtInfo = [
+  {
+    icon: "briefcase",
+    label: "Company",
+    value: studentData.companyName || "Not Available",
+  },
+  {
+    icon: "user",
+    label: "OJT Role",
+    value: studentData.role || "Not Available",
+  },
+  {
+    icon: "calendar",
+    label: "Start Date",
+    value: studentData.startDate || "Not Available",
+  },
+  {
+    icon: "calendar",
+    label: "End Date",
+    value: studentData.endDate || "Not Available",
+  },
+  {
+    icon: "clock",
+    label: "OJT Status",
+    value: studentData.ojtStatus || studentData.status || "Not Available",
+  },
+];
   return (
     <FacultyLayout
       activeItem="studentDetails"
@@ -318,45 +448,45 @@ const goBackToStudents = () => {
           {/* Student Image */}
 <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden shrink-0 flex items-center justify-center text-gray-400">
 
-  {student.photo ? (
-    <img
-      src={student.photo}
-      alt={student.name}
-      className="w-full h-full object-cover"
-      onError={(e) => {
-        e.currentTarget.style.display = "none";
-      }}
-    />
-  ) : (
-    <Icon name="user" className="w-9 h-9" />
-  )}
+  {studentData.profilePhotoUrl ? (
+  <img
+    src={studentData.profilePhotoUrl}
+    alt={studentData.name}
+    className="w-full h-full object-cover"
+    onError={(e) => {
+      e.currentTarget.style.display = "none";
+    }}
+  />
+) : (
+  <Icon name="user" className="w-9 h-9" />
+)}
 
 </div>
 
           {/* Student Information */}
           <div>
             <h2 className="text-lg font-bold text-gray-900">
-              {student.name}
+              {studentData.name}
             </h2>
 
             <p className="text-sm text-gray-600 mt-1">
-              {student.degree}
-            </p>
+  {studentData.department}
+</p>
 
-            <p className="text-sm text-gray-600">
-              {student.studentId}
-            </p>
+<p className="text-sm text-gray-600">
+  {studentData.studentId}
+</p>
 
             <a
-              href={`mailto:${student.email}`}
+              href={`mailto:${studentData.email}`}
               className="text-sm text-blue-600 hover:underline"
             >
-              {student.email}
+              {studentData.email}
             </a>
 
             <div className="mt-2">
               <span className="bg-green-50 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">
-                {student.status}
+                {studentData.status}
               </span>
             </div>
           </div>
@@ -396,10 +526,204 @@ const goBackToStudents = () => {
       </div>
 
       {/* Tab Content */}
-      {activeTab !== "overview" ? (
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center text-gray-400 mb-6">
-          Coming Soon
+      {activeTab === "reports" ? (
+  <div className="space-y-4 mb-6">
+    {weeklyReports.length === 0 ? (
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center text-gray-400">
+        No weekly reports available
+      </div>
+    ) : (
+      weeklyReports.map((report) => (
+        <div
+          key={report._id}
+          className="bg-white rounded-xl border border-gray-100 shadow-sm p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">
+              Week {report.weekNumber}
+            </h3>
+
+            <span className="text-sm text-gray-500">
+              {report.submittedOn}
+            </span>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="text-sm text-gray-500">Task Assigned</p>
+              <p className="text-gray-800 font-medium">
+                {report.taskAssigned}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">Work Completed</p>
+              <p className="text-gray-800">
+                {report.workCompleted}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">Faculty Remarks</p>
+              <p className="text-gray-800">
+                {report.facultyRemarks || "No remarks"}
+              </p>
+            </div>
+          </div>
         </div>
+      ))
+    )}
+  </div>
+) : activeTab === "evaluation" ? (
+  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-6">
+    {evaluation ? (
+      <>
+        <h3 className="text-lg font-semibold text-gray-800 mb-5">
+          Evaluation Details
+        </h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <p className="text-sm text-gray-500">Hours Marks</p>
+            <p className="text-gray-800 font-medium">
+              {evaluation.hoursMarks}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Performance Marks</p>
+            <p className="text-gray-800 font-medium">
+              {evaluation.performanceMarks}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Punctuality Marks</p>
+            <p className="text-gray-800 font-medium">
+              {evaluation.punctualityMarks}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Weekly Report Marks</p>
+            <p className="text-gray-800 font-medium">
+              {evaluation.weeklyReportMarks}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Final Report Marks</p>
+            <p className="text-gray-800 font-medium">
+              {evaluation.finalReportMarks}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Viva Marks</p>
+            <p className="text-gray-800 font-medium">
+              {evaluation.vivaMarks}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Total Marks</p>
+            <p className="text-gray-800 font-medium">
+              {evaluation.totalMarks}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-gray-500">Evaluation Date</p>
+            <p className="text-gray-800 font-medium">
+              {evaluation.evaluatedOn}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5">
+          <p className="text-sm text-gray-500">Remarks</p>
+          <p className="text-gray-800">
+            {evaluation.remarks || "No remarks"}
+          </p>
+        </div>
+      </>
+    ) : (
+      <div className="p-6 text-center text-gray-400">
+        No evaluation available
+      </div>
+    )}
+  </div>
+) : activeTab === "diary" ? (
+  <div className="space-y-4 mb-6">
+    {weeklyReports.length === 0 ? (
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-10 text-center text-gray-400">
+        No diary entries available
+      </div>
+    ) : (
+      weeklyReports.map((report) => (
+        <div
+          key={report._id}
+          className="bg-white rounded-xl border border-gray-100 shadow-sm p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">
+                Week {report.weekNumber}
+              </h3>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Submitted on: {report.submittedOn}
+              </p>
+            </div>
+
+            <span
+              className={`text-xs font-medium px-3 py-1 rounded-full ${
+                report.status === "Approved"
+                  ? "bg-green-50 text-green-700"
+                  : report.status === "Revision Requested"
+                  ? "bg-red-50 text-red-700"
+                  : "bg-yellow-50 text-yellow-700"
+              }`}
+            >
+              {report.status}
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm text-gray-500">
+                Task Assigned
+              </p>
+
+              <p className="text-sm text-gray-800 font-medium mt-1">
+                {report.taskAssigned || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">
+                Work Completed
+              </p>
+
+              <p className="text-sm text-gray-800 mt-1">
+                {report.workCompleted || "N/A"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm text-gray-500">
+                Faculty Remarks
+              </p>
+
+              <p className="text-sm text-gray-800 mt-1">
+                {report.facultyRemarks || "No remarks"}
+              </p>
+            </div>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
       ) : (
         <>
           {/* Personal Information + OJT Information */}
@@ -448,11 +772,11 @@ const goBackToStudents = () => {
               </h2>
 
               <div className="flex overflow-x-auto pb-2">
-                {timeline.map((step, i) => (
+                {(studentData.timeline || []).map((step, i) => (
                   <TimelineStep
                     key={step.step}
                     step={step}
-                    isLast={i === timeline.length - 1}
+                    isLast={i === (studentData.timeline || []).length - 1}
                   />
                 ))}
               </div>
@@ -473,17 +797,17 @@ const goBackToStudents = () => {
                   />
 
                   <p className="text-sm text-gray-700 leading-relaxed">
-                    {mentorNote.text}
+                    {studentData.mentorNote?.text || "No mentor notes available."}
                   </p>
                 </div>
 
                 <div className="flex items-center justify-between mt-4 text-xs text-gray-500">
                   <span>
-                    Last Updated: {mentorNote.updated}
+                    Last Updated: {studentData.mentorNote?.updated || "Not Available"}
                   </span>
 
                   <span className="font-medium text-gray-700">
-                    {mentorNote.author}
+                    {studentData.mentorNote?.author || "Faculty Mentor"}
                   </span>
                 </div>
 
@@ -494,30 +818,84 @@ const goBackToStudents = () => {
       )}
 
       {/* Bottom Actions */}
-      <div className="flex flex-wrap items-center justify-end gap-3">
+<div className="flex flex-wrap items-center justify-end gap-3">
 
-        <button className="flex items-center gap-2 border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-50">
-          <Icon name="chat" />
+  <button
+    onClick={() => setShowMessageModal(true)}
+    className="flex items-center gap-2 border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-50"
+  >
+    <Icon name="chat" />
+    Message Student
+  </button>
+
+  <button
+    onClick={() => window.print()}
+    className="flex items-center gap-2 border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-50"
+  >
+    <Icon name="download" />
+    Download Profile
+  </button>
+
+  <button
+    onClick={goBackToStudents}
+    className="flex items-center gap-2 bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-blue-800"
+  >
+    <Icon name="arrowLeft" />
+    Back to List
+  </button>
+
+</div>
+{showMessageModal && (
+  <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-bold text-gray-900">
           Message Student
-        </button>
+        </h2>
 
         <button
-          onClick={() => window.print()}
-          className="flex items-center gap-2 border border-gray-200 text-gray-700 text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-gray-50"
+          onClick={() => setShowMessageModal(false)}
+          className="text-gray-400 hover:text-gray-600 text-xl"
         >
-          <Icon name="download" />
-          Download Profile
+          ×
         </button>
-
-        <button
-          onClick={goBackToStudents}
-          className="flex items-center gap-2 bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg hover:bg-blue-800"
-        >
-          <Icon name="arrowLeft" />
-          Back to List
-        </button>
-
       </div>
+
+      <p className="text-sm text-gray-500 mb-3">
+        To: {studentData.name}
+      </p>
+
+      <textarea
+        value={messageText}
+        onChange={(e) => setMessageText(e.target.value)}
+        placeholder="Write your message..."
+        rows="5"
+        className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+
+      <div className="flex justify-end gap-3 mt-4">
+        <button
+          onClick={() => {
+            setMessageText("");
+            setShowMessageModal(false);
+          }}
+          className="border border-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={sendMessage}
+          className="bg-blue-700 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-800"
+        >
+          Send Message
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
 
     </FacultyLayout>
   );

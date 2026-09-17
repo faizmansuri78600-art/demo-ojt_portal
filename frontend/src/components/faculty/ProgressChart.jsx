@@ -7,10 +7,16 @@ const ProgressChart = ({ data }) => {
   const padding = 30;
 
   const maxValue = 100;
-  const stepX = (width - padding * 2) / (data.length - 1);
+  const stepX =
+  data.length > 1
+    ? (width - padding * 2) / (data.length - 1)
+    : 0;
 
   const points = data.map((d, i) => {
-    const x = padding + i * stepX;
+    const x =
+  data.length === 1
+    ? width / 2
+    : padding + i * stepX;
     const y = height - padding - (d.value / maxValue) * (height - padding * 2);
     return { x, y, ...d };
   });

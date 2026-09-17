@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const BellIcon = () => (
   <svg
@@ -112,9 +113,35 @@ const CollegeBuilding = () => (
 );
 
 const FacultyHeader = ({
-  facultyName = "Prof. Ayesha Khan",
-  notificationCount = 3,
+  facultyName,
 }) => {
+  const [notificationCount, setNotificationCount] = useState(0);
+   const navigate = useNavigate();
+
+  const user = JSON.parse(localStorage.getItem("user"));
+  const displayName = user?.facultyName || facultyName || "Faculty Mentor";
+
+  useEffect(() => {
+    const userId = user?.id;
+
+    if (!userId) {
+      return;
+    }
+
+    fetch(`http://localhost:5000/api/notifications/unread/${userId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Unread Notifications API:", data);
+
+        if (data.success) {
+          setNotificationCount(data.notifications?.length || 0);
+        }
+      })
+      .catch((error) => {
+        console.error("Unread Notifications Error:", error);
+      });
+  }, []);
+
   return (
     <header className="w-full bg-[#0b1f4d] px-6 py-3 flex items-center justify-between">
 
@@ -160,10 +187,11 @@ const FacultyHeader = ({
         <div className="h-10 border-l border-blue-700"></div>
 
         {/* Notification */}
-        <button
-          className="relative"
-          aria-label="Notifications"
-        >
+       <button
+  onClick={() => navigate("/faculty/Notifications")}
+  className="relative"
+  aria-label="Notifications"
+>
           <BellIcon />
 
           {notificationCount > 0 && (
@@ -182,7 +210,7 @@ const FacultyHeader = ({
 
           <div className="hidden sm:block leading-tight">
             <p className="text-white text-sm font-semibold">
-              {facultyName}
+             {displayName}
             </p>
 
             <p className="text-gray-300 text-xs">
