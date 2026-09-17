@@ -1,4 +1,6 @@
 // const User = require("../models/User");
+// const Faculty = require("../models/Faculty");
+// const Student = require("../models/Student");
 // const bcrypt = require("bcryptjs");
 // const generateToken = require("../utils/generateToken");
 
@@ -13,23 +15,20 @@
 
 //     const { email, password } = req.body;
 
-//     // Check email and password
-//     if (!email || !password) {
-//       return res.status(400).json({
-//         success: false,
-//         message: "Email and password are required",
-//       });
-//     }
+// let facultyId = null;
 
-//     // Find user by email
-//     const user = await User.findOne({ email });
+// if (user.role === "Faculty") {
+// const faculty = await Faculty.findOne({ userId: user._id });
 
-//     if (!user) {
-//       return res.status(401).json({
-//         success: false,
-//         message: "Invalid email or password",
-//       });
-//     }
+// if (!faculty) {
+//    return res.status(404).json({
+//      success: false,
+//      message: "Faculty profile not found",
+// });
+//  }
+
+// facultyId = faculty._id;
+// }
 
 //     // Check password
 //     const isPasswordCorrect = await bcrypt.compare(
@@ -102,6 +101,7 @@
 
 
 const User = require("../models/User");
+const Faculty = require("../models/Faculty");
 const Student = require("../models/Student");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
@@ -123,28 +123,45 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email });
+  const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password",
-      });
-    }
+if (!user) {
+  return res.status(401).json({
+    success: false,
+    message: "Invalid email or password",
+  });
+}
 
-    const isPasswordCorrect = await bcrypt.compare(
-      password,
-      user.passwordHash
-    );
+let facultyId = null;
+let facultyName = null;
 
-    if (!isPasswordCorrect) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password",
-      });
-    }
+if (user.role === "Faculty") {
+  const faculty = await Faculty.findOne({ userId: user._id });
 
-    const token = generateToken(user._id, user.role);
+  if (!faculty) {
+    return res.status(404).json({
+      success: false,
+      message: "Faculty profile not found",
+    });
+  }
+
+  facultyId = faculty._id;
+  facultyName = faculty.name;
+}
+
+const isPasswordCorrect = await bcrypt.compare(
+  password,
+  user.passwordHash
+);
+
+if (!isPasswordCorrect) {
+  return res.status(401).json({
+    success: false,
+    message: "Invalid email or password",
+  });
+}
+
+const token = generateToken(user._id, user.role);
 
     return res.status(200).json({
       success: true,
@@ -153,10 +170,12 @@ const loginUser = async (req, res) => {
       token: token,
 
       user: {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      },
+  id: user._id,
+  email: user.email,
+  role: user.role,
+  facultyId: facultyId,
+  facultyName: facultyName,
+},
     });
   } catch (error) {
     console.error("Login Error:", error);
