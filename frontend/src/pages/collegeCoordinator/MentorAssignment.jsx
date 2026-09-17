@@ -1,243 +1,63 @@
-import { useMemo, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
 import {
   Search,
   Plus,
-  MoreHorizontal,
   Eye,
-  UserRoundCheck,
-  UserRoundX,
   Users,
   UserCheck,
   Clock3,
-  Building2,
-  Mail,
-  Phone,
-  BriefcaseBusiness,
   ChevronRight,
   Check,
   X,
-  ArrowRightLeft,
+  RefreshCw,
+  UserRoundCheck,
+  Trash2,
+  CalendarDays,
+  GraduationCap,
 } from "lucide-react";
 
-const initialMentors = [
-  {
-    id: 1,
-    name: "Rajesh Kumar",
-    initials: "RK",
-    department: "Web Development",
-    company: "Tech Solutions Inc.",
-    email: "rajesh.kumar@techsolutions.com",
-    phone: "+91 98765 42101",
-    capacity: 8,
-    assigned: 6,
-    status: "Assigned",
-    students: [
-      "Aman Verma",
-      "Riya Shah",
-      "Aditya Patel",
-      "Sneha Joshi",
-      "Rahul Mehta",
-      "Neha Singh",
-    ],
-  },
-  {
-    id: 2,
-    name: "Priya Iyer",
-    initials: "PI",
-    department: "Data Analytics",
-    company: "DataMind Pvt. Ltd.",
-    email: "priya.iyer@datamind.com",
-    phone: "+91 98765 42102",
-    capacity: 8,
-    assigned: 8,
-    status: "Full",
-    students: [
-      "Karan Mehta",
-      "Anjali Shah",
-      "Vivek Patil",
-      "Pooja Desai",
-      "Arjun Rao",
-      "Meera Nair",
-      "Sahil Khan",
-      "Nisha Patel",
-    ],
-  },
-  {
-    id: 3,
-    name: "Amit Verma",
-    initials: "AV",
-    department: "UI/UX Design",
-    company: "Creative Media",
-    email: "amit.verma@creativemedia.com",
-    phone: "+91 98765 42103",
-    capacity: 10,
-    assigned: 7,
-    status: "Assigned",
-    students: [
-      "Ishita Shah",
-      "Rohan Patil",
-      "Tanvi Joshi",
-      "Harsh Mehta",
-      "Simran Rao",
-      "Dev Shah",
-      "Maya Patel",
-    ],
-  },
-  {
-    id: 4,
-    name: "Vivek Singh",
-    initials: "VS",
-    department: "Cloud Computing",
-    company: "CloudTech Solutions",
-    email: "vivek.singh@cloudtech.com",
-    phone: "+91 98765 42104",
-    capacity: 8,
-    assigned: 3,
-    status: "Assigned",
-    students: [
-      "Mohit Verma",
-      "Ayesha Khan",
-      "Yash Patel",
-    ],
-  },
-  {
-    id: 5,
-    name: "Neha Kapoor",
-    initials: "NK",
-    department: "Software Development",
-    company: "Innovatech Labs",
-    email: "neha.kapoor@innovatech.com",
-    phone: "+91 98765 42105",
-    capacity: 8,
-    assigned: 0,
-    status: "Unassigned",
-    students: [],
-  },
-  {
-    id: 6,
-    name: "Sanjay Shah",
-    initials: "SS",
-    department: "Cyber Security",
-    company: "SecureNet Pvt. Ltd.",
-    email: "sanjay.shah@securenet.com",
-    phone: "+91 98765 42106",
-    capacity: 6,
-    assigned: 4,
-    status: "Assigned",
-    students: [
-      "Varun Shah",
-      "Akash Patel",
-      "Nitin Rao",
-      "Mansi Mehta",
-    ],
-  },
-  {
-    id: 7,
-    name: "Anjali Desai",
-    initials: "AD",
-    department: "Business Analytics",
-    company: "Deloitte",
-    email: "anjali.desai@deloitte.com",
-    phone: "+91 98765 42107",
-    capacity: 8,
-    assigned: 5,
-    status: "Assigned",
-    students: [
-      "Kunal Shah",
-      "Priyanka Patil",
-      "Siddharth Rao",
-      "Komal Mehta",
-      "Aarav Joshi",
-    ],
-  },
-  {
-    id: 8,
-    name: "Rohan Kulkarni",
-    initials: "RK",
-    department: "Software Development",
-    company: "HCLTech",
-    email: "rohan.kulkarni@hcltech.com",
-    phone: "+91 98765 42108",
-    capacity: 8,
-    assigned: 0,
-    status: "Unassigned",
-    students: [],
-  },
-];
+import mentorAssignmentService from "../../services/mentorAssignmentService";
+import { useCoordinatorTheme } from "../../context/CoordinatorThemeContext";
 
-const departments = [
-  "All Departments",
-  "Web Development",
-  "Data Analytics",
-  "UI/UX Design",
-  "Cloud Computing",
-  "Software Development",
-  "Cyber Security",
-  "Business Analytics",
-];
+const MENTOR_CAPACITY = 8;
+const MENTORS_PER_PAGE = 5;
 
-const statuses = [
-  "All Status",
-  "Assigned",
-  "Unassigned",
-  "Full",
-];
+const emptyForm = {
+  applicationId: "",
+  facultyId: "",
+  startDate: "",
+  endDate: "",
+};
 
-const students = [
-  "Aman Verma",
-  "Riya Shah",
-  "Aditya Patel",
-  "Sneha Joshi",
-  "Rahul Mehta",
-  "Neha Singh",
-  "Karan Mehta",
-  "Anjali Shah",
-  "Vivek Patil",
-  "Pooja Desai",
-  "Arjun Rao",
-  "Meera Nair",
-  "Sahil Khan",
-  "Nisha Patel",
-  "Ishita Shah",
-  "Rohan Patil",
-  "Tanvi Joshi",
-  "Harsh Mehta",
-  "Simran Rao",
-  "Dev Shah",
-  "Maya Patel",
-  "Mohit Verma",
-  "Ayesha Khan",
-  "Yash Patel",
-  "Varun Shah",
-  "Akash Patel",
-  "Nitin Rao",
-  "Mansi Mehta",
-  "Kunal Shah",
-  "Priyanka Patil",
-  "Siddharth Rao",
-  "Komal Mehta",
-  "Aarav Joshi",
-];
-
-function StatusBadge({ status }) {
-  const styles = {
+function getStatusColors(status, colors) {
+  const map = {
     Assigned: {
-      background: "#ecfdf5",
-      color: "#059669",
+      background: colors.successSoft,
+      color: colors.success,
     },
     Unassigned: {
-      background: "#f8fafc",
-      color: "#64748b",
+      background: colors.surfaceMuted,
+      color: colors.textSecondary,
     },
     Full: {
-      background: "#fff7ed",
-      color: "#d97706",
+      background: colors.warningSoft,
+      color: colors.warning,
+    },
+    Ongoing: {
+      background: colors.primarySoft,
+      color: colors.primary,
+    },
+    Completed: {
+      background: colors.surfaceMuted,
+      color: colors.textSecondary,
     },
   };
 
-  const current =
-    styles[status] || styles.Unassigned;
+  return map[status] || map.Unassigned;
+}
+
+function StatusBadge({ status, colors }) {
+  const current = getStatusColors(status, colors);
 
   return (
     <span
@@ -248,7 +68,8 @@ function StatusBadge({ status }) {
         borderRadius: "999px",
         backgroundColor: current.background,
         color: current.color,
-        fontSize: "10px",
+        fontSize: "12px",
+        lineHeight: "18px",
         fontWeight: 700,
         whiteSpace: "nowrap",
       }}
@@ -258,7 +79,12 @@ function StatusBadge({ status }) {
   );
 }
 
-function Modal({ children, onClose, width = "540px" }) {
+function Modal({
+  children,
+  onClose,
+  width = "560px",
+  colors,
+}) {
   return (
     <div
       onMouseDown={(event) => {
@@ -269,13 +95,13 @@ function Modal({ children, onClose, width = "540px" }) {
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 100,
+        zIndex: 1000,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "20px",
-        backgroundColor: "rgba(15, 23, 42, 0.45)",
-        backdropFilter: "blur(2px)",
+        backgroundColor: "rgba(2, 6, 23, 0.68)",
+        backdropFilter: "blur(3px)",
       }}
     >
       <div
@@ -285,9 +111,10 @@ function Modal({ children, onClose, width = "540px" }) {
           maxHeight: "90vh",
           overflowY: "auto",
           borderRadius: "16px",
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 20px 50px rgba(15, 23, 42, 0.18)",
+          backgroundColor: colors.surface,
+          color: colors.text,
+          border: `1px solid ${colors.border}`,
+          boxShadow: "0 20px 50px rgba(0, 0, 0, 0.30)",
         }}
       >
         {children}
@@ -300,6 +127,7 @@ function ModalHeader({
   title,
   subtitle,
   onClose,
+  colors,
 }) {
   return (
     <div
@@ -309,16 +137,17 @@ function ModalHeader({
         justifyContent: "space-between",
         gap: "15px",
         padding: "18px 20px",
-        borderBottom: "1px solid #eef2f7",
+        borderBottom: `1px solid ${colors.border}`,
       }}
     >
       <div>
         <h2
           style={{
             margin: 0,
-            color: "#1e293b",
+            color: colors.text,
             fontSize: "17px",
-            fontWeight: 750,
+            lineHeight: "24px",
+            fontWeight: 700,
           }}
         >
           {title}
@@ -327,8 +156,9 @@ function ModalHeader({
         <p
           style={{
             margin: "5px 0 0",
-            color: "#94a3b8",
-            fontSize: "11px",
+            color: colors.textSecondary,
+            fontSize: "13px",
+            lineHeight: "19px",
           }}
         >
           {subtitle}
@@ -344,10 +174,10 @@ function ModalHeader({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          border: "none",
+          border: `1px solid ${colors.border}`,
           borderRadius: "8px",
-          backgroundColor: "#f8fafc",
-          color: "#64748b",
+          backgroundColor: colors.surfaceMuted,
+          color: colors.textSecondary,
           cursor: "pointer",
         }}
       >
@@ -357,55 +187,133 @@ function ModalHeader({
   );
 }
 
+function FieldLabel({ children, colors }) {
+  return (
+    <label
+      style={{
+        display: "block",
+        marginBottom: "6px",
+        color: colors.textSecondary,
+        fontSize: "13px",
+        lineHeight: "18px",
+        fontWeight: 600,
+      }}
+    >
+      {children}
+    </label>
+  );
+}
+
+function StudentIcon({ colors }) {
+  return (
+    <div
+      style={{
+        width: "38px",
+        height: "38px",
+        flexShrink: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: "50%",
+        backgroundColor: colors.primarySoft,
+        color: colors.primary,
+      }}
+    >
+      <GraduationCap size={19} />
+    </div>
+  );
+}
+
 export default function MentorAssignment() {
-  const [mentors, setMentors] =
-    useState(initialMentors);
+  const { colors } = useCoordinatorTheme();
 
-  const [searchTerm, setSearchTerm] =
-    useState("");
+  const [mentors, setMentors] = useState([]);
+  const [applications, setApplications] = useState([]);
 
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedDepartment, setSelectedDepartment] =
     useState("All Departments");
-
   const [selectedStatus, setSelectedStatus] =
     useState("All Status");
 
-  const [currentPage, setCurrentPage] =
-    useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const [actionMentorId, setActionMentorId] =
+  const [viewMentor, setViewMentor] = useState(null);
+  const [showAssignModal, setShowAssignModal] =
+    useState(false);
+  const [editingAssignment, setEditingAssignment] =
     useState(null);
 
-  const [viewMentor, setViewMentor] =
-    useState(null);
+  const [form, setForm] = useState(emptyForm);
 
-  const [assignmentMentor, setAssignmentMentor] =
-    useState(null);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-  const [selectedStudent, setSelectedStudent] =
-    useState("");
+      const response =
+        await mentorAssignmentService.getData();
 
-  const mentorsPerPage = 5;
+      setMentors(response?.mentors || []);
+      setApplications(response?.applications || []);
+    } catch (err) {
+      console.error(
+        "Mentor assignment load error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to load mentor assignment data."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const departments = useMemo(() => {
+    return [
+      "All Departments",
+      ...Array.from(
+        new Set(
+          mentors
+            .map((mentor) => mentor.department)
+            .filter(Boolean)
+        )
+      ).sort(),
+    ];
+  }, [mentors]);
 
   const filteredMentors = useMemo(() => {
-    const search =
-      searchTerm.trim().toLowerCase();
+    const search = searchTerm.trim().toLowerCase();
 
     return mentors.filter((mentor) => {
+      const name =
+        String(mentor.name || "").toLowerCase();
+      const department =
+        String(
+          mentor.department || ""
+        ).toLowerCase();
+      const designation =
+        String(
+          mentor.designation || ""
+        ).toLowerCase();
+
       const matchesSearch =
         !search ||
-        mentor.name
-          .toLowerCase()
-          .includes(search) ||
-        mentor.company
-          .toLowerCase()
-          .includes(search) ||
-        mentor.department
-          .toLowerCase()
-          .includes(search) ||
-        mentor.email
-          .toLowerCase()
-          .includes(search);
+        name.includes(search) ||
+        department.includes(search) ||
+        designation.includes(search);
 
       const matchesDepartment =
         selectedDepartment ===
@@ -434,70 +342,225 @@ export default function MentorAssignment() {
     1,
     Math.ceil(
       filteredMentors.length /
-        mentorsPerPage
+        MENTORS_PER_PAGE
     )
   );
 
-  const safeCurrentPage = Math.min(
+  const safePage = Math.min(
     currentPage,
     totalPages
   );
 
-  const startIndex =
-    (safeCurrentPage - 1) *
-    mentorsPerPage;
-
   const paginatedMentors =
     filteredMentors.slice(
-      startIndex,
-      startIndex + mentorsPerPage
+      (safePage - 1) *
+        MENTORS_PER_PAGE,
+      safePage *
+        MENTORS_PER_PAGE
     );
 
-  const totalMentors = mentors.length;
+  const stats = useMemo(() => {
+    const totalCapacity =
+      mentors.length * MENTOR_CAPACITY;
 
-  const assignedMentors =
-    mentors.filter(
-      (mentor) =>
-        mentor.assigned > 0
-    ).length;
+    const totalAssigned =
+      mentors.reduce(
+        (sum, mentor) =>
+          sum +
+          Number(mentor.assigned || 0),
+        0
+      );
 
-  const unassignedMentors =
-    mentors.filter(
-      (mentor) =>
-        mentor.assigned === 0
-    ).length;
+    return {
+      totalMentors: mentors.length,
 
-  const totalCapacity =
-    mentors.reduce(
-      (total, mentor) =>
-        total + mentor.capacity,
-      0
-    );
+      assignedMentors:
+        mentors.filter(
+          (mentor) =>
+            Number(mentor.assigned || 0) > 0
+        ).length,
 
-  const totalAssigned =
-    mentors.reduce(
-      (total, mentor) =>
-        total + mentor.assigned,
-      0
-    );
+      unassignedMentors:
+        mentors.filter(
+          (mentor) =>
+            Number(mentor.assigned || 0) === 0
+        ).length,
 
-  const totalUnassigned =
-    Math.max(
-      totalCapacity - totalAssigned,
-      0
-    );
+      totalAssigned,
 
-  const assignmentPercentage =
-    totalCapacity === 0
-      ? 0
-      : Math.round(
-          (totalAssigned /
-            totalCapacity) *
-            100
+      totalUnassigned: Math.max(
+        totalCapacity - totalAssigned,
+        0
+      ),
+
+      percentage: totalCapacity
+        ? Math.round(
+            (totalAssigned /
+              totalCapacity) *
+              100
+          )
+        : 0,
+    };
+  }, [mentors]);
+
+  const availableApplications =
+    useMemo(() => {
+      return applications.filter(
+        (application) =>
+          !application.assigned ||
+          application.applicationId ===
+            editingAssignment?.applicationId
+      );
+    }, [
+      applications,
+      editingAssignment,
+    ]);
+
+  const openAssignModal = () => {
+    setEditingAssignment(null);
+    setForm(emptyForm);
+    setError("");
+    setSuccess("");
+    setShowAssignModal(true);
+  };
+
+  const openEditModal = (student) => {
+    setEditingAssignment(student);
+
+    setForm({
+      applicationId:
+        student.applicationId || "",
+      facultyId:
+        student.facultyId || "",
+      startDate:
+        student.startDate || "",
+      endDate:
+        student.endDate || "",
+    });
+
+    setError("");
+    setSuccess("");
+    setShowAssignModal(true);
+    setViewMentor(null);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (
+      !form.applicationId ||
+      !form.facultyId ||
+      !form.startDate ||
+      !form.endDate
+    ) {
+      setError(
+        "Please fill all assignment fields."
+      );
+      return;
+    }
+
+    if (form.endDate < form.startDate) {
+      setError(
+        "End date cannot be before start date."
+      );
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+
+      if (editingAssignment?.assignmentId) {
+        await mentorAssignmentService.updateAssignment(
+          editingAssignment.assignmentId,
+          {
+            facultyId: form.facultyId,
+            startDate: form.startDate,
+            endDate: form.endDate,
+            status: "Assigned",
+          }
         );
 
-  const resetPage = () => {
-    setCurrentPage(1);
+        setSuccess(
+          "Mentor assignment updated successfully."
+        );
+      } else {
+        await mentorAssignmentService.assignMentor({
+          applicationId:
+            form.applicationId,
+          facultyId:
+            form.facultyId,
+          startDate:
+            form.startDate,
+          endDate:
+            form.endDate,
+          status: "Assigned",
+        });
+
+        setSuccess(
+          "Mentor assigned successfully."
+        );
+      }
+
+      setShowAssignModal(false);
+      setForm(emptyForm);
+      setEditingAssignment(null);
+
+      await loadData();
+    } catch (err) {
+      console.error(
+        "Mentor assignment save error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to save mentor assignment."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemoveAssignment = async (
+    assignmentId
+  ) => {
+    if (
+      !window.confirm(
+        "Remove this mentor assignment?"
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+
+      await mentorAssignmentService.deleteAssignment(
+        assignmentId
+      );
+
+      setSuccess(
+        "Mentor assignment removed successfully."
+      );
+
+      setViewMentor(null);
+
+      await loadData();
+    } catch (err) {
+      console.error(
+        "Remove mentor assignment error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to remove assignment."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   const clearFilters = () => {
@@ -506,230 +569,129 @@ export default function MentorAssignment() {
       "All Departments"
     );
     setSelectedStatus("All Status");
-    resetPage();
+    setCurrentPage(1);
   };
 
-  const availableStudents =
-    students.filter((student) => {
-      const alreadyAssigned =
-        mentors.some((mentor) =>
-          mentor.students.includes(
-            student
-          )
-        );
-
-      return !alreadyAssigned;
-    });
-
-  const handleAssignStudent = (
-    event
-  ) => {
-    event.preventDefault();
-
-    if (
-      !assignmentMentor ||
-      !selectedStudent
-    ) {
-      return;
-    }
-
-    setMentors((current) =>
-      current.map((mentor) => {
-        if (
-          mentor.id !==
-          assignmentMentor.id
-        ) {
-          return mentor;
-        }
-
-        if (
-          mentor.assigned >=
-          mentor.capacity
-        ) {
-          return mentor;
-        }
-
-        return {
-          ...mentor,
-          assigned:
-            mentor.assigned + 1,
-          status:
-            mentor.assigned + 1 >=
-            mentor.capacity
-              ? "Full"
-              : "Assigned",
-          students: [
-            ...mentor.students,
-            selectedStudent,
-          ],
-        };
-      })
-    );
-
-    setAssignmentMentor(null);
-    setSelectedStudent("");
+  const cardStyle = {
+    border: `1px solid ${colors.border}`,
+    borderRadius: "14px",
+    backgroundColor: colors.surface,
+    boxShadow:
+      "0 1px 2px rgba(15, 23, 42, 0.04)",
   };
 
-  const handleUnassignStudent = (
-    mentorId,
-    studentName
-  ) => {
-    setMentors((current) =>
-      current.map((mentor) => {
-        if (mentor.id !== mentorId) {
-          return mentor;
-        }
-
-        const newAssigned =
-          Math.max(
-            mentor.assigned - 1,
-            0
-          );
-
-        return {
-          ...mentor,
-          assigned: newAssigned,
-          status:
-            newAssigned === 0
-              ? "Unassigned"
-              : "Assigned",
-          students:
-            mentor.students.filter(
-              (student) =>
-                student !==
-                studentName
-            ),
-        };
-      })
-    );
-
-    setViewMentor((current) => {
-      if (
-        !current ||
-        current.id !== mentorId
-      ) {
-        return current;
-      }
-
-      const newAssigned =
-        Math.max(
-          current.assigned - 1,
-          0
-        );
-
-      return {
-        ...current,
-        assigned: newAssigned,
-        status:
-          newAssigned === 0
-            ? "Unassigned"
-            : "Assigned",
-        students:
-          current.students.filter(
-            (student) =>
-              student !==
-              studentName
-          ),
-      };
-    });
+  const inputStyle = {
+    width: "100%",
+    minHeight: "42px",
+    boxSizing: "border-box",
+    padding: "0 12px",
+    border: `1px solid ${colors.border}`,
+    borderRadius: "9px",
+    outline: "none",
+    color: colors.text,
+    backgroundColor: colors.surface,
+    fontFamily: "inherit",
+    fontSize: "14px",
   };
 
-  const openAssignment = (
-    mentor
-  ) => {
-    if (
-      mentor.assigned >=
-      mentor.capacity
-    ) {
-      return;
-    }
+  const secondaryButtonStyle = {
+    minHeight: "40px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "7px",
+    padding: "0 13px",
+    border: `1px solid ${colors.border}`,
+    borderRadius: "9px",
+    backgroundColor: colors.surface,
+    color: colors.textSecondary,
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: 600,
+  };
 
-    setAssignmentMentor(
-      mentor
-    );
-
-    setSelectedStudent("");
-    setActionMentorId(null);
+  const primaryButtonStyle = {
+    minHeight: "40px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "7px",
+    padding: "0 14px",
+    border: "none",
+    borderRadius: "9px",
+    backgroundColor: colors.primary,
+    color: "#ffffff",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: 700,
   };
 
   return (
     <div
       style={{
         width: "100%",
+        minHeight: "100%",
         minWidth: 0,
-        color: "#0f172a",
+        padding: "0",
+        backgroundColor: colors.workspace,
+        color: colors.text,
+        fontFamily:
+          '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      {/* =====================================================
-          BREADCRUMB
-      ====================================================== */}
+      {/* Breadcrumb */}
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: "7px",
           marginBottom: "12px",
-          fontSize: "12px",
+          fontSize: "13px",
         }}
       >
         <span
           style={{
-            color: "#2563eb",
-            fontWeight: 700,
+            color: colors.primary,
+            fontWeight: 600,
           }}
         >
-          Dashboard
+          College Coordinator
         </span>
 
         <ChevronRight
           size={14}
-          color="#cbd5e1"
+          color={colors.textMuted}
         />
 
         <span
           style={{
-            color: "#64748b",
+            color: colors.textSecondary,
           }}
         >
           Mentor Assignment
         </span>
       </div>
 
-      {/* =====================================================
-          PAGE HEADER
-      ====================================================== */}
+      {/* Header */}
       <section
         style={{
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           gap: "20px",
-          marginBottom: "20px",
+          marginBottom: "24px",
         }}
       >
         <div>
-          <div
-            style={{
-              marginBottom: "6px",
-              color: "#2563eb",
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "1px",
-              textTransform: "uppercase",
-            }}
-          >
-            OJT Management
-          </div>
-
           <h1
             style={{
               margin: 0,
-              color: "#0f172a",
+              color: colors.text,
               fontSize:
-                "clamp(26px, 3vw, 32px)",
-              lineHeight: "1.1",
-              fontWeight: 800,
-              letterSpacing: "-0.8px",
+                "clamp(26px, 3vw, 28px)",
+              lineHeight: "1.2",
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
             }}
           >
             Mentor Assignment
@@ -738,186 +700,193 @@ export default function MentorAssignment() {
           <p
             style={{
               margin: "7px 0 0",
-              color: "#64748b",
-              fontSize: "13px",
+              color: colors.textSecondary,
+              fontSize: "14px",
+              lineHeight: "20px",
             }}
           >
-            Assign and manage OJT mentors
-            for students.
+            Assign faculty mentors to selected OJT
+            students and manage mentor workload.
           </p>
         </div>
 
         <button
           type="button"
-          onClick={() => {
-            const availableMentor =
-              mentors.find(
-                (mentor) =>
-                  mentor.assigned <
-                  mentor.capacity
-              );
-
-            if (availableMentor) {
-              openAssignment(
-                availableMentor
-              );
-            }
-          }}
-          style={{
-            height: "42px",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            padding: "0 15px",
-            border: "none",
-            borderRadius: "9px",
-            backgroundColor: "#2563eb",
-            color: "#ffffff",
-            fontSize: "12px",
-            fontWeight: 700,
-            cursor: "pointer",
-            boxShadow:
-              "0 4px 10px rgba(37, 99, 235, 0.18)",
-          }}
+          onClick={openAssignModal}
+          style={primaryButtonStyle}
         >
-          <Plus size={17} />
-          Assign Student
+          <UserCheck size={16} />
+          Assign Mentor
         </button>
       </section>
 
-      {/* =====================================================
-          STATISTICS
-      ====================================================== */}
-      <section
-        className="mentor-stat-grid"
+      {/* Messages */}
+      {success && (
+        <div
+          style={{
+            marginBottom: "16px",
+            padding: "11px 13px",
+            borderRadius: "9px",
+            backgroundColor:
+              colors.successSoft,
+            color: colors.success,
+            fontSize: "13px",
+            fontWeight: 600,
+          }}
+        >
+          {success}
+        </div>
+      )}
+
+      {error && !showAssignModal && (
+        <div
+          style={{
+            marginBottom: "16px",
+            padding: "11px 13px",
+            borderRadius: "9px",
+            backgroundColor:
+              colors.dangerSoft,
+            color: colors.danger,
+            fontSize: "13px",
+            fontWeight: 600,
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      {/* Statistics */}
+      <div
         style={{
           display: "grid",
           gridTemplateColumns:
             "repeat(4, minmax(0, 1fr))",
-          gap: "12px",
+          gap: "14px",
           marginBottom: "18px",
         }}
       >
         {[
           {
-            title: "Total Mentors",
-            value: totalMentors,
-            subtitle:
-              "Registered OJT mentors",
+            label: "Total Mentors",
+            value: stats.totalMentors,
+            helper: "Faculty mentors",
             icon: Users,
-            background: "#eff6ff",
-            color: "#2563eb",
+            background:
+              colors.primarySoft,
+            color: colors.primary,
           },
           {
-            title: "Assigned",
-            value: assignedMentors,
-            subtitle:
-              "Mentors with students",
+            label: "Assigned",
+            value: stats.assignedMentors,
+            helper: "Mentors with students",
             icon: UserCheck,
-            background: "#ecfdf5",
-            color: "#059669",
+            background:
+              colors.successSoft,
+            color: colors.success,
           },
           {
-            title: "Unassigned",
-            value: unassignedMentors,
-            subtitle:
-              "Mentors without students",
-            icon: UserRoundX,
-            background: "#fff7ed",
-            color: "#ea580c",
-          },
-          {
-            title: "Assignment Rate",
-            value: `${assignmentPercentage}%`,
-            subtitle: `${totalUnassigned} available capacity`,
+            label: "Available",
+            value: stats.unassignedMentors,
+            helper: "Ready for assignment",
             icon: UserRoundCheck,
-            background: "#f5f3ff",
-            color: "#7c3aed",
+            background:
+              colors.warningSoft,
+            color: colors.warning,
+          },
+          {
+            label: "Assignment Rate",
+            value: `${stats.percentage}%`,
+            helper: `${stats.totalAssigned} of ${
+              mentors.length *
+              MENTOR_CAPACITY
+            } capacity`,
+            icon: Clock3,
+            background:
+              colors.infoSoft,
+            color: colors.info,
           },
         ].map((stat) => {
           const Icon = stat.icon;
 
           return (
             <div
-              key={stat.title}
+              key={stat.label}
               style={{
-                minWidth: 0,
-                padding: "16px",
-                border:
-                  "1px solid #e2e8f0",
-                borderRadius: "13px",
-                backgroundColor:
-                  "#ffffff",
-                boxShadow:
-                  "0 2px 8px rgba(15, 23, 42, 0.035)",
+                ...cardStyle,
+                padding: "18px",
               }}
             >
               <div
                 style={{
-                  width: "39px",
-                  height: "39px",
                   display: "flex",
                   alignItems: "center",
-                  justifyContent:
-                    "center",
-                  borderRadius: "10px",
-                  backgroundColor:
-                    stat.background,
-                  color: stat.color,
+                  gap: "12px",
                 }}
               >
-                <Icon size={19} />
-              </div>
+                <div
+                  style={{
+                    width: "42px",
+                    height: "42px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    borderRadius: "11px",
+                    backgroundColor:
+                      stat.background,
+                    color: stat.color,
+                  }}
+                >
+                  <Icon size={20} />
+                </div>
 
-              <div
-                style={{
-                  marginTop: "10px",
-                  color: "#64748b",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                }}
-              >
-                {stat.title}
-              </div>
+                <div>
+                  <div
+                    style={{
+                      color:
+                        colors.textSecondary,
+                      fontSize: "13px",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {stat.label}
+                  </div>
 
-              <div
-                style={{
-                  marginTop: "4px",
-                  color: "#0f172a",
-                  fontSize: "25px",
-                  lineHeight: "1",
-                  fontWeight: 800,
-                }}
-              >
-                {stat.value}
-              </div>
+                  <div
+                    style={{
+                      marginTop: "2px",
+                      color: colors.text,
+                      fontSize: "26px",
+                      lineHeight: "31px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {stat.value}
+                  </div>
 
-              <div
-                style={{
-                  marginTop: "5px",
-                  color: "#94a3b8",
-                  fontSize: "9px",
-                }}
-              >
-                {stat.subtitle}
+                  <div
+                    style={{
+                      marginTop: "2px",
+                      color:
+                        colors.textMuted,
+                      fontSize: "12px",
+                    }}
+                  >
+                    {stat.helper}
+                  </div>
+                </div>
               </div>
             </div>
           );
         })}
-      </section>
+      </div>
 
-      {/* =====================================================
-          ASSIGNMENT PROGRESS
-      ====================================================== */}
-      <section
+      {/* Overall Allocation */}
+      <div
         style={{
+          ...cardStyle,
+          padding: "18px",
           marginBottom: "18px",
-          padding: "16px 18px",
-          border:
-            "1px solid #dbeafe",
-          borderRadius: "13px",
-          backgroundColor: "#eff6ff",
         }}
       >
         <div
@@ -927,85 +896,104 @@ export default function MentorAssignment() {
             justifyContent:
               "space-between",
             gap: "15px",
-            marginBottom: "9px",
+            marginBottom: "10px",
           }}
         >
           <div>
-            <strong
+            <h2
               style={{
-                color: "#1e3a8a",
-                fontSize: "12px",
+                margin: 0,
+                color: colors.text,
+                fontSize: "17px",
+                fontWeight: 700,
               }}
             >
               Overall Mentor Allocation
-            </strong>
+            </h2>
 
-            <div
+            <p
               style={{
-                marginTop: "3px",
-                color: "#64748b",
-                fontSize: "10px",
+                margin: "4px 0 0",
+                color:
+                  colors.textSecondary,
+                fontSize: "13px",
               }}
             >
-              {totalAssigned} of{" "}
-              {totalCapacity} mentor
-              capacity currently assigned
-            </div>
+              Current utilization of available
+              faculty capacity
+            </p>
           </div>
 
           <strong
             style={{
-              color: "#2563eb",
-              fontSize: "16px",
+              color: colors.primary,
+              fontSize: "26px",
             }}
           >
-            {assignmentPercentage}%
+            {stats.percentage}%
           </strong>
         </div>
 
         <div
           style={{
-            width: "100%",
-            height: "8px",
+            height: "9px",
             overflow: "hidden",
             borderRadius: "999px",
-            backgroundColor: "#dbeafe",
+            backgroundColor:
+              colors.surfaceMuted,
           }}
         >
           <div
             style={{
-              width: `${assignmentPercentage}%`,
+              width: `${Math.min(
+                stats.percentage,
+                100
+              )}%`,
               height: "100%",
               borderRadius: "999px",
-              backgroundColor: "#2563eb",
+              backgroundColor:
+                colors.primary,
               transition:
-                "width 250ms ease",
+                "width .25s ease",
             }}
           />
         </div>
-      </section>
 
-      {/* =====================================================
-          MENTOR TABLE
-      ====================================================== */}
-      <section
+        <div
+          style={{
+            display: "flex",
+            justifyContent:
+              "space-between",
+            gap: "10px",
+            marginTop: "9px",
+            color:
+              colors.textSecondary,
+            fontSize: "13px",
+          }}
+        >
+          <span>
+            {stats.totalAssigned} students
+            assigned
+          </span>
+
+          <span>
+            {stats.totalUnassigned} available
+            slots
+          </span>
+        </div>
+      </div>
+
+      {/* Mentor Directory */}
+      <div
         style={{
-          width: "100%",
-          minWidth: 0,
+          ...cardStyle,
           overflow: "hidden",
-          border:
-            "1px solid #e2e8f0",
-          borderRadius: "14px",
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 2px 8px rgba(15, 23, 42, 0.035)",
         }}
       >
         <div
           style={{
-            padding: "15px 18px",
-            borderBottom:
-              "1px solid #eef2f7",
+            padding: "18px",
+            borderBottom: `1px solid ${colors.border}`,
           }}
         >
           <div
@@ -1015,97 +1003,82 @@ export default function MentorAssignment() {
               justifyContent:
                 "space-between",
               gap: "15px",
+              marginBottom: "14px",
             }}
           >
             <div>
               <h2
                 style={{
                   margin: 0,
-                  color: "#1e293b",
-                  fontSize: "15px",
-                  fontWeight: 750,
+                  color: colors.text,
+                  fontSize: "17px",
+                  fontWeight: 700,
                 }}
               >
-                Mentor Allocation
+                Mentor Directory
               </h2>
 
               <p
                 style={{
                   margin: "4px 0 0",
-                  color: "#94a3b8",
-                  fontSize: "10px",
+                  color:
+                    colors.textSecondary,
+                  fontSize: "13px",
                 }}
               >
-                Manage mentor and student
-                assignments
+                Faculty mentor workload and OJT
+                assignment status
               </p>
             </div>
 
             <span
               style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "5px",
-                color: "#64748b",
-                fontSize: "10px",
+                color: colors.textSecondary,
+                fontSize: "13px",
               }}
             >
-              <Clock3 size={13} />
-              Live allocation
+              {filteredMentors.length} mentors
             </span>
           </div>
 
-          {/* FILTERS */}
           <div
-            className="mentor-filter-grid"
             style={{
               display: "grid",
               gridTemplateColumns:
-                "minmax(240px, 1fr) auto auto",
-              gap: "9px",
-              marginTop: "14px",
+                "minmax(260px, 1fr) 190px 150px auto",
+              gap: "10px",
             }}
           >
             <div
               style={{
-                height: "38px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor:
-                  "#ffffff",
-                boxSizing:
-                  "border-box",
+                position: "relative",
               }}
             >
               <Search
-                size={16}
-                color="#94a3b8"
+                size={17}
+                color={colors.textMuted}
+                style={{
+                  position: "absolute",
+                  left: "12px",
+                  top: "50%",
+                  transform:
+                    "translateY(-50%)",
+                  pointerEvents: "none",
+                }}
               />
 
               <input
-                type="text"
                 value={searchTerm}
                 onChange={(event) => {
                   setSearchTerm(
                     event.target.value
                   );
-                  resetPage();
+                  setCurrentPage(1);
                 }}
-                placeholder="Search mentor, company, department..."
+                placeholder="Search mentor, department or student..."
                 style={{
-                  width: "100%",
-                  minWidth: 0,
-                  border: "none",
-                  outline: "none",
-                  background:
-                    "transparent",
-                  color: "#334155",
-                  fontSize: "11px",
+                  ...inputStyle,
+                  paddingLeft: "38px",
                 }}
               />
             </div>
@@ -1116,22 +1089,9 @@ export default function MentorAssignment() {
                 setSelectedDepartment(
                   event.target.value
                 );
-                resetPage();
+                setCurrentPage(1);
               }}
-              style={{
-                height: "38px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor:
-                  "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
-                cursor: "pointer",
-                outline: "none",
-              }}
+              style={inputStyle}
             >
               {departments.map(
                 (department) => (
@@ -1151,940 +1111,133 @@ export default function MentorAssignment() {
                 setSelectedStatus(
                   event.target.value
                 );
-                resetPage();
+                setCurrentPage(1);
               }}
-              style={{
-                height: "38px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor:
-                  "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
-                cursor: "pointer",
-                outline: "none",
-              }}
-            >
-              {statuses.map(
-                (status) => (
-                  <option
-                    key={status}
-                    value={status}
-                  >
-                    {status}
-                  </option>
-                )
-              )}
-            </select>
-          </div>
-        </div>
-
-        {/* RESULT */}
-        <div
-          style={{
-            padding:
-              "10px 16px",
-            backgroundColor:
-              "#f8fafc",
-            borderBottom:
-              "1px solid #eef2f7",
-            color: "#64748b",
-            fontSize: "10px",
-          }}
-        >
-          Showing{" "}
-          <strong
-            style={{
-              color: "#334155",
-            }}
-          >
-            {filteredMentors.length ===
-            0
-              ? 0
-              : startIndex + 1}
-            -
-            {Math.min(
-              startIndex +
-                mentorsPerPage,
-              filteredMentors.length
-            )}
-          </strong>{" "}
-          of{" "}
-          <strong
-            style={{
-              color: "#334155",
-            }}
-          >
-            {filteredMentors.length}
-          </strong>{" "}
-          mentors
-        </div>
-
-        {/* TABLE */}
-        <div
-          style={{
-            width: "100%",
-            overflowX: "auto",
-          }}
-        >
-          <table
-            style={{
-              width: "100%",
-              minWidth: "950px",
-              borderCollapse:
-                "collapse",
-            }}
-          >
-            <thead>
-              <tr>
-                {[
-                  "Mentor",
-                  "Company",
-                  "Department",
-                  "Students",
-                  "Capacity",
-                  "Status",
-                  "Action",
-                ].map((heading) => (
-                  <th
-                    key={heading}
-                    style={{
-                      padding:
-                        "10px 13px",
-                      backgroundColor:
-                        "#f8fafc",
-                      borderBottom:
-                        "1px solid #e2e8f0",
-                      color: "#94a3b8",
-                      fontSize: "9px",
-                      fontWeight: 750,
-                      textAlign: "left",
-                      textTransform:
-                        "uppercase",
-                      letterSpacing:
-                        "0.45px",
-                      whiteSpace:
-                        "nowrap",
-                    }}
-                  >
-                    {heading}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody>
-              {paginatedMentors.length >
-              0 ? (
-                paginatedMentors.map(
-                  (mentor) => {
-                    const percentage =
-                      mentor.capacity ===
-                      0
-                        ? 0
-                        : Math.round(
-                            (mentor.assigned /
-                              mentor.capacity) *
-                              100
-                          );
-
-                    return (
-                      <tr
-                        key={
-                          mentor.id
-                        }
-                      >
-                        <td
-                          style={{
-                            padding:
-                              "11px 13px",
-                            borderBottom:
-                              "1px solid #f1f5f9",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display:
-                                "flex",
-                              alignItems:
-                                "center",
-                              gap: "9px",
-                            }}
-                          >
-                            <div
-                              style={{
-                                width:
-                                  "34px",
-                                height:
-                                  "34px",
-                                minWidth:
-                                  "34px",
-                                display:
-                                  "flex",
-                                alignItems:
-                                  "center",
-                                justifyContent:
-                                  "center",
-                                borderRadius:
-                                  "9px",
-                                backgroundColor:
-                                  "#eff6ff",
-                                color:
-                                  "#2563eb",
-                                fontSize:
-                                  "9px",
-                                fontWeight:
-                                  800,
-                              }}
-                            >
-                              {
-                                mentor.initials
-                              }
-                            </div>
-
-                            <div>
-                              <strong
-                                style={{
-                                  display:
-                                    "block",
-                                  color:
-                                    "#334155",
-                                  fontSize:
-                                    "11px",
-                                  fontWeight:
-                                    700,
-                                  whiteSpace:
-                                    "nowrap",
-                                }}
-                              >
-                                {
-                                  mentor.name
-                                }
-                              </strong>
-
-                              <span
-                                style={{
-                                  display:
-                                    "block",
-                                  marginTop:
-                                    "2px",
-                                  color:
-                                    "#94a3b8",
-                                  fontSize:
-                                    "9px",
-                                }}
-                              >
-                                OJT Mentor
-                              </span>
-                            </div>
-                          </div>
-                        </td>
-
-                        <td
-                          style={{
-                            padding:
-                              "11px 13px",
-                            borderBottom:
-                              "1px solid #f1f5f9",
-                            color:
-                              "#64748b",
-                            fontSize:
-                              "10px",
-                            whiteSpace:
-                              "nowrap",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display:
-                                "flex",
-                              alignItems:
-                                "center",
-                              gap: "5px",
-                            }}
-                          >
-                            <Building2
-                              size={
-                                12
-                              }
-                              color="#94a3b8"
-                            />
-
-                            {
-                              mentor.company
-                            }
-                          </div>
-                        </td>
-
-                        <td
-                          style={{
-                            padding:
-                              "11px 13px",
-                            borderBottom:
-                              "1px solid #f1f5f9",
-                            color:
-                              "#64748b",
-                            fontSize:
-                              "10px",
-                            whiteSpace:
-                              "nowrap",
-                          }}
-                        >
-                          {
-                            mentor.department
-                          }
-                        </td>
-
-                        <td
-                          style={{
-                            padding:
-                              "11px 13px",
-                            borderBottom:
-                              "1px solid #f1f5f9",
-                          }}
-                        >
-                          <strong
-                            style={{
-                              color:
-                                "#334155",
-                              fontSize:
-                                "11px",
-                            }}
-                          >
-                            {
-                              mentor.assigned
-                            }
-                          </strong>
-
-                          <div
-                            style={{
-                              width:
-                                "55px",
-                              height:
-                                "4px",
-                              marginTop:
-                                "5px",
-                              overflow:
-                                "hidden",
-                              borderRadius:
-                                "999px",
-                              backgroundColor:
-                                "#e2e8f0",
-                            }}
-                          >
-                            <div
-                              style={{
-                                width: `${percentage}%`,
-                                height:
-                                  "100%",
-                                borderRadius:
-                                  "999px",
-                                backgroundColor:
-                                  percentage >=
-                                  100
-                                    ? "#f59e0b"
-                                    : "#2563eb",
-                              }}
-                            />
-                          </div>
-                        </td>
-
-                        <td
-                          style={{
-                            padding:
-                              "11px 13px",
-                            borderBottom:
-                              "1px solid #f1f5f9",
-                            color:
-                              "#64748b",
-                            fontSize:
-                              "10px",
-                          }}
-                        >
-                          {
-                            mentor.assigned
-                          }{" "}
-                          /{" "}
-                          {
-                            mentor.capacity
-                          }
-                        </td>
-
-                        <td
-                          style={{
-                            padding:
-                              "11px 13px",
-                            borderBottom:
-                              "1px solid #f1f5f9",
-                          }}
-                        >
-                          <StatusBadge
-                            status={
-                              mentor.status
-                            }
-                          />
-                        </td>
-
-                        <td
-                          style={{
-                            position:
-                              "relative",
-                            padding:
-                              "11px 13px",
-                            borderBottom:
-                              "1px solid #f1f5f9",
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setActionMentorId(
-                                actionMentorId ===
-                                  mentor.id
-                                  ? null
-                                  : mentor.id
-                              )
-                            }
-                            style={{
-                              width:
-                                "30px",
-                              height:
-                                "30px",
-                              display:
-                                "flex",
-                              alignItems:
-                                "center",
-                              justifyContent:
-                                "center",
-                              border:
-                                "none",
-                              borderRadius:
-                                "7px",
-                              backgroundColor:
-                                "#f8fafc",
-                              color:
-                                "#64748b",
-                              cursor:
-                                "pointer",
-                            }}
-                          >
-                            <MoreHorizontal
-                              size={
-                                16
-                              }
-                            />
-                          </button>
-
-                          {actionMentorId ===
-                            mentor.id && (
-                            <div
-                              style={{
-                                position:
-                                  "absolute",
-                                right:
-                                  "13px",
-                                top:
-                                  "45px",
-                                zIndex:
-                                  20,
-                                width:
-                                  "175px",
-                                padding:
-                                  "5px",
-                                border:
-                                  "1px solid #e2e8f0",
-                                borderRadius:
-                                  "9px",
-                                backgroundColor:
-                                  "#ffffff",
-                                boxShadow:
-                                  "0 10px 25px rgba(15, 23, 42, 0.12)",
-                              }}
-                            >
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setViewMentor(
-                                    mentor
-                                  );
-                                  setActionMentorId(
-                                    null
-                                  );
-                                }}
-                                className="mentor-action-button"
-                              >
-                                <Eye
-                                  size={
-                                    14
-                                  }
-                                />
-                                View Mentor
-                              </button>
-
-                              {mentor.assigned <
-                                mentor.capacity && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    openAssignment(
-                                      mentor
-                                    )
-                                  }
-                                  className="mentor-action-button mentor-action-success"
-                                >
-                                  <UserRoundCheck
-                                    size={
-                                      14
-                                    }
-                                  />
-                                  Assign Student
-                                </button>
-                              )}
-
-                              {mentor.assigned >
-                                0 && (
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    setViewMentor(
-                                      mentor
-                                    )
-                                  }
-                                  className="mentor-action-button"
-                                >
-                                  <ArrowRightLeft
-                                    size={
-                                      14
-                                    }
-                                  />
-                                  Manage Students
-                                </button>
-                              )}
-                            </div>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  }
-                )
-              ) : (
-                <tr>
-                  <td
-                    colSpan="7"
-                    style={{
-                      padding:
-                        "50px 20px",
-                      textAlign:
-                        "center",
-                      color:
-                        "#94a3b8",
-                      fontSize:
-                        "11px",
-                    }}
-                  >
-                    <Users
-                      size={28}
-                      color="#cbd5e1"
-                      style={{
-                        marginBottom:
-                          "8px",
-                      }}
-                    />
-
-                    <div>
-                      No mentors found
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop:
-                          "4px",
-                        fontSize:
-                          "10px",
-                      }}
-                    >
-                      Try changing your
-                      search or filters.
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* PAGINATION */}
-        <div
-          style={{
-            minHeight: "58px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent:
-              "space-between",
-            gap: "12px",
-            padding:
-              "10px 16px",
-            borderTop:
-              "1px solid #eef2f7",
-          }}
-        >
-          <span
-            style={{
-              color: "#94a3b8",
-              fontSize: "10px",
-            }}
-          >
-            Page {safeCurrentPage} of{" "}
-            {totalPages}
-          </span>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-            }}
-          >
-            <button
-              type="button"
-              disabled={
-                safeCurrentPage === 1
-              }
-              onClick={() =>
-                setCurrentPage(
-                  (page) =>
-                    Math.max(
-                      1,
-                      page - 1
-                    )
-                )
-              }
-              className="mentor-page-button"
-            >
-              ‹
-            </button>
-
-            {Array.from(
-              {
-                length: totalPages,
-              },
-              (_, index) =>
-                index + 1
-            ).map((page) => (
-              <button
-                key={page}
-                type="button"
-                onClick={() =>
-                  setCurrentPage(
-                    page
-                  )
-                }
-                className={`mentor-page-button ${
-                  safeCurrentPage ===
-                  page
-                    ? "mentor-page-active"
-                    : ""
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              type="button"
-              disabled={
-                safeCurrentPage ===
-                totalPages
-              }
-              onClick={() =>
-                setCurrentPage(
-                  (page) =>
-                    Math.min(
-                      totalPages,
-                      page + 1
-                    )
-                )
-              }
-              className="mentor-page-button"
-            >
-              ›
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* =====================================================
-          VIEW MENTOR MODAL
-      ====================================================== */}
-      {viewMentor && (
-        <Modal
-          onClose={() =>
-            setViewMentor(null)
-          }
-          width="560px"
-        >
-          <ModalHeader
-            title="Mentor Details"
-            subtitle="Mentor allocation and student details"
-            onClose={() =>
-              setViewMentor(null)
-            }
-          />
-
-          <div
-            style={{
-              padding: "20px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "13px",
-                padding: "14px",
-                borderRadius: "11px",
-                backgroundColor:
-                  "#f8fafc",
-              }}
-            >
-              <div
-                style={{
-                  width: "50px",
-                  height: "50px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent:
-                    "center",
-                  borderRadius: "12px",
-                  backgroundColor:
-                    "#eff6ff",
-                  color: "#2563eb",
-                  fontSize: "13px",
-                  fontWeight: 800,
-                }}
-              >
-                {
-                  viewMentor.initials
-                }
-              </div>
-
-              <div
-                style={{
-                  flex: 1,
-                }}
-              >
-                <h3
-                  style={{
-                    margin: 0,
-                    color: "#1e293b",
-                    fontSize: "16px",
-                    fontWeight: 750,
-                  }}
-                >
-                  {viewMentor.name}
-                </h3>
-
-                <div
-                  style={{
-                    marginTop: "5px",
-                    color: "#64748b",
-                    fontSize: "10px",
-                  }}
-                >
-                  {viewMentor.department}
-                </div>
-              </div>
-
-              <StatusBadge
-                status={
-                  viewMentor.status
-                }
-              />
-            </div>
-
-            <div
-              className="mentor-detail-grid"
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "1fr 1fr",
-                gap: "10px",
-                marginTop: "15px",
-              }}
+              style={inputStyle}
             >
               {[
-                {
-                  icon: Building2,
-                  label: "Company",
-                  value:
-                    viewMentor.company,
-                },
-                {
-                  icon: BriefcaseBusiness,
-                  label: "Department",
-                  value:
-                    viewMentor.department,
-                },
-                {
-                  icon: Mail,
-                  label: "Email",
-                  value:
-                    viewMentor.email,
-                },
-                {
-                  icon: Phone,
-                  label: "Phone",
-                  value:
-                    viewMentor.phone,
-                },
-                {
-                  icon: Users,
-                  label: "Assigned Students",
-                  value:
-                    `${viewMentor.assigned} / ${viewMentor.capacity}`,
-                },
-                {
-                  icon: UserCheck,
-                  label: "Available Capacity",
-                  value:
-                    Math.max(
-                      viewMentor.capacity -
-                        viewMentor.assigned,
-                      0
-                    ),
-                },
-              ].map(
-                ({
-                  icon: Icon,
-                  label,
-                  value,
-                }) => (
-                  <div
-                    key={label}
-                    style={{
-                      padding:
-                        "12px",
-                      border:
-                        "1px solid #edf2f7",
-                      borderRadius:
-                        "10px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display:
-                          "flex",
-                        alignItems:
-                          "center",
-                        gap: "7px",
-                        color:
-                          "#94a3b8",
-                        fontSize:
-                          "9px",
-                        fontWeight:
-                          700,
-                        textTransform:
-                          "uppercase",
-                      }}
-                    >
-                      <Icon
-                        size={13}
-                      />
-                      {label}
-                    </div>
+                "All Status",
+                "Assigned",
+                "Unassigned",
+                "Full",
+              ].map((status) => (
+                <option
+                  key={status}
+                  value={status}
+                >
+                  {status}
+                </option>
+              ))}
+            </select>
 
-                    <div
-                      style={{
-                        marginTop:
-                          "6px",
-                        color:
-                          "#334155",
-                        fontSize:
-                          "11px",
-                        fontWeight:
-                          650,
-                        wordBreak:
-                          "break-word",
-                      }}
-                    >
-                      {value}
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-
-            <div
+            <button
+              type="button"
+              onClick={loadData}
+              disabled={loading}
               style={{
-                marginTop: "17px",
+                ...secondaryButtonStyle,
+                opacity: loading ? 0.6 : 1,
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent:
-                    "space-between",
-                  marginBottom:
-                    "8px",
-                }}
-              >
-                <strong
-                  style={{
-                    color:
-                      "#334155",
-                    fontSize:
-                      "11px",
-                  }}
-                >
-                  Assigned Students
-                </strong>
+              <RefreshCw size={16} />
+              Refresh
+            </button>
+          </div>
+        </div>
 
-                <span
+        {loading ? (
+          <div
+            style={{
+              padding: "60px 20px",
+              textAlign: "center",
+              color:
+                colors.textSecondary,
+              fontSize: "14px",
+            }}
+          >
+            Loading mentors...
+          </div>
+        ) : paginatedMentors.length === 0 ? (
+          <div
+            style={{
+              padding: "60px 20px",
+              textAlign: "center",
+              color:
+                colors.textSecondary,
+              fontSize: "14px",
+            }}
+          >
+            No faculty mentors found.
+          </div>
+        ) : (
+          <div
+            style={{
+              width: "100%",
+              overflowX: "auto",
+            }}
+          >
+            <table
+              style={{
+                width: "100%",
+                minWidth: "900px",
+                borderCollapse:
+                  "collapse",
+              }}
+            >
+              <thead>
+                <tr
                   style={{
-                    color:
-                      "#94a3b8",
-                    fontSize:
-                      "9px",
+                    backgroundColor:
+                      colors.surfaceMuted,
                   }}
                 >
-                  {viewMentor.students.length}{" "}
-                  students
-                </span>
-              </div>
+                  {[
+                    "Mentor",
+                    "Department",
+                    "Designation",
+                    "Students",
+                    "Capacity",
+                    "Status",
+                    "Action",
+                  ].map((heading) => (
+                    <th
+                      key={heading}
+                      style={{
+                        padding:
+                          "12px 14px",
+                        textAlign: "left",
+                        color:
+                          colors.textSecondary,
+                        fontSize: "12px",
+                        fontWeight: 700,
+                        textTransform:
+                          "uppercase",
+                        letterSpacing:
+                          ".03em",
+                        borderBottom: `1px solid ${colors.border}`,
+                      }}
+                    >
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
 
-              {viewMentor.students.length >
-              0 ? (
-                <div
-                  style={{
-                    display:
-                      "flex",
-                    flexDirection:
-                      "column",
-                    gap: "6px",
-                  }}
-                >
-                  {viewMentor.students.map(
-                    (student) => (
-                      <div
-                        key={student}
+              <tbody>
+                {paginatedMentors.map(
+                  (mentor) => (
+                    <tr
+                      key={mentor.id}
+                      style={{
+                        backgroundColor:
+                          colors.surface,
+                      }}
+                    >
+                      <td
                         style={{
-                          display:
-                            "flex",
-                          alignItems:
-                            "center",
-                          justifyContent:
-                            "space-between",
-                          gap: "10px",
                           padding:
-                            "8px 10px",
-                          border:
-                            "1px solid #edf2f7",
-                          borderRadius:
-                            "8px",
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
                         }}
                       >
                         <div
@@ -2093,466 +1246,904 @@ export default function MentorAssignment() {
                               "flex",
                             alignItems:
                               "center",
-                            gap: "8px",
+                            gap: "11px",
                           }}
                         >
-                          <div
+                          <StudentIcon
+                            colors={
+                              colors
+                            }
+                          />
+
+                          <div>
+                            <div
+                              style={{
+                                color:
+                                  colors.text,
+                                fontSize:
+                                  "14px",
+                                fontWeight:
+                                  700,
+                              }}
+                            >
+                              {mentor.name}
+                            </div>
+
+                            <div
+                              style={{
+                                marginTop:
+                                  "3px",
+                                color:
+                                  colors.textMuted,
+                                fontSize:
+                                  "12px",
+                              }}
+                            >
+                              {mentor.id}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+
+                      <td
+                        style={{
+                          padding:
+                            "14px",
+                          color:
+                            colors.textSecondary,
+                          fontSize:
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
+                        }}
+                      >
+                        {mentor.department ||
+                          "—"}
+                      </td>
+
+                      <td
+                        style={{
+                          padding:
+                            "14px",
+                          color:
+                            colors.textSecondary,
+                          fontSize:
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
+                        }}
+                      >
+                        {mentor.designation ||
+                          "Faculty Mentor"}
+                      </td>
+
+                      <td
+                        style={{
+                          padding:
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
+                        }}
+                      >
+                        <strong
+                          style={{
+                            color:
+                              colors.text,
+                            fontSize:
+                              "14px",
+                          }}
+                        >
+                          {mentor.assigned ||
+                            0}
+                        </strong>
+
+                        <span
+                          style={{
+                            color:
+                              colors.textMuted,
+                            fontSize:
+                              "12px",
+                          }}
+                        >
+                          {" "}
+                          students
+                        </span>
+                      </td>
+
+                      <td
+                        style={{
+                          padding:
+                            "14px",
+                          color:
+                            colors.textSecondary,
+                          fontSize:
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
+                        }}
+                      >
+                        {mentor.capacity ||
+                          MENTOR_CAPACITY}
+                      </td>
+
+                      <td
+                        style={{
+                          padding:
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
+                        }}
+                      >
+                        <StatusBadge
+                          status={
+                            mentor.status
+                          }
+                          colors={
+                            colors
+                          }
+                        />
+                      </td>
+
+                      <td
+                        style={{
+                          padding:
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display:
+                              "flex",
+                            gap: "7px",
+                          }}
+                        >
+                          <button
+                            type="button"
+                            title="View students"
+                            onClick={() =>
+                              setViewMentor(
+                                mentor
+                              )
+                            }
                             style={{
-                              width:
-                                "26px",
-                              height:
-                                "26px",
+                              width: "34px",
+                              height: "34px",
                               display:
                                 "flex",
                               alignItems:
                                 "center",
                               justifyContent:
                                 "center",
+                              border: `1px solid ${colors.border}`,
                               borderRadius:
-                                "50%",
-                              backgroundColor:
-                                "#eff6ff",
-                              color:
-                                "#2563eb",
-                              fontSize:
                                 "8px",
-                              fontWeight:
-                                800,
-                            }}
-                          >
-                            {student
-                              .split(
-                                " "
-                              )
-                              .map(
-                                (
-                                  word
-                                ) =>
-                                  word[0]
-                              )
-                              .join(
-                                ""
-                              )
-                              .slice(
-                                0,
-                                2
-                              )}
-                          </div>
-
-                          <span
-                            style={{
+                              backgroundColor:
+                                colors.surface,
                               color:
-                                "#475569",
-                              fontSize:
-                                "10px",
-                              fontWeight:
-                                600,
+                                colors.textSecondary,
+                              cursor:
+                                "pointer",
                             }}
                           >
-                            {student}
-                          </span>
-                        </div>
+                            <Eye
+                              size={15}
+                            />
+                          </button>
 
-                        <button
-                          type="button"
-                          onClick={() =>
-                            handleUnassignStudent(
-                              viewMentor.id,
-                              student
-                            )
-                          }
-                          style={{
-                            width:
-                              "26px",
-                            height:
-                              "26px",
-                            display:
-                              "flex",
-                            alignItems:
-                              "center",
-                            justifyContent:
-                              "center",
-                            border:
-                              "none",
-                            borderRadius:
-                              "6px",
-                            backgroundColor:
-                              "#fef2f2",
-                            color:
-                              "#dc2626",
-                            cursor:
-                              "pointer",
-                          }}
-                          title="Unassign student"
-                        >
-                          <X
-                            size={
-                              13
+                          <button
+                            type="button"
+                            title="Assign student"
+                            disabled={
+                              mentor.assigned >=
+                                mentor.capacity ||
+                              availableApplications.length ===
+                                0
                             }
-                          />
-                        </button>
-                      </div>
-                    )
-                  )}
-                </div>
-              ) : (
-                <div
-                  style={{
-                    padding:
-                      "20px",
-                    border:
-                      "1px dashed #dbe4ee",
-                    borderRadius:
-                      "9px",
-                    textAlign:
-                      "center",
-                    color:
-                      "#94a3b8",
-                    fontSize:
-                      "10px",
-                  }}
-                >
-                  No students assigned
-                  yet.
-                </div>
-              )}
-            </div>
+                            onClick={() => {
+                              setForm({
+                                ...emptyForm,
+                                facultyId:
+                                  mentor.id,
+                              });
+                              setEditingAssignment(
+                                null
+                              );
+                              setError("");
+                              setShowAssignModal(
+                                true
+                              );
+                            }}
+                            style={{
+                              width: "34px",
+                              height: "34px",
+                              display:
+                                "flex",
+                              alignItems:
+                                "center",
+                              justifyContent:
+                                "center",
+                              border: `1px solid ${colors.border}`,
+                              borderRadius:
+                                "8px",
+                              backgroundColor:
+                                colors.surface,
+                              color:
+                                colors.primary,
+                              cursor:
+                                mentor.assigned >=
+                                  mentor.capacity ||
+                                availableApplications.length ===
+                                  0
+                                  ? "not-allowed"
+                                  : "pointer",
+                              opacity:
+                                mentor.assigned >=
+                                  mentor.capacity ||
+                                availableApplications.length ===
+                                  0
+                                  ? 0.45
+                                  : 1,
+                            }}
+                          >
+                            <Plus
+                              size={15}
+                            />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
 
+        {!loading &&
+          filteredMentors.length > 0 && (
             <div
               style={{
-                display:
-                  "flex",
+                display: "flex",
+                alignItems:
+                  "center",
                 justifyContent:
-                  "flex-end",
-                gap: "8px",
-                marginTop:
-                  "18px",
+                  "space-between",
+                gap: "12px",
+                padding:
+                  "13px 18px",
+                borderTop: `1px solid ${colors.border}`,
+                color:
+                  colors.textSecondary,
+                fontSize: "13px",
               }}
             >
-              {viewMentor.assigned <
-                viewMentor.capacity && (
+              <span>
+                Showing{" "}
+                {(safePage - 1) *
+                  MENTORS_PER_PAGE +
+                  1}
+                -
+                {Math.min(
+                  safePage *
+                    MENTORS_PER_PAGE,
+                  filteredMentors.length
+                )}{" "}
+                of{" "}
+                {filteredMentors.length}
+              </span>
+
+              <div
+                style={{
+                  display:
+                    "flex",
+                  gap: "6px",
+                }}
+              >
                 <button
                   type="button"
+                  disabled={
+                    safePage === 1
+                  }
                   onClick={() =>
-                    openAssignment(
-                      viewMentor
+                    setCurrentPage(
+                      (page) =>
+                        Math.max(
+                          page - 1,
+                          1
+                        )
                     )
                   }
                   style={{
-                    height:
-                      "36px",
+                    ...secondaryButtonStyle,
+                    minHeight: "34px",
+                    opacity:
+                      safePage === 1
+                        ? 0.45
+                        : 1,
+                  }}
+                >
+                  Previous
+                </button>
+
+                <span
+                  style={{
+                    minHeight: "34px",
                     display:
                       "inline-flex",
                     alignItems:
                       "center",
-                    gap: "6px",
                     padding:
-                      "0 13px",
-                    border:
-                      "none",
+                      "0 11px",
                     borderRadius:
                       "8px",
                     backgroundColor:
-                      "#2563eb",
+                      colors.primarySoft,
                     color:
-                      "#ffffff",
-                    fontSize:
-                      "10px",
-                    fontWeight:
-                      700,
-                    cursor:
-                      "pointer",
+                      colors.primary,
+                    fontWeight: 700,
                   }}
                 >
-                  <Plus
-                    size={13}
-                  />
-                  Assign Student
+                  {safePage} /{" "}
+                  {totalPages}
+                </span>
+
+                <button
+                  type="button"
+                  disabled={
+                    safePage ===
+                    totalPages
+                  }
+                  onClick={() =>
+                    setCurrentPage(
+                      (page) =>
+                        Math.min(
+                          page + 1,
+                          totalPages
+                        )
+                    )
+                  }
+                  style={{
+                    ...secondaryButtonStyle,
+                    minHeight: "34px",
+                    opacity:
+                      safePage ===
+                      totalPages
+                        ? 0.45
+                        : 1,
+                  }}
+                >
+                  Next
                 </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() =>
-                  setViewMentor(
-                    null
-                  )
-                }
-                style={{
-                  height: "36px",
-                  padding:
-                    "0 15px",
-                  border:
-                    "1px solid #dbe4ee",
-                  borderRadius:
-                    "8px",
-                  backgroundColor:
-                    "#ffffff",
-                  color:
-                    "#475569",
-                  fontSize:
-                    "10px",
-                  fontWeight:
-                    700,
-                  cursor:
-                    "pointer",
-                }}
-              >
-                Close
-              </button>
+              </div>
             </div>
-          </div>
-        </Modal>
-      )}
+          )}
+      </div>
 
-      {/* =====================================================
-          ASSIGN STUDENT MODAL
-      ====================================================== */}
-      {assignmentMentor && (
+      {/* View Mentor */}
+      {viewMentor && (
         <Modal
-          onClose={() => {
-            setAssignmentMentor(
-              null
-            );
-            setSelectedStudent(
-              ""
-            );
-          }}
-          width="470px"
+          onClose={() =>
+            setViewMentor(null)
+          }
+          width="680px"
+          colors={colors}
         >
           <ModalHeader
-            title="Assign Student"
-            subtitle={`Assign a student to ${assignmentMentor.name}`}
-            onClose={() => {
-              setAssignmentMentor(
-                null
-              );
-              setSelectedStudent(
-                ""
-              );
-            }}
+            title={viewMentor.name}
+            subtitle={`${viewMentor.department || "Department"} • ${
+              viewMentor.designation ||
+              "Faculty Mentor"
+            }`}
+            onClose={() =>
+              setViewMentor(null)
+            }
+            colors={colors}
           />
 
-          <form
-            onSubmit={
-              handleAssignStudent
-            }
+          <div
             style={{
               padding: "20px",
             }}
           >
-            <div
-              style={{
-                display:
-                  "flex",
-                alignItems:
-                  "center",
-                gap: "10px",
-                marginBottom:
-                  "16px",
-                padding:
-                  "12px",
-                borderRadius:
-                  "9px",
-                backgroundColor:
-                  "#eff6ff",
-              }}
-            >
+            {(viewMentor.students ||
+              []).length === 0 ? (
               <div
                 style={{
-                  width: "38px",
-                  height: "38px",
-                  display:
-                    "flex",
-                  alignItems:
+                  padding:
+                    "35px 20px",
+                  textAlign:
                     "center",
-                  justifyContent:
-                    "center",
+                  color:
+                    colors.textSecondary,
+                  fontSize:
+                    "14px",
+                }}
+              >
+                No students assigned to
+                this mentor.
+              </div>
+            ) : (
+              <div
+                style={{
+                  display: "grid",
+                  gap: "10px",
+                }}
+              >
+                {(
+                  viewMentor.students ||
+                  []
+                ).map((student) => (
+                  <div
+                    key={
+                      student.assignmentId
+                    }
+                    style={{
+                      display:
+                        "flex",
+                      alignItems:
+                        "center",
+                      justifyContent:
+                        "space-between",
+                      gap: "12px",
+                      padding:
+                        "13px",
+                      border: `1px solid ${colors.border}`,
+                      borderRadius:
+                        "10px",
+                      backgroundColor:
+                        colors.surfaceMuted,
+                    }}
+                  >
+                    <div
+                      style={{
+                        minWidth: 0,
+                      }}
+                    >
+                      <div
+                        style={{
+                          color:
+                            colors.text,
+                          fontSize:
+                            "14px",
+                          fontWeight:
+                            700,
+                        }}
+                      >
+                        {
+                          student.studentName
+                        }
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop:
+                            "4px",
+                          color:
+                            colors.textSecondary,
+                          fontSize:
+                            "12px",
+                        }}
+                      >
+                        {student.rollNumber ||
+                          student.studentId}{" "}
+                        •{" "}
+                        {
+                          student.opportunityTitle
+                        }
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop:
+                            "4px",
+                          color:
+                            colors.textMuted,
+                          fontSize:
+                            "12px",
+                        }}
+                      >
+                        {
+                          student.startDate
+                        }{" "}
+                        →{" "}
+                        {
+                          student.endDate
+                        }
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display:
+                          "flex",
+                        gap: "7px",
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() =>
+                          openEditModal(
+                            student
+                          )
+                        }
+                        style={{
+                          ...secondaryButtonStyle,
+                          minHeight:
+                            "34px",
+                          color:
+                            colors.primary,
+                        }}
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleRemoveAssignment(
+                            student.assignmentId
+                          )
+                        }
+                        style={{
+                          width:
+                            "34px",
+                          height:
+                            "34px",
+                          display:
+                            "flex",
+                          alignItems:
+                            "center",
+                          justifyContent:
+                            "center",
+                          border: `1px solid ${colors.dangerSoft}`,
+                          borderRadius:
+                            "8px",
+                          backgroundColor:
+                            colors.dangerSoft,
+                          color:
+                            colors.danger,
+                          cursor:
+                            "pointer",
+                        }}
+                      >
+                        <Trash2
+                          size={14}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
+
+      {/* Assignment Modal */}
+      {showAssignModal && (
+        <Modal
+          onClose={() =>
+            !saving &&
+            setShowAssignModal(
+              false
+            )
+          }
+          colors={colors}
+        >
+          <ModalHeader
+            title={
+              editingAssignment
+                ? "Edit Mentor Assignment"
+                : "Assign Mentor"
+            }
+            subtitle="Save the OJT mentor assignment to MongoDB."
+            onClose={() =>
+              !saving &&
+              setShowAssignModal(
+                false
+              )
+            }
+            colors={colors}
+          />
+
+          <form
+            onSubmit={handleSubmit}
+            style={{
+              padding: "20px",
+            }}
+          >
+            {error && (
+              <div
+                style={{
+                  marginBottom:
+                    "14px",
+                  padding:
+                    "11px 12px",
                   borderRadius:
                     "9px",
                   backgroundColor:
-                    "#ffffff",
+                    colors.dangerSoft,
                   color:
-                    "#2563eb",
+                    colors.danger,
                   fontSize:
-                    "10px",
+                    "13px",
                   fontWeight:
-                    800,
+                    600,
                 }}
               >
-                {
-                  assignmentMentor.initials
-                }
+                {error}
               </div>
-
-              <div>
-                <strong
-                  style={{
-                    display:
-                      "block",
-                    color:
-                      "#334155",
-                    fontSize:
-                      "11px",
-                  }}
-                >
-                  {
-                    assignmentMentor.name
-                  }
-                </strong>
-
-                <span
-                  style={{
-                    display:
-                      "block",
-                    marginTop:
-                      "3px",
-                    color:
-                      "#64748b",
-                    fontSize:
-                      "9px",
-                  }}
-                >
-                  {assignmentMentor.assigned}{" "}
-                  /{" "}
-                  {
-                    assignmentMentor.capacity
-                  }{" "}
-                  students assigned
-                </span>
-              </div>
-            </div>
-
-            <label
-              style={{
-                display:
-                  "block",
-                marginBottom:
-                  "6px",
-                color:
-                  "#475569",
-                fontSize:
-                  "10px",
-                fontWeight:
-                  700,
-              }}
-            >
-              Select Student
-            </label>
-
-            <select
-              required
-              value={
-                selectedStudent
-              }
-              onChange={(event) =>
-                setSelectedStudent(
-                  event.target
-                    .value
-                )
-              }
-              style={{
-                width:
-                  "100%",
-                height:
-                  "40px",
-                padding:
-                  "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius:
-                  "8px",
-                backgroundColor:
-                  "#ffffff",
-                color:
-                  "#334155",
-                fontSize:
-                  "11px",
-                outline:
-                  "none",
-              }}
-            >
-              <option value="">
-                Choose a student
-              </option>
-
-              {availableStudents.map(
-                (student) => (
-                  <option
-                    key={
-                      student
-                    }
-                    value={
-                      student
-                    }
-                  >
-                    {student}
-                  </option>
-                )
-              )}
-            </select>
-
-            {availableStudents.length ===
-              0 && (
-              <p
-                style={{
-                  margin:
-                    "8px 0 0",
-                  color:
-                    "#dc2626",
-                  fontSize:
-                    "10px",
-                }}
-              >
-                All students are
-                currently assigned.
-              </p>
             )}
 
             <div
               style={{
-                display:
-                  "flex",
+                marginBottom:
+                  "16px",
+              }}
+            >
+              <FieldLabel
+                colors={colors}
+              >
+                Selected Student /
+                Application
+              </FieldLabel>
+
+              <select
+                value={
+                  form.applicationId
+                }
+                disabled={Boolean(
+                  editingAssignment
+                )}
+                onChange={(event) =>
+                  setForm(
+                    (current) => ({
+                      ...current,
+                      applicationId:
+                        event.target
+                          .value,
+                    })
+                  )
+                }
+                style={{
+                  ...inputStyle,
+                  opacity:
+                    editingAssignment
+                      ? 0.7
+                      : 1,
+                }}
+              >
+                <option value="">
+                  Select a selected student
+                </option>
+
+                {availableApplications.map(
+                  (application) => (
+                    <option
+                      key={
+                        application.applicationId
+                      }
+                      value={
+                        application.applicationId
+                      }
+                    >
+                      {
+                        application.studentName
+                      }{" "}
+                      —{" "}
+                      {
+                        application.opportunityTitle
+                      }
+                    </option>
+                  )
+                )}
+              </select>
+
+              {availableApplications.length ===
+                0 &&
+                !editingAssignment && (
+                  <div
+                    style={{
+                      marginTop:
+                        "6px",
+                      color:
+                        colors.warning,
+                      fontSize:
+                        "12px",
+                    }}
+                  >
+                    No selected and
+                    unassigned applications
+                    are available.
+                  </div>
+                )}
+            </div>
+
+            <div
+              style={{
+                marginBottom:
+                  "16px",
+              }}
+            >
+              <FieldLabel
+                colors={colors}
+              >
+                Faculty Mentor
+              </FieldLabel>
+
+              <select
+                value={
+                  form.facultyId
+                }
+                onChange={(event) =>
+                  setForm(
+                    (current) => ({
+                      ...current,
+                      facultyId:
+                        event.target
+                          .value,
+                    })
+                  )
+                }
+                style={inputStyle}
+              >
+                <option value="">
+                  Select faculty mentor
+                </option>
+
+                {mentors
+                  .filter(
+                    (mentor) =>
+                      mentor.assigned <
+                        mentor.capacity ||
+                      mentor.id ===
+                        form.facultyId
+                  )
+                  .map((mentor) => (
+                    <option
+                      key={mentor.id}
+                      value={mentor.id}
+                    >
+                      {mentor.name} —{" "}
+                      {
+                        mentor.department
+                      }{" "}
+                      (
+                      {mentor.assigned}/
+                      {mentor.capacity}
+                      )
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "1fr 1fr",
+                gap: "12px",
+                marginBottom:
+                  "20px",
+              }}
+            >
+              <div>
+                <FieldLabel
+                  colors={colors}
+                >
+                  Start Date
+                </FieldLabel>
+
+                <div
+                  style={{
+                    position:
+                      "relative",
+                  }}
+                >
+                  <input
+                    type="date"
+                    value={
+                      form.startDate
+                    }
+                    onChange={(event) =>
+                      setForm(
+                        (current) => ({
+                          ...current,
+                          startDate:
+                            event.target
+                              .value,
+                        })
+                      )
+                    }
+                    style={inputStyle}
+                  />
+
+                  <CalendarDays
+                    size={15}
+                    color={
+                      colors.textMuted
+                    }
+                    style={{
+                      position:
+                        "absolute",
+                      right: "11px",
+                      top: "50%",
+                      transform:
+                        "translateY(-50%)",
+                      pointerEvents:
+                        "none",
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <FieldLabel
+                  colors={colors}
+                >
+                  End Date
+                </FieldLabel>
+
+                <div
+                  style={{
+                    position:
+                      "relative",
+                  }}
+                >
+                  <input
+                    type="date"
+                    value={
+                      form.endDate
+                    }
+                    onChange={(event) =>
+                      setForm(
+                        (current) => ({
+                          ...current,
+                          endDate:
+                            event.target
+                              .value,
+                        })
+                      )
+                    }
+                    style={inputStyle}
+                  />
+
+                  <CalendarDays
+                    size={15}
+                    color={
+                      colors.textMuted
+                    }
+                    style={{
+                      position:
+                        "absolute",
+                      right: "11px",
+                      top: "50%",
+                      transform:
+                        "translateY(-50%)",
+                      pointerEvents:
+                        "none",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
                 justifyContent:
                   "flex-end",
                 gap: "8px",
-                marginTop:
-                  "20px",
-                paddingTop:
-                  "15px",
-                borderTop:
-                  "1px solid #eef2f7",
               }}
             >
               <button
                 type="button"
-                onClick={() => {
-                  setAssignmentMentor(
-                    null
-                  );
-                  setSelectedStudent(
-                    ""
-                  );
-                }}
+                disabled={saving}
+                onClick={() =>
+                  setShowAssignModal(
+                    false
+                  )
+                }
                 style={{
-                  height:
-                    "37px",
-                  padding:
-                    "0 14px",
-                  border:
-                    "1px solid #dbe4ee",
-                  borderRadius:
-                    "8px",
-                  backgroundColor:
-                    "#ffffff",
-                  color:
-                    "#64748b",
-                  fontSize:
-                    "10px",
-                  fontWeight:
-                    700,
-                  cursor:
-                    "pointer",
+                  ...secondaryButtonStyle,
+                  opacity:
+                    saving ? 0.6 : 1,
                 }}
               >
                 Cancel
@@ -2560,129 +2151,49 @@ export default function MentorAssignment() {
 
               <button
                 type="submit"
-                disabled={
-                  !selectedStudent
-                }
+                disabled={saving}
                 style={{
-                  height:
-                    "37px",
-                  padding:
-                    "0 15px",
-                  border:
-                    "none",
-                  borderRadius:
-                    "8px",
-                  backgroundColor:
-                    selectedStudent
-                      ? "#2563eb"
-                      : "#cbd5e1",
-                  color:
-                    "#ffffff",
-                  fontSize:
-                    "10px",
-                  fontWeight:
-                    700,
-                  cursor:
-                    selectedStudent
-                      ? "pointer"
-                      : "not-allowed",
+                  ...primaryButtonStyle,
+                  opacity:
+                    saving ? 0.65 : 1,
                 }}
               >
-                Assign Student
+                <Check size={15} />
+
+                {saving
+                  ? "Saving..."
+                  : editingAssignment
+                  ? "Update Assignment"
+                  : "Assign Mentor"}
               </button>
             </div>
           </form>
         </Modal>
       )}
 
-      {/* =====================================================
-          STYLES
-      ====================================================== */}
-      <style>
-        {`
-          .mentor-action-button {
-            width: 100%;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 9px;
-            border: none;
-            border-radius: 6px;
-            background: transparent;
-            color: #475569;
-            font-size: 10px;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
+      <style>{`
+        @media (max-width: 1100px) {
+          .mentor-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+          }
+        }
+
+        @media (max-width: 850px) {
+          .mentor-filter-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+
+        @media (max-width: 650px) {
+          .mentor-stats {
+            grid-template-columns: 1fr !important;
           }
 
-          .mentor-action-button:hover {
-            background: #f8fafc;
+          .mentor-date-grid {
+            grid-template-columns: 1fr !important;
           }
-
-          .mentor-action-success {
-            color: #059669;
-          }
-
-          .mentor-action-success:hover {
-            background: #ecfdf5;
-          }
-
-          .mentor-page-button {
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #e2e8f0;
-            border-radius: 7px;
-            background: #ffffff;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-          }
-
-          .mentor-page-button:hover:not(:disabled) {
-            border-color: #bfdbfe;
-            background: #eff6ff;
-            color: #2563eb;
-          }
-
-          .mentor-page-button:disabled {
-            color: #cbd5e1;
-            cursor: not-allowed;
-            background: #f8fafc;
-          }
-
-          .mentor-page-active {
-            border-color: #2563eb;
-            background: #2563eb;
-            color: #ffffff;
-          }
-
-          @media (max-width: 1000px) {
-            .mentor-stat-grid {
-              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
-          }
-
-          @media (max-width: 700px) {
-            .mentor-stat-grid {
-              grid-template-columns: 1fr !important;
-            }
-
-            .mentor-filter-grid {
-              grid-template-columns: 1fr !important;
-            }
-
-            .mentor-detail-grid {
-              grid-template-columns: 1fr !important;
-            }
-          }
-        `}
-      </style>
+        }
+      `}</style>
     </div>
   );
 }

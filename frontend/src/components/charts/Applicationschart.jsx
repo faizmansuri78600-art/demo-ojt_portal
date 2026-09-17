@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import {
   LineChart,
   Line,
@@ -8,20 +9,40 @@ import {
   ResponsiveContainer
 } from 'recharts';
 
-const data = [
-  { date: '01 Jul', applications: 4 },
-  { date: '05 Jul', applications: 9 },
-  { date: '10 Jul', applications: 14 },
-  { date: '15 Jul', applications: 28 },
-  { date: '20 Jul', applications: 22 },
-  { date: '25 Jul', applications: 34 },
-  { date: '31 Jul', applications: 48 },
-];
+const companyId = 'C001';
 
 export default function ApplicationsChart() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchApplicationTrend = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/companies/${companyId}/dashboard/application-trend`
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          const formattedData = result.trend.map((item) => ({
+            date: item.date,
+            applications: item.applications
+          }));
+
+          setData(formattedData);
+        }
+      } catch (error) {
+        console.error(
+          'Failed to fetch application trend:',
+          error
+        );
+      }
+    };
+
+    fetchApplicationTrend();
+  }, []);
+
   return (
-    // h-full + flex flex-col instead of a fixed h-[235px] — lets this card
-    // stretch to match DepartmentChart's height (grid rows stretch by default)
     <div className="bg-white rounded-2xl p-5 shadow-sm h-full flex flex-col">
 
       <div className="flex items-center justify-between mb-2">
@@ -34,13 +55,16 @@ export default function ApplicationsChart() {
         </select>
       </div>
 
-      {/* flex-1 + min-h-0: this wrapper takes all remaining space in the card,
-          and ResponsiveContainer height="100%" fills exactly that */}
       <div className="flex-1 min-h-0">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart
             data={data}
-            margin={{ top: 5, right: 10, left: -10, bottom: 0 }}
+            margin={{
+              top: 5,
+              right: 10,
+              left: -10,
+              bottom: 0
+            }}
           >
             <CartesianGrid
               stroke="#E5E7EB"
@@ -56,8 +80,8 @@ export default function ApplicationsChart() {
             />
 
             <YAxis
-              domain={[0, 60]}
-              ticks={[0, 10, 20, 30, 40, 50, 60]}
+              domain={[0, 6]}
+              ticks={[0, 1, 2, 3, 4, 5, 6]}
               tick={{ fontSize: 10 }}
               axisLine={false}
               tickLine={false}
@@ -70,8 +94,14 @@ export default function ApplicationsChart() {
               dataKey="applications"
               stroke="#1E5EFF"
               strokeWidth={2.5}
-              dot={{ r: 3.5, fill: '#1E5EFF' }}
-              activeDot={{ r: 5, fill: '#1E5EFF' }}
+              dot={{
+                r: 3.5,
+                fill: '#1E5EFF'
+              }}
+              activeDot={{
+                r: 5,
+                fill: '#1E5EFF'
+              }}
             />
           </LineChart>
         </ResponsiveContainer>

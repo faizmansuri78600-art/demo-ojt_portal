@@ -1,197 +1,316 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
-  Search,
-  Filter,
-  Eye,
-  Download,
-  MoreHorizontal,
-  FileText,
-  Users,
+  AlertCircle,
+  ArrowRight,
+  BarChart3,
   Building2,
   CalendarDays,
   CheckCircle2,
-  Clock3,
-  AlertCircle,
-  TrendingUp,
-  UserCheck,
-  X,
+  ChevronLeft,
   ChevronRight,
-  ClipboardList,
-  BarChart3,
+  Clock3,
+  Download,
+  Eye,
+  FileBarChart2,
+  FileText,
+  GraduationCap,
+  RefreshCw,
+  Search,
+  Users,
+  X,
 } from "lucide-react";
 
-const reportData = [
-  {
-    id: 1,
-    student: "Aman Verma",
-    initials: "AV",
-    company: "Tech Solutions Inc.",
-    position: "Web Developer Intern",
-    mentor: "Rajesh Kumar",
-    startDate: "01 May 2026",
-    endDate: "31 July 2026",
-    progress: 78,
-    attendance: 94,
-    mentorFeedback: "Submitted",
-    completion: "In Progress",
-    department: "Web Development",
-  },
-  {
-    id: 2,
-    student: "Riya Shah",
-    initials: "RS",
-    company: "DataMind Pvt. Ltd.",
-    position: "Data Analyst Intern",
-    mentor: "Priya Iyer",
-    startDate: "05 May 2026",
-    endDate: "05 August 2026",
-    progress: 72,
-    attendance: 91,
-    mentorFeedback: "Submitted",
-    completion: "In Progress",
-    department: "Data Analytics",
-  },
-  {
-    id: 3,
-    student: "Aditya Patel",
-    initials: "AP",
-    company: "Creative Media",
-    position: "UI/UX Design Intern",
-    mentor: "Amit Verma",
-    startDate: "10 April 2026",
-    endDate: "10 July 2026",
-    progress: 100,
-    attendance: 97,
-    mentorFeedback: "Submitted",
-    completion: "Completed",
-    department: "UI/UX Design",
-  },
-  {
-    id: 4,
-    student: "Sneha Joshi",
-    initials: "SJ",
-    company: "CloudTech Solutions",
-    position: "Cloud Intern",
-    mentor: "Vivek Singh",
-    startDate: "15 May 2026",
-    endDate: "15 August 2026",
-    progress: 65,
-    attendance: 88,
-    mentorFeedback: "Pending",
-    completion: "In Progress",
-    department: "Cloud Computing",
-  },
-  {
-    id: 5,
-    student: "Rahul Mehta",
-    initials: "RM",
-    company: "Innovatech Labs",
-    position: "Software Developer Intern",
-    mentor: "Neha Kapoor",
-    startDate: "01 June 2026",
-    endDate: "31 August 2026",
-    progress: 48,
-    attendance: 82,
-    mentorFeedback: "Pending",
-    completion: "Needs Attention",
-    department: "Software Development",
-  },
-  {
-    id: 6,
-    student: "Neha Singh",
-    initials: "NS",
-    company: "SecureNet Pvt. Ltd.",
-    position: "Cyber Security Intern",
-    mentor: "Sanjay Shah",
-    startDate: "01 May 2026",
-    endDate: "31 July 2026",
-    progress: 100,
-    attendance: 96,
-    mentorFeedback: "Submitted",
-    completion: "Completed",
-    department: "Cyber Security",
-  },
-  {
-    id: 7,
-    student: "Karan Mehta",
-    initials: "KM",
-    company: "Deloitte",
-    position: "Business Analyst Intern",
-    mentor: "Anjali Desai",
-    startDate: "10 May 2026",
-    endDate: "10 August 2026",
-    progress: 70,
-    attendance: 90,
-    mentorFeedback: "Submitted",
-    completion: "In Progress",
-    department: "Business Analytics",
-  },
-  {
-    id: 8,
-    student: "Ishita Shah",
-    initials: "IS",
-    company: "HCLTech",
-    position: "Software Engineer Intern",
-    mentor: "Rohan Kulkarni",
-    startDate: "15 April 2026",
-    endDate: "15 July 2026",
-    progress: 100,
-    attendance: 98,
-    mentorFeedback: "Submitted",
-    completion: "Completed",
-    department: "Software Development",
-  },
-];
+import { ojtReportsService } from "../../services/ojtReportsService";
+import { useCoordinatorTheme } from "../../context/CoordinatorThemeContext";
 
-const companies = [
-  "All Companies",
-  "Tech Solutions Inc.",
-  "DataMind Pvt. Ltd.",
-  "Creative Media",
-  "CloudTech Solutions",
-  "Innovatech Labs",
-  "SecureNet Pvt. Ltd.",
-  "Deloitte",
-  "HCLTech",
-];
+/* ============================================================
+   HELPERS
+============================================================ */
 
-const reportTypes = [
-  "All Reports",
-  "Student Report",
-  "Company Report",
-  "Attendance Report",
-  "Progress Report",
-];
+function getInitials(name = "") {
+  const initials = String(name)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part.charAt(0).toUpperCase())
+    .join("");
 
-const completionStatuses = [
-  "All Status",
-  "In Progress",
-  "Completed",
-  "Needs Attention",
-];
+  return initials || "ST";
+}
 
-function CompletionBadge({ status }) {
-  const styles = {
-    Completed: {
-      background: "#ecfdf5",
-      color: "#059669",
-    },
-    "In Progress": {
-      background: "#eff6ff",
-      color: "#2563eb",
-    },
-    "Needs Attention": {
-      background: "#fef2f2",
-      color: "#dc2626",
-    },
+function formatDate(value) {
+  if (!value) return "Not available";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function formatNumber(value) {
+  const number = Number(value);
+
+  if (Number.isNaN(number)) return "0";
+
+  return number.toLocaleString("en-IN");
+}
+
+function normalizeReport(item = {}) {
+  const student =
+    item.student ||
+    item.studentName ||
+    item.name ||
+    "Unknown Student";
+
+  const company =
+    item.company ||
+    item.companyName ||
+    "Company not available";
+
+  const mentor =
+    item.mentor ||
+    item.mentorName ||
+    item.supervisor ||
+    "Mentor not assigned";
+
+  const progress =
+    item.progress ??
+    item.ojtProgress ??
+    item.completionPercentage ??
+    0;
+
+  const attendance =
+    item.attendance ??
+    item.attendancePercentage ??
+    0;
+
+  const weeklyReports =
+    item.weeklyReports ??
+    item.weeklyReportCount ??
+    item.reports ??
+    0;
+
+  const totalMarks =
+    item.totalMarks ??
+    item.overallScore ??
+    item.score ??
+    null;
+
+  const status =
+    item.status ||
+    item.ojtStatus ||
+    item.assignmentStatus ||
+    "Not available";
+
+  return {
+    ...item,
+
+    id:
+      item.id ||
+      item._id ||
+      item.assignmentId ||
+      item.applicationId ||
+      `${student}-${company}`,
+
+    student,
+
+    studentId:
+      item.studentId ||
+      item.student?._id ||
+      "",
+
+    initials:
+      item.initials ||
+      getInitials(student),
+
+    rollNumber:
+      item.rollNumber ||
+      item.rollNo ||
+      item.studentRollNumber ||
+      "N/A",
+
+    department:
+      item.department ||
+      item.studentDepartment ||
+      "N/A",
+
+    company,
+
+    companyId:
+      item.companyId ||
+      "",
+
+    position:
+      item.position ||
+      item.opportunityTitle ||
+      item.role ||
+      "OJT",
+
+    mentor,
+
+    mentorDepartment:
+      item.mentorDepartment ||
+      "",
+
+    startDate:
+      item.startDate ||
+      "",
+
+    endDate:
+      item.endDate ||
+      "",
+
+    progress: Math.max(
+      0,
+      Math.min(100, Number(progress) || 0)
+    ),
+
+    attendance: Math.max(
+      0,
+      Math.min(100, Number(attendance) || 0)
+    ),
+
+    attendancePresent:
+      Number(item.attendancePresent) || 0,
+
+    attendanceAbsent:
+      Number(item.attendanceAbsent) || 0,
+
+    attendanceLeave:
+      Number(item.attendanceLeave) || 0,
+
+    weeklyReports:
+      Number(weeklyReports) || 0,
+
+    totalDays:
+      Number(item.totalDays) || 0,
+
+    completedDays:
+      Number(item.completedDays) || 0,
+
+    totalMarks:
+      totalMarks === null ||
+      totalMarks === undefined ||
+      totalMarks === ""
+        ? null
+        : Number(totalMarks),
+
+    status,
+
+    assignmentStatus:
+      item.assignmentStatus ||
+      item.status ||
+      "Assigned",
+
+    location:
+      item.location ||
+      "Not specified",
+
+    lastUpdate:
+      item.lastUpdate ||
+      item.updatedAt ||
+      "",
   };
+}
 
-  const style =
-    styles[status] || {
-      background: "#f8fafc",
-      color: "#64748b",
+function extractReports(payload) {
+  if (!payload) return [];
+
+  if (Array.isArray(payload)) {
+    return payload.map(normalizeReport);
+  }
+
+  if (Array.isArray(payload.reports)) {
+    return payload.reports.map(normalizeReport);
+  }
+
+  if (Array.isArray(payload.reportData)) {
+    return payload.reportData.map(normalizeReport);
+  }
+
+  if (Array.isArray(payload.reportsData)) {
+    return payload.reportsData.map(normalizeReport);
+  }
+
+  if (Array.isArray(payload.data)) {
+    return payload.data.map(normalizeReport);
+  }
+
+  if (Array.isArray(payload.trackingData)) {
+    return payload.trackingData.map(normalizeReport);
+  }
+
+  if (Array.isArray(payload.assignedOjts)) {
+    return payload.assignedOjts.map(normalizeReport);
+  }
+
+  return [];
+}
+
+/* ============================================================
+   STATUS
+============================================================ */
+
+function getStatusStyle(status, colors) {
+  const value = String(status || "").toLowerCase();
+
+  if (
+    value.includes("complete") ||
+    value.includes("evaluated")
+  ) {
+    return {
+      background: colors.successSoft,
+      color: colors.success,
+      icon: CheckCircle2,
     };
+  }
+
+  if (
+    value.includes("attention") ||
+    value.includes("reject")
+  ) {
+    return {
+      background: colors.dangerSoft,
+      color: colors.danger,
+      icon: AlertCircle,
+    };
+  }
+
+  if (
+    value.includes("pending") ||
+    value.includes("soon") ||
+    value.includes("draft")
+  ) {
+    return {
+      background: colors.warningSoft,
+      color: colors.warning,
+      icon: Clock3,
+    };
+  }
+
+  return {
+    background: colors.primarySoft,
+    color: colors.primary,
+    icon: BarChart3,
+  };
+}
+
+function StatusBadge({ status, colors }) {
+  const current = getStatusStyle(
+    status,
+    colors
+  );
+
+  const Icon = current.icon;
 
   return (
     <span
@@ -199,97 +318,88 @@ function CompletionBadge({ status }) {
         display: "inline-flex",
         alignItems: "center",
         gap: "5px",
-        padding: "5px 9px",
+        padding: "6px 9px",
         borderRadius: "999px",
-        backgroundColor: style.background,
-        color: style.color,
-        fontSize: "9px",
+        background: current.background,
+        color: current.color,
+        fontSize: "12px",
+        lineHeight: 1,
         fontWeight: 700,
         whiteSpace: "nowrap",
       }}
     >
-      {status === "Completed" ? (
-        <CheckCircle2 size={11} />
-      ) : status === "Needs Attention" ? (
-        <AlertCircle size={11} />
-      ) : (
-        <Clock3 size={11} />
-      )}
+      <Icon size={12} />
 
-      {status}
+      {status || "Not available"}
     </span>
   );
 }
 
-function FeedbackBadge({ value }) {
-  const submitted = value === "Submitted";
-
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "5px",
-        color: submitted ? "#059669" : "#d97706",
-        fontSize: "9px",
-        fontWeight: 700,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {submitted ? (
-        <CheckCircle2 size={12} />
-      ) : (
-        <Clock3 size={12} />
-      )}
-
-      {value}
-    </span>
+function ProgressBar({ value, colors }) {
+  const progress = Math.max(
+    0,
+    Math.min(100, Number(value) || 0)
   );
-}
 
-function ProgressBar({ value }) {
   const progressColor =
-    value >= 85
-      ? "#059669"
-      : value < 50
-      ? "#dc2626"
-      : "#2563eb";
+    progress >= 100
+      ? colors.success
+      : progress < 50
+      ? colors.danger
+      : colors.primary;
 
   return (
-    <div style={{ width: "100%", minWidth: "75px" }}>
+    <div
+      style={{
+        width: "100%",
+        minWidth: "95px",
+      }}
+    >
       <div
         style={{
           display: "flex",
+          alignItems: "center",
           justifyContent: "space-between",
+          gap: "8px",
           marginBottom: "5px",
         }}
       >
         <span
           style={{
-            color: "#334155",
-            fontSize: "10px",
+            color: colors.text,
+            fontSize: "12px",
             fontWeight: 700,
           }}
         >
-          {value}%
+          {progress}%
+        </span>
+
+        <span
+          style={{
+            color: colors.textMuted,
+            fontSize: "11px",
+          }}
+        >
+          Progress
         </span>
       </div>
 
       <div
         style={{
           width: "100%",
-          height: "5px",
+          height: "6px",
           overflow: "hidden",
           borderRadius: "999px",
-          backgroundColor: "#e2e8f0",
+          background: colors.border,
         }}
       >
         <div
           style={{
-            width: `${value}%`,
+            width: `${progress}%`,
             height: "100%",
             borderRadius: "999px",
-            backgroundColor: progressColor,
+            background: progressColor,
+            transition: "width 200ms ease",
           }}
         />
       </div>
@@ -297,7 +407,77 @@ function ProgressBar({ value }) {
   );
 }
 
-function Modal({ children, onClose, width = "650px" }) {
+function DetailItem({
+  icon: Icon,
+  label,
+  value,
+  colors,
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "flex-start",
+        gap: "11px",
+        padding: "13px",
+        border: `1px solid ${colors.border}`,
+        borderRadius: "10px",
+        background: colors.surfaceMuted,
+      }}
+    >
+      <div
+        style={{
+          width: "34px",
+          height: "34px",
+          minWidth: "34px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          borderRadius: "9px",
+          background: colors.primarySoft,
+          color: colors.primary,
+        }}
+      >
+        <Icon size={16} />
+      </div>
+
+      <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            color: colors.textMuted,
+            fontSize: "11px",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.45px",
+          }}
+        >
+          {label}
+        </div>
+
+        <div
+          style={{
+            marginTop: "4px",
+            color: colors.text,
+            fontSize: "14px",
+            lineHeight: 1.4,
+            fontWeight: 650,
+            wordBreak: "break-word",
+          }}
+        >
+          {value || "Not available"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Modal({
+  children,
+  onClose,
+  colors,
+  darkMode,
+  width = "820px",
+}) {
   return (
     <div
       onMouseDown={(event) => {
@@ -308,12 +488,14 @@ function Modal({ children, onClose, width = "650px" }) {
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 100,
+        zIndex: 1000,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "20px",
-        backgroundColor: "rgba(15, 23, 42, 0.45)",
+        background: darkMode
+          ? "rgba(0, 0, 0, 0.68)"
+          : "rgba(15, 23, 42, 0.48)",
         backdropFilter: "blur(2px)",
       }}
     >
@@ -324,9 +506,11 @@ function Modal({ children, onClose, width = "650px" }) {
           maxHeight: "90vh",
           overflowY: "auto",
           borderRadius: "16px",
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 20px 50px rgba(15, 23, 42, 0.18)",
+          background: colors.surface,
+          border: `1px solid ${colors.border}`,
+          boxShadow: darkMode
+            ? "0 24px 60px rgba(0, 0, 0, 0.45)"
+            : "0 24px 60px rgba(15, 23, 42, 0.20)",
         }}
       >
         {children}
@@ -335,142 +519,203 @@ function Modal({ children, onClose, width = "650px" }) {
   );
 }
 
-function ModalHeader({ title, subtitle, onClose }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: "15px",
-        padding: "18px 20px",
-        borderBottom: "1px solid #eef2f7",
-      }}
-    >
-      <div>
-        <h2
-          style={{
-            margin: 0,
-            color: "#1e293b",
-            fontSize: "17px",
-            fontWeight: 750,
-          }}
-        >
-          {title}
-        </h2>
-
-        <p
-          style={{
-            margin: "5px 0 0",
-            color: "#94a3b8",
-            fontSize: "11px",
-          }}
-        >
-          {subtitle}
-        </p>
-      </div>
-
-      <button
-        type="button"
-        onClick={onClose}
-        style={{
-          width: "32px",
-          height: "32px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "none",
-          borderRadius: "8px",
-          backgroundColor: "#f8fafc",
-          color: "#64748b",
-          cursor: "pointer",
-        }}
-      >
-        <X size={16} />
-      </button>
-    </div>
-  );
-}
+/* ============================================================
+   MAIN COMPONENT
+============================================================ */
 
 export default function OJTReports() {
-  const [reports, setReports] = useState(reportData);
+  const { colors, darkMode } =
+    useCoordinatorTheme();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [reports, setReports] = useState([]);
 
-  const [selectedCompany, setSelectedCompany] =
-    useState("All Companies");
+  const [loading, setLoading] =
+    useState(true);
 
-  const [selectedReportType, setSelectedReportType] =
-    useState("All Reports");
+  const [refreshing, setRefreshing] =
+    useState(false);
 
-  const [selectedStatus, setSelectedStatus] =
-    useState("All Status");
+  const [error, setError] = useState("");
 
-  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] =
+    useState("");
 
-  const [actionId, setActionId] = useState(null);
+  const [
+    selectedDepartment,
+    setSelectedDepartment,
+  ] = useState("All Departments");
+
+  const [
+    selectedCompany,
+    setSelectedCompany,
+  ] = useState("All Companies");
+
+  const [
+    selectedStatus,
+    setSelectedStatus,
+  ] = useState("All Status");
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
 
   const [selectedReport, setSelectedReport] =
     useState(null);
 
-  const reportsPerPage = 5;
+  const PAGE_SIZE = 7;
+
+  /* ==========================================================
+     LOAD REPORTS
+  ========================================================== */
+
+  const loadReports = async (
+    isRefresh = false
+  ) => {
+    try {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
+      setError("");
+
+      const response =
+        await ojtReportsService.getReports();
+
+      const list = extractReports(response);
+
+      setReports(list);
+    } catch (err) {
+      console.error(
+        "Load OJT reports error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to load OJT reports."
+      );
+
+      setReports([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReports();
+  }, []);
+
+  /* ==========================================================
+     FILTER OPTIONS
+  ========================================================== */
+
+  const departments = useMemo(() => {
+    const values = reports
+      .map((item) => item.department)
+      .filter(
+        (value) =>
+          value &&
+          value !== "N/A"
+      );
+
+    return [
+      "All Departments",
+      ...Array.from(new Set(values)).sort(),
+    ];
+  }, [reports]);
+
+  const companies = useMemo(() => {
+    const values = reports
+      .map((item) => item.company)
+      .filter(
+        (value) =>
+          value &&
+          value !== "Company not available"
+      );
+
+    return [
+      "All Companies",
+      ...Array.from(new Set(values)).sort(),
+    ];
+  }, [reports]);
+
+  const statuses = useMemo(() => {
+    const values = reports
+      .map((item) => item.status)
+      .filter(Boolean);
+
+    return [
+      "All Status",
+      ...Array.from(new Set(values)).sort(),
+    ];
+  }, [reports]);
+
+  /* ==========================================================
+     FILTERING
+  ========================================================== */
 
   const filteredReports = useMemo(() => {
-    const search = searchTerm.trim().toLowerCase();
+    const search =
+      searchTerm.trim().toLowerCase();
 
     return reports.filter((report) => {
+      const searchableText = [
+        report.student,
+        report.rollNumber,
+        report.studentId,
+        report.company,
+        report.position,
+        report.mentor,
+        report.department,
+      ]
+        .join(" ")
+        .toLowerCase();
+
       const matchesSearch =
         !search ||
-        report.student.toLowerCase().includes(search) ||
-        report.company.toLowerCase().includes(search) ||
-        report.mentor.toLowerCase().includes(search) ||
-        report.position.toLowerCase().includes(search);
+        searchableText.includes(search);
+
+      const matchesDepartment =
+        selectedDepartment ===
+          "All Departments" ||
+        report.department ===
+          selectedDepartment;
 
       const matchesCompany =
-        selectedCompany === "All Companies" ||
-        report.company === selectedCompany;
+        selectedCompany ===
+          "All Companies" ||
+        report.company ===
+          selectedCompany;
 
       const matchesStatus =
         selectedStatus === "All Status" ||
-        report.completion === selectedStatus;
-
-      let matchesType = true;
-
-      if (selectedReportType === "Student Report") {
-        matchesType = true;
-      }
-
-      if (selectedReportType === "Company Report") {
-        matchesType = true;
-      }
-
-      if (selectedReportType === "Attendance Report") {
-        matchesType = report.attendance < 95;
-      }
-
-      if (selectedReportType === "Progress Report") {
-        matchesType = report.progress < 100;
-      }
+        report.status === selectedStatus;
 
       return (
         matchesSearch &&
+        matchesDepartment &&
         matchesCompany &&
-        matchesStatus &&
-        matchesType
+        matchesStatus
       );
     });
   }, [
     reports,
     searchTerm,
+    selectedDepartment,
     selectedCompany,
-    selectedReportType,
     selectedStatus,
   ]);
+
+  /* ==========================================================
+     PAGINATION
+  ========================================================== */
 
   const totalPages = Math.max(
     1,
     Math.ceil(
-      filteredReports.length / reportsPerPage
+      filteredReports.length / PAGE_SIZE
     )
   );
 
@@ -480,124 +725,283 @@ export default function OJTReports() {
   );
 
   const startIndex =
-    (safeCurrentPage - 1) * reportsPerPage;
+    (safeCurrentPage - 1) *
+    PAGE_SIZE;
 
-  const paginatedReports = filteredReports.slice(
-    startIndex,
-    startIndex + reportsPerPage
-  );
+  const paginatedReports =
+    filteredReports.slice(
+      startIndex,
+      startIndex + PAGE_SIZE
+    );
 
-  const totalStudents = reports.length;
+  /* ==========================================================
+     STATISTICS
+  ========================================================== */
 
-  const completedStudents = reports.filter(
-    (report) => report.completion === "Completed"
-  ).length;
+  const statistics = useMemo(() => {
+    const total = reports.length;
 
-  const attentionStudents = reports.filter(
-    (report) =>
-      report.completion === "Needs Attention"
-  ).length;
+    const completed = reports.filter(
+      (item) => {
+        const status =
+          String(
+            item.status || ""
+          ).toLowerCase();
 
-  const feedbackPending = reports.filter(
-    (report) => report.mentorFeedback === "Pending"
-  ).length;
-
-  const averageProgress =
-    totalStudents === 0
-      ? 0
-      : Math.round(
-          reports.reduce(
-            (sum, report) => sum + report.progress,
-            0
-          ) / totalStudents
+        return (
+          status.includes("complete") ||
+          item.progress >= 100
         );
+      }
+    ).length;
 
-  const averageAttendance =
-    totalStudents === 0
-      ? 0
-      : Math.round(
-          reports.reduce(
-            (sum, report) => sum + report.attendance,
-            0
-          ) / totalStudents
+    const active = reports.filter(
+      (item) => {
+        const status =
+          String(
+            item.status || ""
+          ).toLowerCase();
+
+        return (
+          !status.includes("complete") &&
+          !status.includes("reject") &&
+          status !== "cancelled" &&
+          item.progress < 100
         );
+      }
+    ).length;
+
+    const needsAttention =
+      reports.filter((item) => {
+        const status =
+          String(
+            item.status || ""
+          ).toLowerCase();
+
+        return (
+          status.includes("attention") ||
+          item.attendance < 80 ||
+          item.progress < 50
+        );
+      }).length;
+
+    const evaluated =
+      reports.filter(
+        (item) =>
+          item.totalMarks !== null &&
+          !Number.isNaN(
+            item.totalMarks
+          )
+      );
+
+    const averageMarks =
+      evaluated.length > 0
+        ? Math.round(
+            evaluated.reduce(
+              (sum, item) =>
+                sum + item.totalMarks,
+              0
+            ) / evaluated.length
+          )
+        : 0;
+
+    const averageProgress =
+      total > 0
+        ? Math.round(
+            reports.reduce(
+              (sum, item) =>
+                sum + item.progress,
+              0
+            ) / total
+          )
+        : 0;
+
+    return {
+      total,
+      active,
+      completed,
+      needsAttention,
+      averageMarks,
+      averageProgress,
+    };
+  }, [reports]);
+
+  /* ==========================================================
+     CLEAR FILTERS
+  ========================================================== */
 
   const clearFilters = () => {
     setSearchTerm("");
-    setSelectedCompany("All Companies");
-    setSelectedReportType("All Reports");
+    setSelectedDepartment(
+      "All Departments"
+    );
+    setSelectedCompany(
+      "All Companies"
+    );
     setSelectedStatus("All Status");
     setCurrentPage(1);
   };
 
-  const generateReport = (report) => {
-    setSelectedReport(report);
-    setActionId(null);
-  };
+  const hasFilters =
+    Boolean(searchTerm) ||
+    selectedDepartment !==
+      "All Departments" ||
+    selectedCompany !==
+      "All Companies" ||
+    selectedStatus !==
+      "All Status";
 
-  const handleDownload = (report) => {
-    setActionId(null);
+  /* ==========================================================
+     CSV EXPORT
+  ========================================================== */
 
-    const reportText = `
-AISC OJT PORTAL
-OJT STUDENT REPORT
+  const exportReports = () => {
+    if (!filteredReports.length) return;
 
-Student: ${report.student}
-Company: ${report.company}
-Position: ${report.position}
-Mentor: ${report.mentor}
-Department: ${report.department}
+    const headers = [
+      "Student",
+      "Student ID",
+      "Roll Number",
+      "Department",
+      "Company",
+      "Position",
+      "Mentor",
+      "Start Date",
+      "End Date",
+      "Progress",
+      "Attendance",
+      "Weekly Reports",
+      "Total Marks",
+      "Status",
+    ];
 
-OJT Period:
-${report.startDate} - ${report.endDate}
+    const rows = filteredReports.map(
+      (report) => [
+        report.student,
+        report.studentId,
+        report.rollNumber,
+        report.department,
+        report.company,
+        report.position,
+        report.mentor,
+        report.startDate,
+        report.endDate,
+        `${report.progress}%`,
+        `${report.attendance}%`,
+        report.weeklyReports,
+        report.totalMarks ?? "",
+        report.status,
+      ]
+    );
 
-Progress: ${report.progress}%
-Attendance: ${report.attendance}%
-Mentor Feedback: ${report.mentorFeedback}
-Completion Status: ${report.completion}
-`;
+    const escapeCsv = (value) => {
+      const text = String(
+        value ?? ""
+      );
 
-    const blob = new Blob([reportText], {
-      type: "text/plain",
+      if (
+        text.includes(",") ||
+        text.includes('"') ||
+        text.includes("\n")
+      ) {
+        return `"${text.replace(
+          /"/g,
+          '""'
+        )}"`;
+      }
+
+      return text;
+    };
+
+    const csv = [
+      headers.map(escapeCsv).join(","),
+      ...rows.map((row) =>
+        row.map(escapeCsv).join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([csv], {
+      type: "text/csv;charset=utf-8;",
     });
 
-    const url = URL.createObjectURL(blob);
+    const url =
+      URL.createObjectURL(blob);
 
-    const link = document.createElement("a");
+    const link =
+      document.createElement("a");
+
     link.href = url;
-    link.download = `${report.student.replace(
-      /\s+/g,
-      "_"
-    )}_OJT_Report.txt`;
+
+    link.download =
+      `ojt-reports-${new Date()
+        .toISOString()
+        .slice(0, 10)}.csv`;
 
     document.body.appendChild(link);
+
     link.click();
-    document.body.removeChild(link);
+
+    link.remove();
 
     URL.revokeObjectURL(url);
   };
 
+  /* ==========================================================
+     COMMON STYLES
+  ========================================================== */
+
+  const pageStyle = {
+    width: "100%",
+    minWidth: 0,
+    color: colors.text,
+    fontFamily:
+      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    letterSpacing: "-0.01em",
+  };
+
+  const cardStyle = {
+    background: colors.surface,
+    border: `1px solid ${colors.border}`,
+    borderRadius: "14px",
+    boxShadow: darkMode
+      ? "0 2px 8px rgba(0, 0, 0, 0.18)"
+      : "0 2px 8px rgba(15, 23, 42, 0.035)",
+  };
+
+  const inputStyle = {
+    height: "40px",
+    border: `1px solid ${colors.border}`,
+    borderRadius: "9px",
+    background: colors.surface,
+    color: colors.text,
+    fontSize: "13px",
+    fontWeight: 600,
+    outline: "none",
+  };
+
+  /* ==========================================================
+     RENDER
+  ========================================================== */
+
   return (
-    <div
-      style={{
-        width: "100%",
-        minWidth: 0,
-        color: "#0f172a",
-      }}
-    >
-      {/* BREADCRUMB */}
+    <div style={pageStyle}>
+      {/* ======================================================
+          BREADCRUMB
+      ======================================================= */}
+
       <div
         style={{
           display: "flex",
           alignItems: "center",
           gap: "7px",
-          marginBottom: "12px",
-          fontSize: "12px",
+          marginBottom: "13px",
+          color: colors.textSecondary,
+          fontSize: "13px",
         }}
       >
         <span
           style={{
-            color: "#2563eb",
+            color: colors.primary,
             fontWeight: 700,
           }}
         >
@@ -606,60 +1010,66 @@ Completion Status: ${report.completion}
 
         <ChevronRight
           size={14}
-          color="#cbd5e1"
+          color={colors.textMuted}
         />
 
-        <span style={{ color: "#64748b" }}>
-          OJT Reports
+        <span>
+          Generate Reports
         </span>
       </div>
 
-      {/* PAGE HEADER */}
+      {/* ======================================================
+          HEADER
+      ======================================================= */}
+
       <section
+        className="ojt-report-header"
         style={{
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-end",
           justifyContent: "space-between",
           gap: "20px",
-          marginBottom: "20px",
+          marginBottom: "22px",
         }}
       >
         <div>
           <div
             style={{
               marginBottom: "6px",
-              color: "#2563eb",
-              fontSize: "11px",
+              color: colors.primary,
+              fontSize: "12px",
               fontWeight: 800,
-              letterSpacing: "1px",
+              letterSpacing: "0.9px",
               textTransform: "uppercase",
             }}
           >
-            Reports & Analytics
+            OJT Administration
           </div>
 
           <h1
             style={{
               margin: 0,
-              color: "#0f172a",
-              fontSize: "clamp(26px, 3vw, 32px)",
-              lineHeight: "1.1",
-              fontWeight: 800,
-              letterSpacing: "-0.8px",
+              color: colors.text,
+              fontSize: "28px",
+              lineHeight: 1.2,
+              fontWeight: 750,
+              letterSpacing: "-0.55px",
             }}
           >
-            OJT Reports
+            Generate Reports
           </h1>
 
           <p
             style={{
               margin: "7px 0 0",
-              color: "#64748b",
-              fontSize: "13px",
+              color: colors.textSecondary,
+              fontSize: "14px",
+              lineHeight: 1.5,
             }}
           >
-            View, analyze and generate reports for
-            student OJT performance.
+            Generate and review consolidated OJT
+            reports for students, companies and
+            faculty mentors.
           </p>
         </div>
 
@@ -668,41 +1078,83 @@ Completion Status: ${report.completion}
             display: "flex",
             alignItems: "center",
             gap: "8px",
-            padding: "10px 13px",
-            border: "1px solid #dbeafe",
-            borderRadius: "10px",
-            backgroundColor: "#eff6ff",
-            color: "#2563eb",
           }}
         >
-          <BarChart3 size={17} />
-
-          <div>
-            <div
+          <button
+            type="button"
+            onClick={() =>
+              loadReports(true)
+            }
+            disabled={refreshing}
+            style={{
+              height: "40px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "7px",
+              padding: "0 13px",
+              border: `1px solid ${colors.border}`,
+              borderRadius: "9px",
+              background: colors.surface,
+              color: colors.text,
+              fontSize: "13px",
+              fontWeight: 650,
+              cursor: refreshing
+                ? "not-allowed"
+                : "pointer",
+              opacity: refreshing ? 0.65 : 1,
+            }}
+          >
+            <RefreshCw
+              size={15}
               style={{
-                fontSize: "9px",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
+                animation: refreshing
+                  ? "ojtReportsSpin 1s linear infinite"
+                  : "none",
               }}
-            >
-              Report Status
-            </div>
+            />
 
-            <strong
-              style={{
-                display: "block",
-                marginTop: "2px",
-                fontSize: "11px",
-              }}
-            >
-              Updated
-            </strong>
-          </div>
+            Refresh
+          </button>
+
+          <button
+            type="button"
+            onClick={exportReports}
+            disabled={
+              !filteredReports.length
+            }
+            style={{
+              height: "40px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "7px",
+              padding: "0 14px",
+              border: "none",
+              borderRadius: "9px",
+              background:
+                filteredReports.length
+                  ? colors.primary
+                  : colors.textMuted,
+              color: "#ffffff",
+              fontSize: "13px",
+              fontWeight: 700,
+              cursor:
+                filteredReports.length
+                  ? "pointer"
+                  : "not-allowed",
+            }}
+          >
+            <Download size={15} />
+            Export CSV
+          </button>
         </div>
       </section>
 
-      {/* STAT CARDS */}
+      {/* ======================================================
+          STATISTICS
+      ======================================================= */}
+
       <section
         className="ojt-report-stat-grid"
         style={{
@@ -715,36 +1167,36 @@ Completion Status: ${report.completion}
       >
         {[
           {
-            title: "Total Students",
-            value: totalStudents,
-            subtitle: "Students in OJT",
-            icon: Users,
-            background: "#eff6ff",
-            color: "#2563eb",
+            title: "Total Reports",
+            value: statistics.total,
+            subtitle: "All OJT records",
+            icon: FileBarChart2,
+            background: colors.primarySoft,
+            color: colors.primary,
           },
           {
-            title: "Completed",
-            value: completedStudents,
-            subtitle: "OJT completed",
+            title: "Active OJT",
+            value: statistics.active,
+            subtitle: "Currently in progress",
+            icon: Clock3,
+            background: colors.warningSoft,
+            color: colors.warning,
+          },
+          {
+            title: "Completed OJT",
+            value: statistics.completed,
+            subtitle: "Training completed",
             icon: CheckCircle2,
-            background: "#ecfdf5",
-            color: "#059669",
+            background: colors.successSoft,
+            color: colors.success,
           },
           {
-            title: "Average Progress",
-            value: `${averageProgress}%`,
-            subtitle: "Overall OJT progress",
-            icon: TrendingUp,
-            background: "#f5f3ff",
-            color: "#7c3aed",
-          },
-          {
-            title: "Feedback Pending",
-            value: feedbackPending,
-            subtitle: `${attentionStudents} need attention`,
+            title: "Needs Attention",
+            value: statistics.needsAttention,
+            subtitle: "Requires coordinator review",
             icon: AlertCircle,
-            background: "#fef2f2",
-            color: "#dc2626",
+            background: colors.dangerSoft,
+            color: colors.danger,
           },
         ].map((stat) => {
           const Icon = stat.icon;
@@ -753,24 +1205,20 @@ Completion Status: ${report.completion}
             <div
               key={stat.title}
               style={{
+                ...cardStyle,
+                padding: "17px",
                 minWidth: 0,
-                padding: "16px",
-                border: "1px solid #e2e8f0",
-                borderRadius: "13px",
-                backgroundColor: "#ffffff",
-                boxShadow:
-                  "0 2px 8px rgba(15, 23, 42, 0.035)",
               }}
             >
               <div
                 style={{
-                  width: "39px",
-                  height: "39px",
+                  width: "40px",
+                  height: "40px",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   borderRadius: "10px",
-                  backgroundColor: stat.background,
+                  background: stat.background,
                   color: stat.color,
                 }}
               >
@@ -779,9 +1227,9 @@ Completion Status: ${report.completion}
 
               <div
                 style={{
-                  marginTop: "10px",
-                  color: "#64748b",
-                  fontSize: "11px",
+                  marginTop: "11px",
+                  color: colors.textSecondary,
+                  fontSize: "13px",
                   fontWeight: 600,
                 }}
               >
@@ -790,21 +1238,21 @@ Completion Status: ${report.completion}
 
               <div
                 style={{
-                  marginTop: "4px",
-                  color: "#0f172a",
-                  fontSize: "25px",
-                  lineHeight: "1",
-                  fontWeight: 800,
+                  marginTop: "3px",
+                  color: colors.text,
+                  fontSize: "26px",
+                  lineHeight: 1.1,
+                  fontWeight: 750,
                 }}
               >
-                {stat.value}
+                {formatNumber(stat.value)}
               </div>
 
               <div
                 style={{
                   marginTop: "5px",
-                  color: "#94a3b8",
-                  fontSize: "9px",
+                  color: colors.textMuted,
+                  fontSize: "12px",
                 }}
               >
                 {stat.subtitle}
@@ -814,188 +1262,182 @@ Completion Status: ${report.completion}
         })}
       </section>
 
-      {/* SUMMARY */}
+      {/* ======================================================
+          SUMMARY
+      ======================================================= */}
+
       <section
         className="ojt-report-summary-grid"
         style={{
           display: "grid",
-          gridTemplateColumns: "1.5fr 1fr 1fr",
+          gridTemplateColumns:
+            "repeat(2, minmax(0, 1fr))",
           gap: "12px",
           marginBottom: "18px",
         }}
       >
         <div
           style={{
-            padding: "15px 17px",
-            border: "1px solid #dbeafe",
-            borderRadius: "12px",
-            backgroundColor: "#eff6ff",
+            ...cardStyle,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "20px",
+            padding: "17px 18px",
           }}
         >
           <div
             style={{
               display: "flex",
-              justifyContent: "space-between",
-              gap: "15px",
-              marginBottom: "9px",
-            }}
-          >
-            <div>
-              <strong
-                style={{
-                  color: "#1e3a8a",
-                  fontSize: "12px",
-                }}
-              >
-                Overall Progress
-              </strong>
-
-              <div
-                style={{
-                  marginTop: "3px",
-                  color: "#64748b",
-                  fontSize: "10px",
-                }}
-              >
-                Average student progress
-              </div>
-            </div>
-
-            <strong
-              style={{
-                color: "#2563eb",
-                fontSize: "16px",
-              }}
-            >
-              {averageProgress}%
-            </strong>
-          </div>
-
-          <div
-            style={{
-              width: "100%",
-              height: "8px",
-              overflow: "hidden",
-              borderRadius: "999px",
-              backgroundColor: "#dbeafe",
+              alignItems: "center",
+              gap: "11px",
             }}
           >
             <div
               style={{
-                width: `${averageProgress}%`,
-                height: "100%",
-                borderRadius: "999px",
-                backgroundColor: "#2563eb",
+                width: "38px",
+                height: "38px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "9px",
+                background:
+                  colors.primarySoft,
+                color: colors.primary,
               }}
+            >
+              <BarChart3 size={18} />
+            </div>
+
+            <div>
+              <div
+                style={{
+                  color: colors.textSecondary,
+                  fontSize: "12px",
+                  fontWeight: 600,
+                }}
+              >
+                Average OJT Progress
+              </div>
+
+              <div
+                style={{
+                  marginTop: "2px",
+                  color: colors.text,
+                  fontSize: "21px",
+                  fontWeight: 750,
+                }}
+              >
+                {statistics.averageProgress}%
+              </div>
+            </div>
+          </div>
+
+          <div style={{ width: "150px" }}>
+            <ProgressBar
+              value={
+                statistics.averageProgress
+              }
+              colors={colors}
             />
           </div>
         </div>
 
         <div
           style={{
-            padding: "15px 17px",
-            border: "1px solid #d1fae5",
-            borderRadius: "12px",
-            backgroundColor: "#ecfdf5",
+            ...cardStyle,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "20px",
+            padding: "17px 18px",
           }}
         >
           <div
             style={{
-              color: "#64748b",
-              fontSize: "10px",
-              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: "11px",
             }}
           >
-            Average Attendance
+            <div
+              style={{
+                width: "38px",
+                height: "38px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "9px",
+                background:
+                  colors.primarySoft,
+                color: colors.primary,
+              }}
+            >
+              <GraduationCap size={18} />
+            </div>
+
+            <div>
+              <div
+                style={{
+                  color: colors.textSecondary,
+                  fontSize: "12px",
+                  fontWeight: 600,
+                }}
+              >
+                Average Evaluated Marks
+              </div>
+
+              <div
+                style={{
+                  marginTop: "2px",
+                  color: colors.text,
+                  fontSize: "21px",
+                  fontWeight: 750,
+                }}
+              >
+                {statistics.averageMarks}
+
+                <span
+                  style={{
+                    marginLeft: "3px",
+                    color: colors.textMuted,
+                    fontSize: "13px",
+                    fontWeight: 600,
+                  }}
+                >
+                  / 100
+                </span>
+              </div>
+            </div>
           </div>
 
-          <strong
-            style={{
-              display: "block",
-              marginTop: "5px",
-              color: "#059669",
-              fontSize: "22px",
-            }}
-          >
-            {averageAttendance}%
-          </strong>
-
-          <div
-            style={{
-              marginTop: "4px",
-              color: "#64748b",
-              fontSize: "9px",
-            }}
-          >
-            Across all students
-          </div>
-        </div>
-
-        <div
-          style={{
-            padding: "15px 17px",
-            border: "1px solid #e2e8f0",
-            borderRadius: "12px",
-            backgroundColor: "#ffffff",
-          }}
-        >
-          <div
-            style={{
-              color: "#64748b",
-              fontSize: "10px",
-              fontWeight: 600,
-            }}
-          >
-            Completion Rate
-          </div>
-
-          <strong
-            style={{
-              display: "block",
-              marginTop: "5px",
-              color: "#2563eb",
-              fontSize: "22px",
-            }}
-          >
-            {totalStudents === 0
-              ? 0
-              : Math.round(
-                  (completedStudents /
-                    totalStudents) *
-                    100
-                )}
-            %
-          </strong>
-
-          <div
-            style={{
-              marginTop: "4px",
-              color: "#64748b",
-              fontSize: "9px",
-            }}
-          >
-            Students who completed OJT
+          <div style={{ width: "110px" }}>
+            <ProgressBar
+              value={
+                statistics.averageMarks
+              }
+              colors={colors}
+            />
           </div>
         </div>
       </section>
 
-      {/* REPORT TABLE */}
+      {/* ======================================================
+          REPORT DIRECTORY
+      ======================================================= */}
+
       <section
         style={{
+          ...cardStyle,
           width: "100%",
           minWidth: 0,
           overflow: "hidden",
-          border: "1px solid #e2e8f0",
-          borderRadius: "14px",
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 2px 8px rgba(15, 23, 42, 0.035)",
         }}
       >
         <div
           style={{
-            padding: "15px 18px",
-            borderBottom: "1px solid #eef2f7",
+            padding: "18px 20px",
+            borderBottom: `1px solid ${colors.border}`,
           }}
         >
           <div
@@ -1010,137 +1452,143 @@ Completion Status: ${report.completion}
               <h2
                 style={{
                   margin: 0,
-                  color: "#1e293b",
-                  fontSize: "15px",
+                  color: colors.text,
+                  fontSize: "17px",
+                  lineHeight: 1.3,
                   fontWeight: 750,
                 }}
               >
-                OJT Report Records
+                OJT Report Directory
               </h2>
 
               <p
                 style={{
-                  margin: "4px 0 0",
-                  color: "#94a3b8",
-                  fontSize: "10px",
+                  margin: "5px 0 0",
+                  color: colors.textSecondary,
+                  fontSize: "13px",
                 }}
               >
-                Student-wise OJT performance and
-                completion information.
+                Review consolidated student OJT
+                records and performance details.
               </p>
             </div>
 
             <div
               style={{
-                display: "flex",
+                display: "inline-flex",
                 alignItems: "center",
-                gap: "5px",
-                color: "#64748b",
-                fontSize: "10px",
+                gap: "6px",
+                color: colors.textSecondary,
+                fontSize: "12px",
+                fontWeight: 600,
               }}
             >
-              <Filter size={13} />
-              Filters
+              <FileText size={15} />
+
+              {filteredReports.length} records
             </div>
           </div>
 
           {/* FILTERS */}
+
           <div
             className="ojt-report-filter-grid"
             style={{
               display: "grid",
               gridTemplateColumns:
-                "minmax(230px, 1fr) auto auto auto",
+                "minmax(250px, 1fr) repeat(3, auto)",
               gap: "9px",
-              marginTop: "14px",
+              marginTop: "16px",
             }}
           >
             <div
               style={{
-                height: "38px",
+                height: "40px",
                 display: "flex",
                 alignItems: "center",
                 gap: "8px",
-                padding: "0 11px",
-                border: "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor: "#ffffff",
-                boxSizing: "border-box",
+                padding: "0 12px",
+                border: `1px solid ${colors.border}`,
+                borderRadius: "9px",
+                background: colors.surface,
               }}
             >
               <Search
                 size={16}
-                color="#94a3b8"
+                color={colors.textMuted}
               />
 
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(event) => {
-                  setSearchTerm(event.target.value);
+                  setSearchTerm(
+                    event.target.value
+                  );
                   setCurrentPage(1);
                 }}
-                placeholder="Search student, company, mentor..."
+                placeholder="Search student, roll no., company or mentor..."
                 style={{
                   width: "100%",
                   minWidth: 0,
                   border: "none",
                   outline: "none",
                   background: "transparent",
-                  color: "#334155",
-                  fontSize: "11px",
+                  color: colors.text,
+                  fontSize: "14px",
                 }}
               />
             </div>
 
             <select
-              value={selectedCompany}
+              value={selectedDepartment}
               onChange={(event) => {
-                setSelectedCompany(event.target.value);
+                setSelectedDepartment(
+                  event.target.value
+                );
                 setCurrentPage(1);
               }}
               style={{
-                height: "38px",
+                ...inputStyle,
+                minWidth: "150px",
                 padding: "0 11px",
-                border: "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor: "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
                 cursor: "pointer",
-                outline: "none",
               }}
             >
-              {companies.map((company) => (
-                <option key={company} value={company}>
-                  {company}
-                </option>
-              ))}
+              {departments.map(
+                (department) => (
+                  <option
+                    key={department}
+                    value={department}
+                  >
+                    {department}
+                  </option>
+                )
+              )}
             </select>
 
             <select
-              value={selectedReportType}
+              value={selectedCompany}
               onChange={(event) => {
-                setSelectedReportType(event.target.value);
+                setSelectedCompany(
+                  event.target.value
+                );
                 setCurrentPage(1);
               }}
               style={{
-                height: "38px",
+                ...inputStyle,
+                minWidth: "150px",
+                maxWidth: "220px",
                 padding: "0 11px",
-                border: "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor: "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
                 cursor: "pointer",
-                outline: "none",
               }}
             >
-              {reportTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
+              {companies.map((company) => (
+                <option
+                  key={company}
+                  value={company}
+                >
+                  {company}
                 </option>
               ))}
             </select>
@@ -1148,885 +1596,1744 @@ Completion Status: ${report.completion}
             <select
               value={selectedStatus}
               onChange={(event) => {
-                setSelectedStatus(event.target.value);
+                setSelectedStatus(
+                  event.target.value
+                );
                 setCurrentPage(1);
               }}
               style={{
-                height: "38px",
+                ...inputStyle,
+                minWidth: "145px",
                 padding: "0 11px",
-                border: "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor: "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
                 cursor: "pointer",
-                outline: "none",
               }}
             >
-              {completionStatuses.map((status) => (
-                <option key={status} value={status}>
+              {statuses.map((status) => (
+                <option
+                  key={status}
+                  value={status}
+                >
                   {status}
                 </option>
               ))}
             </select>
           </div>
 
-          <button
-            type="button"
-            onClick={clearFilters}
-            style={{
-              marginTop: "9px",
-              height: "32px",
-              padding: "0 11px",
-              border: "1px solid #dbe4ee",
-              borderRadius: "7px",
-              backgroundColor: "#ffffff",
-              color: "#64748b",
-              fontSize: "9px",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
-          >
-            Clear Filters
-          </button>
-        </div>
-
-        {/* RESULT COUNT */}
-        <div
-          style={{
-            padding: "10px 16px",
-            backgroundColor: "#f8fafc",
-            borderBottom: "1px solid #eef2f7",
-            color: "#64748b",
-            fontSize: "10px",
-          }}
-        >
-          Showing{" "}
-          <strong style={{ color: "#334155" }}>
-            {filteredReports.length === 0
-              ? 0
-              : startIndex + 1}
-            -
-            {Math.min(
-              startIndex + reportsPerPage,
-              filteredReports.length
-            )}
-          </strong>{" "}
-          of{" "}
-          <strong style={{ color: "#334155" }}>
-            {filteredReports.length}
-          </strong>{" "}
-          reports
-        </div>
-
-        {/* TABLE */}
-        <div
-          style={{
-            width: "100%",
-            overflowX: "auto",
-          }}
-        >
-          <table
-            style={{
-              width: "100%",
-              minWidth: "1180px",
-              borderCollapse: "collapse",
-            }}
-          >
-            <thead>
-              <tr>
-                {[
-                  "Student",
-                  "Company",
-                  "Mentor",
-                  "Progress",
-                  "Attendance",
-                  "Feedback",
-                  "Status",
-                  "Action",
-                ].map((heading) => (
-                  <th
-                    key={heading}
-                    style={{
-                      padding: "10px 13px",
-                      backgroundColor: "#f8fafc",
-                      borderBottom:
-                        "1px solid #e2e8f0",
-                      color: "#94a3b8",
-                      fontSize: "9px",
-                      fontWeight: 750,
-                      textAlign: "left",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.45px",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {heading}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody>
-              {paginatedReports.length > 0 ? (
-                paginatedReports.map((report) => (
-                  <tr key={report.id}>
-                    {/* STUDENT */}
-                    <td
-                      style={{
-                        padding: "11px 13px",
-                        borderBottom:
-                          "1px solid #f1f5f9",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "9px",
-                        }}
-                      >
-                        <div
-                          style={{
-                            width: "34px",
-                            height: "34px",
-                            minWidth: "34px",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            borderRadius: "9px",
-                            backgroundColor: "#eff6ff",
-                            color: "#2563eb",
-                            fontSize: "9px",
-                            fontWeight: 800,
-                          }}
-                        >
-                          {report.initials}
-                        </div>
-
-                        <div>
-                          <strong
-                            style={{
-                              display: "block",
-                              color: "#334155",
-                              fontSize: "11px",
-                              fontWeight: 700,
-                              whiteSpace: "nowrap",
-                            }}
-                          >
-                            {report.student}
-                          </strong>
-
-                          <span
-                            style={{
-                              display: "block",
-                              marginTop: "2px",
-                              color: "#94a3b8",
-                              fontSize: "9px",
-                            }}
-                          >
-                            {report.position}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* COMPANY */}
-                    <td
-                      style={{
-                        padding: "11px 13px",
-                        borderBottom:
-                          "1px solid #f1f5f9",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                        }}
-                      >
-                        <Building2
-                          size={13}
-                          color="#94a3b8"
-                        />
-
-                        <span
-                          style={{
-                            color: "#475569",
-                            fontSize: "10px",
-                            fontWeight: 650,
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {report.company}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* MENTOR */}
-                    <td
-                      style={{
-                        padding: "11px 13px",
-                        borderBottom:
-                          "1px solid #f1f5f9",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "6px",
-                          color: "#64748b",
-                          fontSize: "10px",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        <UserCheck
-                          size={13}
-                          color="#94a3b8"
-                        />
-
-                        {report.mentor}
-                      </div>
-                    </td>
-
-                    {/* PROGRESS */}
-                    <td
-                      style={{
-                        width: "130px",
-                        padding: "11px 13px",
-                        borderBottom:
-                          "1px solid #f1f5f9",
-                      }}
-                    >
-                      <ProgressBar value={report.progress} />
-                    </td>
-
-                    {/* ATTENDANCE */}
-                    <td
-                      style={{
-                        padding: "11px 13px",
-                        borderBottom:
-                          "1px solid #f1f5f9",
-                      }}
-                    >
-                      <span
-                        style={{
-                          color:
-                            report.attendance >= 90
-                              ? "#059669"
-                              : "#d97706",
-                          fontSize: "10px",
-                          fontWeight: 700,
-                        }}
-                      >
-                        {report.attendance}%
-                      </span>
-                    </td>
-
-                    {/* FEEDBACK */}
-                    <td
-                      style={{
-                        padding: "11px 13px",
-                        borderBottom:
-                          "1px solid #f1f5f9",
-                      }}
-                    >
-                      <FeedbackBadge
-                        value={report.mentorFeedback}
-                      />
-                    </td>
-
-                    {/* STATUS */}
-                    <td
-                      style={{
-                        padding: "11px 13px",
-                        borderBottom:
-                          "1px solid #f1f5f9",
-                      }}
-                    >
-                      <CompletionBadge
-                        status={report.completion}
-                      />
-                    </td>
-
-                    {/* ACTION */}
-                    <td
-                      style={{
-                        position: "relative",
-                        padding: "11px 13px",
-                        borderBottom:
-                          "1px solid #f1f5f9",
-                      }}
-                    >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setActionId(
-                            actionId === report.id
-                              ? null
-                              : report.id
-                          )
-                        }
-                        style={{
-                          width: "30px",
-                          height: "30px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          border: "none",
-                          borderRadius: "7px",
-                          backgroundColor: "#f8fafc",
-                          color: "#64748b",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <MoreHorizontal size={16} />
-                      </button>
-
-                      {actionId === report.id && (
-                        <div
-                          style={{
-                            position: "absolute",
-                            right: "13px",
-                            top: "45px",
-                            zIndex: 20,
-                            width: "180px",
-                            padding: "5px",
-                            border:
-                              "1px solid #e2e8f0",
-                            borderRadius: "9px",
-                            backgroundColor: "#ffffff",
-                            boxShadow:
-                              "0 10px 25px rgba(15, 23, 42, 0.12)",
-                          }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() =>
-                              generateReport(report)
-                            }
-                            className="ojt-report-action-button"
-                          >
-                            <Eye size={14} />
-                            View Report
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDownload(report)
-                            }
-                            className="ojt-report-action-button"
-                          >
-                            <Download size={14} />
-                            Download Report
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="8"
-                    style={{
-                      padding: "55px 20px",
-                      textAlign: "center",
-                      color: "#94a3b8",
-                      fontSize: "11px",
-                    }}
-                  >
-                    <FileText
-                      size={30}
-                      color="#cbd5e1"
-                      style={{
-                        marginBottom: "8px",
-                      }}
-                    />
-
-                    <div>
-                      No reports found
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop: "4px",
-                        fontSize: "10px",
-                      }}
-                    >
-                      Try changing your search or
-                      filters.
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* PAGINATION */}
-        <div
-          style={{
-            minHeight: "58px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "12px",
-            padding: "10px 16px",
-            borderTop: "1px solid #eef2f7",
-          }}
-        >
-          <span
-            style={{
-              color: "#94a3b8",
-              fontSize: "10px",
-            }}
-          >
-            Page {safeCurrentPage} of {totalPages}
-          </span>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "5px",
-            }}
-          >
-            <button
-              type="button"
-              disabled={safeCurrentPage === 1}
-              onClick={() =>
-                setCurrentPage((page) =>
-                  Math.max(1, page - 1)
-                )
-              }
-              className="ojt-report-page-button"
-            >
-              ‹
-            </button>
-
-            {Array.from(
-              { length: totalPages },
-              (_, index) => index + 1
-            ).map((page) => (
-              <button
-                key={page}
-                type="button"
-                onClick={() => setCurrentPage(page)}
-                className={`ojt-report-page-button ${
-                  safeCurrentPage === page
-                    ? "ojt-report-page-active"
-                    : ""
-                }`}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              type="button"
-              disabled={safeCurrentPage === totalPages}
-              onClick={() =>
-                setCurrentPage((page) =>
-                  Math.min(totalPages, page + 1)
-                )
-              }
-              className="ojt-report-page-button"
-            >
-              ›
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* REPORT VIEW MODAL */}
-      {selectedReport && (
-        <Modal
-          onClose={() => setSelectedReport(null)}
-          width="650px"
-        >
-          <ModalHeader
-            title="OJT Student Report"
-            subtitle="Detailed student OJT performance report"
-            onClose={() => setSelectedReport(null)}
-          />
-
-          <div style={{ padding: "20px" }}>
-            {/* STUDENT */}
+          {hasFilters && (
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "13px",
-                padding: "14px",
-                borderRadius: "11px",
-                backgroundColor: "#f8fafc",
+                justifyContent: "space-between",
+                gap: "10px",
+                marginTop: "11px",
+              }}
+            >
+              <span
+                style={{
+                  color: colors.textSecondary,
+                  fontSize: "12px",
+                }}
+              >
+                Showing {filteredReports.length}{" "}
+                filtered records.
+              </span>
+
+              <button
+                type="button"
+                onClick={clearFilters}
+                style={{
+                  border: "none",
+                  background: "transparent",
+                  color: colors.primary,
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  padding: "3px",
+                }}
+              >
+                Clear filters
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* ====================================================
+            LOADING
+        ===================================================== */}
+
+        {loading ? (
+          <div
+            style={{
+              minHeight: "360px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "12px",
+            }}
+          >
+            <div
+              style={{
+                width: "36px",
+                height: "36px",
+                border: `3px solid ${colors.primarySoft}`,
+                borderTopColor:
+                  colors.primary,
+                borderRadius: "50%",
+                animation:
+                  "ojtReportsSpin 0.8s linear infinite",
+              }}
+            />
+
+            <div
+              style={{
+                color: colors.textSecondary,
+                fontSize: "14px",
+                fontWeight: 650,
+              }}
+            >
+              Loading OJT reports...
+            </div>
+          </div>
+        ) : error ? (
+          <div
+            style={{
+              minHeight: "320px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "30px",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                width: "48px",
+                height: "48px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "12px",
+                background:
+                  colors.dangerSoft,
+                color: colors.danger,
+              }}
+            >
+              <AlertCircle size={23} />
+            </div>
+
+            <h3
+              style={{
+                margin: "13px 0 5px",
+                color: colors.text,
+                fontSize: "16px",
+                fontWeight: 700,
+              }}
+            >
+              Unable to load reports
+            </h3>
+
+            <p
+              style={{
+                maxWidth: "480px",
+                margin: 0,
+                color: colors.textSecondary,
+                fontSize: "13px",
+                lineHeight: 1.5,
+              }}
+            >
+              {error}
+            </p>
+
+            <button
+              type="button"
+              onClick={() => loadReports()}
+              style={{
+                marginTop: "16px",
+                height: "38px",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "7px",
+                padding: "0 13px",
+                border: "none",
+                borderRadius: "8px",
+                background:
+                  colors.primary,
+                color: "#ffffff",
+                fontSize: "13px",
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              <RefreshCw size={14} />
+              Try Again
+            </button>
+          </div>
+        ) : filteredReports.length ===
+          0 ? (
+          <div
+            style={{
+              minHeight: "320px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "30px",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                width: "50px",
+                height: "50px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "13px",
+                background:
+                  colors.surfaceMuted,
+                color: colors.textMuted,
+              }}
+            >
+              <FileBarChart2 size={24} />
+            </div>
+
+            <h3
+              style={{
+                margin: "13px 0 5px",
+                color: colors.text,
+                fontSize: "16px",
+                fontWeight: 700,
+              }}
+            >
+              No reports found
+            </h3>
+
+            <p
+              style={{
+                maxWidth: "430px",
+                margin: 0,
+                color: colors.textSecondary,
+                fontSize: "13px",
+                lineHeight: 1.5,
+              }}
+            >
+              {hasFilters
+                ? "No OJT records match the selected filters. Try clearing the filters."
+                : "There are currently no OJT report records available."}
+            </p>
+
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                style={{
+                  marginTop: "15px",
+                  height: "36px",
+                  padding: "0 12px",
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: "8px",
+                  background:
+                    colors.surface,
+                  color: colors.primary,
+                  fontSize: "12px",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                }}
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            {/* ==================================================
+                TABLE
+            =================================================== */}
+
+            <div
+              style={{
+                width: "100%",
+                overflowX: "auto",
+              }}
+            >
+              <table
+                style={{
+                  width: "100%",
+                  minWidth: "1120px",
+                  borderCollapse: "collapse",
+                }}
+              >
+                <thead>
+                  <tr>
+                    {[
+                      "Student",
+                      "Company",
+                      "Mentor",
+                      "OJT Period",
+                      "Progress",
+                      "Attendance",
+                      "Reports",
+                      "Status",
+                      "Action",
+                    ].map((heading) => (
+                      <th
+                        key={heading}
+                        style={{
+                          padding: "12px 14px",
+                          background:
+                            colors.surfaceMuted,
+                          borderBottom: `1px solid ${colors.border}`,
+                          color:
+                            colors.textSecondary,
+                          fontSize: "12px",
+                          fontWeight: 750,
+                          textAlign: "left",
+                          textTransform:
+                            "uppercase",
+                          letterSpacing:
+                            "0.45px",
+                          whiteSpace:
+                            "nowrap",
+                        }}
+                      >
+                        {heading}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {paginatedReports.map(
+                    (report) => (
+                      <tr
+                        key={String(
+                          report.id
+                        )}
+                        onClick={() =>
+                          setSelectedReport(
+                            report
+                          )
+                        }
+                        style={{
+                          cursor: "pointer",
+                          background:
+                            colors.surface,
+                        }}
+                        onMouseEnter={(
+                          event
+                        ) => {
+                          event.currentTarget.style.backgroundColor =
+                            colors.surfaceMuted;
+                        }}
+                        onMouseLeave={(
+                          event
+                        ) => {
+                          event.currentTarget.style.backgroundColor =
+                            colors.surface;
+                        }}
+                      >
+                        <td
+                          style={{
+                            padding:
+                              "13px 14px",
+                            borderBottom: `1px solid ${colors.borderLight}`,
+                          }}
+                        >
+                          <div
+                            style={{
+                              display:
+                                "flex",
+                              alignItems:
+                                "center",
+                              gap: "10px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "36px",
+                                height: "36px",
+                                minWidth:
+                                  "36px",
+                                display:
+                                  "flex",
+                                alignItems:
+                                  "center",
+                                justifyContent:
+                                  "center",
+                                borderRadius:
+                                  "50%",
+                                background:
+                                  colors.primarySoft,
+                                color:
+                                  colors.primary,
+                                fontSize:
+                                  "12px",
+                                fontWeight:
+                                  800,
+                              }}
+                            >
+                              {report.initials}
+                            </div>
+
+                            <div>
+                              <strong
+                                style={{
+                                  display:
+                                    "block",
+                                  color:
+                                    colors.text,
+                                  fontSize:
+                                    "14px",
+                                  fontWeight:
+                                    700,
+                                  whiteSpace:
+                                    "nowrap",
+                                }}
+                              >
+                                {
+                                  report.student
+                                }
+                              </strong>
+
+                              <span
+                                style={{
+                                  display:
+                                    "block",
+                                  marginTop:
+                                    "3px",
+                                  color:
+                                    colors.textMuted,
+                                  fontSize:
+                                    "12px",
+                                }}
+                              >
+                                {
+                                  report.rollNumber
+                                }
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td
+                          style={{
+                            padding:
+                              "13px 14px",
+                            borderBottom: `1px solid ${colors.borderLight}`,
+                          }}
+                        >
+                          <div
+                            style={{
+                              display:
+                                "flex",
+                              alignItems:
+                                "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "30px",
+                                height: "30px",
+                                display:
+                                  "flex",
+                                alignItems:
+                                  "center",
+                                justifyContent:
+                                  "center",
+                                borderRadius:
+                                  "8px",
+                                background:
+                                  colors.surfaceMuted,
+                                color:
+                                  colors.textSecondary,
+                              }}
+                            >
+                              <Building2
+                                size={15}
+                              />
+                            </div>
+
+                            <div>
+                              <div
+                                style={{
+                                  color:
+                                    colors.text,
+                                  fontSize:
+                                    "14px",
+                                  fontWeight:
+                                    650,
+                                  whiteSpace:
+                                    "nowrap",
+                                }}
+                              >
+                                {
+                                  report.company
+                                }
+                              </div>
+
+                              <div
+                                style={{
+                                  marginTop:
+                                    "2px",
+                                  color:
+                                    colors.textMuted,
+                                  fontSize:
+                                    "12px",
+                                }}
+                              >
+                                {
+                                  report.position
+                                }
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td
+                          style={{
+                            padding:
+                              "13px 14px",
+                            borderBottom: `1px solid ${colors.borderLight}`,
+                          }}
+                        >
+                          <div
+                            style={{
+                              display:
+                                "flex",
+                              alignItems:
+                                "center",
+                              gap: "8px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                width: "30px",
+                                height: "30px",
+                                display:
+                                  "flex",
+                                alignItems:
+                                  "center",
+                                justifyContent:
+                                  "center",
+                                borderRadius:
+                                  "50%",
+                                background:
+                                  darkMode
+                                    ? "#2E2350"
+                                    : "#f5f3ff",
+                                color:
+                                  darkMode
+                                    ? "#C4B5FD"
+                                    : "#7c3aed",
+                                fontSize:
+                                  "10px",
+                                fontWeight:
+                                  800,
+                              }}
+                            >
+                              {getInitials(
+                                report.mentor
+                              )}
+                            </div>
+
+                            <div>
+                              <div
+                                style={{
+                                  color:
+                                    colors.text,
+                                  fontSize:
+                                    "14px",
+                                  fontWeight:
+                                    650,
+                                  whiteSpace:
+                                    "nowrap",
+                                }}
+                              >
+                                {
+                                  report.mentor
+                                }
+                              </div>
+
+                              {report.mentorDepartment && (
+                                <div
+                                  style={{
+                                    marginTop:
+                                      "2px",
+                                    color:
+                                      colors.textMuted,
+                                    fontSize:
+                                      "12px",
+                                  }}
+                                >
+                                  {
+                                    report.mentorDepartment
+                                  }
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        <td
+                          style={{
+                            padding:
+                              "13px 14px",
+                            borderBottom: `1px solid ${colors.borderLight}`,
+                            color:
+                              colors.textSecondary,
+                            fontSize: "13px",
+                            whiteSpace:
+                              "nowrap",
+                          }}
+                        >
+                          <div
+                            style={{
+                              display:
+                                "flex",
+                              alignItems:
+                                "center",
+                              gap: "6px",
+                              marginBottom:
+                                "4px",
+                              color:
+                                colors.text,
+                              fontWeight:
+                                650,
+                            }}
+                          >
+                            <CalendarDays
+                              size={14}
+                              color={
+                                colors.textMuted
+                              }
+                            />
+
+                            {formatDate(
+                              report.startDate
+                            )}
+                          </div>
+
+                          <div
+                            style={{
+                              paddingLeft:
+                                "20px",
+                              color:
+                                colors.textMuted,
+                              fontSize:
+                                "12px",
+                            }}
+                          >
+                            to{" "}
+                            {formatDate(
+                              report.endDate
+                            )}
+                          </div>
+                        </td>
+
+                        <td
+                          style={{
+                            width: "140px",
+                            padding:
+                              "13px 14px",
+                            borderBottom: `1px solid ${colors.borderLight}`,
+                          }}
+                        >
+                          <ProgressBar
+                            value={
+                              report.progress
+                            }
+                            colors={colors}
+                          />
+                        </td>
+
+                        <td
+                          style={{
+                            padding:
+                              "13px 14px",
+                            borderBottom: `1px solid ${colors.borderLight}`,
+                          }}
+                        >
+                          <div
+                            style={{
+                              color:
+                                report.attendance >=
+                                80
+                                  ? colors.success
+                                  : colors.danger,
+                              fontSize:
+                                "14px",
+                              fontWeight:
+                                750,
+                            }}
+                          >
+                            {
+                              report.attendance
+                            }%
+                          </div>
+
+                          <div
+                            style={{
+                              marginTop:
+                                "3px",
+                              color:
+                                colors.textMuted,
+                              fontSize:
+                                "11px",
+                            }}
+                          >
+                            {
+                              report.attendancePresent
+                            }{" "}
+                            present
+                          </div>
+                        </td>
+
+                        <td
+                          style={{
+                            padding:
+                              "13px 14px",
+                            borderBottom: `1px solid ${colors.borderLight}`,
+                          }}
+                        >
+                          <div
+                            style={{
+                              display:
+                                "inline-flex",
+                              alignItems:
+                                "center",
+                              gap: "6px",
+                              color:
+                                colors.text,
+                              fontSize:
+                                "14px",
+                              fontWeight:
+                                700,
+                            }}
+                          >
+                            <FileText
+                              size={14}
+                              color={
+                                colors.primary
+                              }
+                            />
+
+                            {
+                              report.weeklyReports
+                            }
+                          </div>
+
+                          <div
+                            style={{
+                              marginTop:
+                                "3px",
+                              color:
+                                colors.textMuted,
+                              fontSize:
+                                "11px",
+                            }}
+                          >
+                            weekly
+                          </div>
+                        </td>
+
+                        <td
+                          style={{
+                            padding:
+                              "13px 14px",
+                            borderBottom: `1px solid ${colors.borderLight}`,
+                          }}
+                        >
+                          <StatusBadge
+                            status={
+                              report.status
+                            }
+                            colors={
+                              colors
+                            }
+                          />
+                        </td>
+
+                        <td
+                          style={{
+                            padding:
+                              "13px 14px",
+                            borderBottom: `1px solid ${colors.borderLight}`,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            onClick={(
+                              event
+                            ) => {
+                              event.stopPropagation();
+
+                              setSelectedReport(
+                                report
+                              );
+                            }}
+                            aria-label={`View report for ${report.student}`}
+                            style={{
+                              width: "34px",
+                              height: "34px",
+                              display:
+                                "flex",
+                              alignItems:
+                                "center",
+                              justifyContent:
+                                "center",
+                              border: `1px solid ${colors.border}`,
+                              borderRadius:
+                                "8px",
+                              background:
+                                colors.surface,
+                              color:
+                                colors.primary,
+                              cursor:
+                                "pointer",
+                            }}
+                          >
+                            <Eye size={15} />
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* ==================================================
+                PAGINATION
+            =================================================== */}
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent:
+                  "space-between",
+                gap: "15px",
+                padding:
+                  "13px 18px",
+                borderTop: `1px solid ${colors.border}`,
               }}
             >
               <div
                 style={{
-                  width: "50px",
-                  height: "50px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "12px",
-                  backgroundColor: "#eff6ff",
-                  color: "#2563eb",
-                  fontSize: "13px",
-                  fontWeight: 800,
+                  color:
+                    colors.textSecondary,
+                  fontSize: "12px",
                 }}
               >
-                {selectedReport.initials}
+                Showing{" "}
+                <strong
+                  style={{
+                    color: colors.text,
+                  }}
+                >
+                  {filteredReports.length
+                    ? startIndex + 1
+                    : 0}
+                </strong>{" "}
+                to{" "}
+                <strong
+                  style={{
+                    color: colors.text,
+                  }}
+                >
+                  {Math.min(
+                    startIndex +
+                      PAGE_SIZE,
+                    filteredReports.length
+                  )}
+                </strong>{" "}
+                of{" "}
+                <strong
+                  style={{
+                    color: colors.text,
+                  }}
+                >
+                  {filteredReports.length}
+                </strong>
               </div>
 
-              <div style={{ flex: 1 }}>
-                <h3
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "5px",
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage(
+                      (page) =>
+                        Math.max(
+                          1,
+                          page - 1
+                        )
+                    )
+                  }
+                  disabled={
+                    safeCurrentPage === 1
+                  }
                   style={{
-                    margin: 0,
-                    color: "#1e293b",
-                    fontSize: "16px",
-                    fontWeight: 750,
+                    width: "32px",
+                    height: "32px",
+                    display: "flex",
+                    alignItems:
+                      "center",
+                    justifyContent:
+                      "center",
+                    border: `1px solid ${colors.border}`,
+                    borderRadius:
+                      "8px",
+                    background:
+                      colors.surface,
+                    color:
+                      safeCurrentPage ===
+                      1
+                        ? colors.textMuted
+                        : colors.textSecondary,
+                    cursor:
+                      safeCurrentPage ===
+                      1
+                        ? "not-allowed"
+                        : "pointer",
                   }}
                 >
-                  {selectedReport.student}
-                </h3>
+                  <ChevronLeft size={15} />
+                </button>
 
+                {Array.from(
+                  {
+                    length: totalPages,
+                  },
+                  (_, index) =>
+                    index + 1
+                )
+                  .filter(
+                    (page) =>
+                      totalPages <= 5 ||
+                      page === 1 ||
+                      page === totalPages ||
+                      Math.abs(
+                        page -
+                          safeCurrentPage
+                      ) <= 1
+                  )
+                  .map(
+                    (
+                      page,
+                      index,
+                      pages
+                    ) => {
+                      const previous =
+                        pages[index - 1];
+
+                      const showEllipsis =
+                        previous &&
+                        page -
+                          previous >
+                          1;
+
+                      return (
+                        <span
+                          key={page}
+                          style={{
+                            display:
+                              "inline-flex",
+                            alignItems:
+                              "center",
+                            gap: "5px",
+                          }}
+                        >
+                          {showEllipsis && (
+                            <span
+                              style={{
+                                padding:
+                                  "0 3px",
+                                color:
+                                  colors.textMuted,
+                                fontSize:
+                                  "12px",
+                              }}
+                            >
+                              ...
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCurrentPage(
+                                page
+                              )
+                            }
+                            style={{
+                              width:
+                                "32px",
+                              height:
+                                "32px",
+                              display:
+                                "flex",
+                              alignItems:
+                                "center",
+                              justifyContent:
+                                "center",
+                              border:
+                                page ===
+                                safeCurrentPage
+                                  ? `1px solid ${colors.primary}`
+                                  : `1px solid ${colors.border}`,
+                              borderRadius:
+                                "8px",
+                              background:
+                                page ===
+                                safeCurrentPage
+                                  ? colors.primary
+                                  : colors.surface,
+                              color:
+                                page ===
+                                safeCurrentPage
+                                  ? "#ffffff"
+                                  : colors.textSecondary,
+                              fontSize:
+                                "12px",
+                              fontWeight:
+                                700,
+                              cursor:
+                                "pointer",
+                            }}
+                          >
+                            {page}
+                          </button>
+                        </span>
+                      );
+                    }
+                  )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage(
+                      (page) =>
+                        Math.min(
+                          totalPages,
+                          page + 1
+                        )
+                    )
+                  }
+                  disabled={
+                    safeCurrentPage ===
+                    totalPages
+                  }
+                  style={{
+                    width: "32px",
+                    height: "32px",
+                    display: "flex",
+                    alignItems:
+                      "center",
+                    justifyContent:
+                      "center",
+                    border: `1px solid ${colors.border}`,
+                    borderRadius:
+                      "8px",
+                    background:
+                      colors.surface,
+                    color:
+                      safeCurrentPage ===
+                      totalPages
+                        ? colors.textMuted
+                        : colors.textSecondary,
+                    cursor:
+                      safeCurrentPage ===
+                      totalPages
+                        ? "not-allowed"
+                        : "pointer",
+                  }}
+                >
+                  <ChevronRight size={15} />
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* ======================================================
+          DETAIL MODAL
+      ======================================================= */}
+
+      {selectedReport && (
+        <Modal
+          colors={colors}
+          darkMode={darkMode}
+          onClose={() =>
+            setSelectedReport(null)
+          }
+        >
+          {/* MODAL HEADER */}
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              justifyContent:
+                "space-between",
+              gap: "16px",
+              padding: "20px 22px",
+              borderBottom: `1px solid ${colors.border}`,
+            }}
+          >
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  color: colors.text,
+                  fontSize: "18px",
+                  lineHeight: 1.3,
+                  fontWeight: 750,
+                }}
+              >
+                OJT Report Details
+              </h2>
+
+              <p
+                style={{
+                  margin: "5px 0 0",
+                  color: colors.textSecondary,
+                  fontSize: "13px",
+                  lineHeight: 1.5,
+                }}
+              >
+                Consolidated student training
+                record
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() =>
+                setSelectedReport(null)
+              }
+              style={{
+                width: "34px",
+                height: "34px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                border: `1px solid ${colors.border}`,
+                borderRadius: "9px",
+                background:
+                  colors.surfaceMuted,
+                color:
+                  colors.textSecondary,
+                cursor: "pointer",
+              }}
+            >
+              <X size={17} />
+            </button>
+          </div>
+
+          <div
+            style={{
+              padding: "20px 22px 22px",
+            }}
+          >
+            {/* STUDENT HEADER */}
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent:
+                  "space-between",
+                gap: "15px",
+                padding: "16px",
+                border: `1px solid ${colors.border}`,
+                borderRadius: "12px",
+                background:
+                  colors.surfaceMuted,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
                 <div
                   style={{
-                    marginTop: "5px",
-                    color: "#64748b",
-                    fontSize: "10px",
+                    width: "48px",
+                    height: "48px",
+                    display: "flex",
+                    alignItems:
+                      "center",
+                    justifyContent:
+                      "center",
+                    borderRadius: "50%",
+                    background:
+                      colors.primarySoft,
+                    color:
+                      colors.primary,
+                    fontSize: "14px",
+                    fontWeight: 800,
                   }}
                 >
-                  {selectedReport.position}
+                  {
+                    selectedReport.initials
+                  }
+                </div>
+
+                <div>
+                  <h3
+                    style={{
+                      margin: 0,
+                      color: colors.text,
+                      fontSize: "17px",
+                      fontWeight: 750,
+                    }}
+                  >
+                    {
+                      selectedReport.student
+                    }
+                  </h3>
+
+                  <p
+                    style={{
+                      margin:
+                        "4px 0 0",
+                      color:
+                        colors.textSecondary,
+                      fontSize: "13px",
+                    }}
+                  >
+                    {
+                      selectedReport.rollNumber
+                    }{" "}
+                    •{" "}
+                    {
+                      selectedReport.department
+                    }
+                  </p>
                 </div>
               </div>
 
-              <CompletionBadge
-                status={selectedReport.completion}
+              <StatusBadge
+                status={
+                  selectedReport.status
+                }
+                colors={colors}
               />
             </div>
 
-            {/* INFORMATION */}
+            {/* DETAILS */}
+
             <div
-              className="ojt-report-detail-grid"
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr",
+                gridTemplateColumns:
+                  "repeat(2, minmax(0, 1fr))",
+                gap: "10px",
+                marginTop: "15px",
+              }}
+              className="ojt-report-detail-grid"
+            >
+              <DetailItem
+                icon={Building2}
+                label="Company"
+                value={
+                  selectedReport.company
+                }
+                colors={colors}
+              />
+
+              <DetailItem
+                icon={GraduationCap}
+                label="Position"
+                value={
+                  selectedReport.position
+                }
+                colors={colors}
+              />
+
+              <DetailItem
+                icon={Users}
+                label="Faculty Mentor"
+                value={
+                  selectedReport.mentor
+                }
+                colors={colors}
+              />
+
+              <DetailItem
+                icon={CalendarDays}
+                label="OJT Period"
+                value={`${formatDate(
+                  selectedReport.startDate
+                )} — ${formatDate(
+                  selectedReport.endDate
+                )}`}
+                colors={colors}
+              />
+
+              <DetailItem
+                icon={FileText}
+                label="Student ID"
+                value={
+                  selectedReport.studentId
+                }
+                colors={colors}
+              />
+
+              <DetailItem
+                icon={Clock3}
+                label="Location"
+                value={
+                  selectedReport.location
+                }
+                colors={colors}
+              />
+            </div>
+
+            {/* METRICS */}
+
+            <div
+              className="ojt-report-detail-metrics"
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(3, minmax(0, 1fr))",
                 gap: "10px",
                 marginTop: "15px",
               }}
             >
-              {[
-                {
-                  icon: Building2,
-                  label: "Company",
-                  value: selectedReport.company,
-                },
-                {
-                  icon: UserCheck,
-                  label: "Mentor",
-                  value: selectedReport.mentor,
-                },
-                {
-                  icon: ClipboardList,
-                  label: "Department",
-                  value: selectedReport.department,
-                },
-                {
-                  icon: CalendarDays,
-                  label: "OJT Period",
-                  value: `${selectedReport.startDate} - ${selectedReport.endDate}`,
-                },
-              ].map(({ icon: Icon, label, value }) => (
+              <div
+                style={{
+                  padding: "15px",
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: "11px",
+                  background:
+                    colors.surface,
+                }}
+              >
                 <div
-                  key={label}
+                  style={{
+                    color:
+                      colors.textSecondary,
+                    fontSize: "12px",
+                    fontWeight: 650,
+                  }}
+                >
+                  OJT Progress
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "5px",
+                    color: colors.text,
+                    fontSize: "22px",
+                    fontWeight: 750,
+                  }}
+                >
+                  {
+                    selectedReport.progress
+                  }
+                  %
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "9px",
+                  }}
+                >
+                  <ProgressBar
+                    value={
+                      selectedReport.progress
+                    }
+                    colors={colors}
+                  />
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: "15px",
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: "11px",
+                  background:
+                    colors.surface,
+                }}
+              >
+                <div
+                  style={{
+                    color:
+                      colors.textSecondary,
+                    fontSize: "12px",
+                    fontWeight: 650,
+                  }}
+                >
+                  Attendance
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "5px",
+                    color:
+                      selectedReport.attendance >=
+                      80
+                        ? colors.success
+                        : colors.danger,
+                    fontSize: "22px",
+                    fontWeight: 750,
+                  }}
+                >
+                  {
+                    selectedReport.attendance
+                  }%
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "5px",
+                    color:
+                      colors.textMuted,
+                    fontSize: "12px",
+                  }}
+                >
+                  {
+                    selectedReport.attendancePresent
+                  }{" "}
+                  present •{" "}
+                  {
+                    selectedReport.attendanceAbsent
+                  }{" "}
+                  absent
+                </div>
+              </div>
+
+              <div
+                style={{
+                  padding: "15px",
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: "11px",
+                  background:
+                    colors.surface,
+                }}
+              >
+                <div
+                  style={{
+                    color:
+                      colors.textSecondary,
+                    fontSize: "12px",
+                    fontWeight: 650,
+                  }}
+                >
+                  Evaluation
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "5px",
+                    color: colors.text,
+                    fontSize: "22px",
+                    fontWeight: 750,
+                  }}
+                >
+                  {selectedReport.totalMarks ??
+                    "—"}
+
+                  {selectedReport.totalMarks !==
+                    null &&
+                    selectedReport.totalMarks !==
+                      undefined && (
+                      <span
+                        style={{
+                          marginLeft:
+                            "3px",
+                          color:
+                            colors.textMuted,
+                          fontSize:
+                            "13px",
+                        }}
+                      >
+                        / 100
+                      </span>
+                    )}
+                </div>
+
+                <div
+                  style={{
+                    marginTop: "5px",
+                    color:
+                      colors.textMuted,
+                    fontSize: "12px",
+                  }}
+                >
+                  {selectedReport.totalMarks !==
+                  null
+                    ? "Recorded evaluation"
+                    : "Evaluation not available"}
+                </div>
+              </div>
+            </div>
+
+            {/* REPORT SUMMARY */}
+
+            <div
+              style={{
+                marginTop: "15px",
+                padding: "16px",
+                border: `1px solid ${colors.border}`,
+                borderRadius: "11px",
+              }}
+            >
+              <h3
+                style={{
+                  margin: 0,
+                  color: colors.text,
+                  fontSize: "15px",
+                  fontWeight: 750,
+                }}
+              >
+                Report & Training Summary
+              </h3>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(3, minmax(0, 1fr))",
+                  gap: "12px",
+                  marginTop: "13px",
+                }}
+                className="ojt-report-summary-detail"
+              >
+                {[
+                  [
+                    "Weekly Reports",
+                    selectedReport.weeklyReports,
+                  ],
+                  [
+                    "Training Days",
+                    `${selectedReport.completedDays} / ${selectedReport.totalDays}`,
+                  ],
+                  [
+                    "Last Update",
+                    selectedReport.lastUpdate
+                      ? formatDate(
+                          selectedReport.lastUpdate
+                        )
+                      : "Not available",
+                  ],
+                ].map(
+                  ([label, value]) => (
+                    <div key={label}>
+                      <div
+                        style={{
+                          color:
+                            colors.textMuted,
+                          fontSize: "11px",
+                          fontWeight: 700,
+                          textTransform:
+                            "uppercase",
+                        }}
+                      >
+                        {label}
+                      </div>
+
+                      <div
+                        style={{
+                          marginTop: "4px",
+                          color:
+                            colors.text,
+                          fontSize:
+                            "14px",
+                          fontWeight:
+                            650,
+                        }}
+                      >
+                        {value}
+                      </div>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+
+            {/* EVALUATION STRUCTURE */}
+
+            <div
+              style={{
+                marginTop: "15px",
+                padding: "16px",
+                border: `1px solid ${colors.border}`,
+                borderRadius: "11px",
+                background:
+                  colors.surfaceMuted,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <GraduationCap
+                  size={17}
+                  color={
+                    colors.primary
+                  }
+                />
+
+                <h3
+                  style={{
+                    margin: 0,
+                    color: colors.text,
+                    fontSize: "15px",
+                    fontWeight: 750,
+                  }}
+                >
+                  Evaluation Structure
+                </h3>
+              </div>
+
+              <p
+                style={{
+                  margin:
+                    "7px 0 0",
+                  color:
+                    colors.textSecondary,
+                  fontSize: "12px",
+                  lineHeight: 1.5,
+                }}
+              >
+                The portal's evaluation framework
+                uses a 100-mark structure combining
+                company and college assessment.
+              </p>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns:
+                    "repeat(2, minmax(0, 1fr))",
+                  gap: "10px",
+                  marginTop: "12px",
+                }}
+                className="ojt-report-evaluation-grid"
+              >
+                <div
                   style={{
                     padding: "12px",
-                    border: "1px solid #edf2f7",
-                    borderRadius: "10px",
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: "9px",
+                    background:
+                      colors.surface,
                   }}
                 >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "7px",
-                      color: "#94a3b8",
-                      fontSize: "9px",
-                      fontWeight: 700,
-                      textTransform: "uppercase",
+                      color:
+                        colors.primary,
+                      fontSize: "12px",
+                      fontWeight: 750,
                     }}
                   >
-                    <Icon size={13} />
-                    {label}
+                    External — 50 Marks
                   </div>
 
                   <div
                     style={{
                       marginTop: "6px",
-                      color: "#334155",
-                      fontSize: "10px",
-                      fontWeight: 650,
+                      color:
+                        colors.textSecondary,
+                      fontSize: "12px",
+                      lineHeight: 1.7,
                     }}
                   >
-                    {value}
+                    Hours Completed — 20
+                    <br />
+                    Performance — 20
+                    <br />
+                    Punctuality — 10
                   </div>
                 </div>
-              ))}
-            </div>
 
-            {/* PERFORMANCE */}
-            <div
-              style={{
-                marginTop: "15px",
-                padding: "14px",
-                border: "1px solid #e2e8f0",
-                borderRadius: "10px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "7px",
-                  marginBottom: "12px",
-                }}
-              >
-                <BarChart3
-                  size={15}
-                  color="#2563eb"
-                />
-
-                <strong
+                <div
                   style={{
-                    color: "#334155",
-                    fontSize: "11px",
+                    padding: "12px",
+                    border: `1px solid ${colors.border}`,
+                    borderRadius: "9px",
+                    background:
+                      colors.surface,
                   }}
                 >
-                  Performance Summary
-                </strong>
-              </div>
-
-              <div
-                className="ojt-report-performance-grid"
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "12px",
-                }}
-              >
-                <div>
                   <div
                     style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "6px",
+                      color:
+                        darkMode
+                          ? "#C4B5FD"
+                          : "#7c3aed",
+                      fontSize: "12px",
+                      fontWeight: 750,
                     }}
                   >
-                    <span
-                      style={{
-                        color: "#64748b",
-                        fontSize: "9px",
-                      }}
-                    >
-                      OJT Progress
-                    </span>
-
-                    <strong
-                      style={{
-                        color: "#2563eb",
-                        fontSize: "10px",
-                      }}
-                    >
-                      {selectedReport.progress}%
-                    </strong>
-                  </div>
-
-                  <ProgressBar
-                    value={selectedReport.progress}
-                  />
-                </div>
-
-                <div>
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      marginBottom: "6px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "#64748b",
-                        fontSize: "9px",
-                      }}
-                    >
-                      Attendance
-                    </span>
-
-                    <strong
-                      style={{
-                        color:
-                          selectedReport.attendance >= 90
-                            ? "#059669"
-                            : "#d97706",
-                        fontSize: "10px",
-                      }}
-                    >
-                      {selectedReport.attendance}%
-                    </strong>
+                    Internal — 50 Marks
                   </div>
 
                   <div
                     style={{
-                      width: "100%",
-                      height: "5px",
-                      overflow: "hidden",
-                      borderRadius: "999px",
-                      backgroundColor: "#e2e8f0",
+                      marginTop: "6px",
+                      color:
+                        colors.textSecondary,
+                      fontSize: "12px",
+                      lineHeight: 1.7,
                     }}
                   >
-                    <div
-                      style={{
-                        width: `${selectedReport.attendance}%`,
-                        height: "100%",
-                        borderRadius: "999px",
-                        backgroundColor:
-                          selectedReport.attendance >= 90
-                            ? "#059669"
-                            : "#d97706",
-                      }}
-                    />
+                    Weekly Reports — 15
+                    <br />
+                    Final Report — 20
+                    <br />
+                    Viva / Presentation — 15
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* REPORT STATUS */}
-            <div
-              className="ojt-report-status-grid"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "10px",
-                marginTop: "10px",
-              }}
-            >
-              <div
-                style={{
-                  padding: "12px",
-                  border: "1px solid #edf2f7",
-                  borderRadius: "10px",
-                }}
-              >
-                <div
-                  style={{
-                    color: "#94a3b8",
-                    fontSize: "9px",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Mentor Feedback
-                </div>
+            {/* MODAL FOOTER */}
 
-                <div style={{ marginTop: "6px" }}>
-                  <FeedbackBadge
-                    value={
-                      selectedReport.mentorFeedback
-                    }
-                  />
-                </div>
-              </div>
-
-              <div
-                style={{
-                  padding: "12px",
-                  border: "1px solid #edf2f7",
-                  borderRadius: "10px",
-                }}
-              >
-                <div
-                  style={{
-                    color: "#94a3b8",
-                    fontSize: "9px",
-                    fontWeight: 700,
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Report Status
-                </div>
-
-                <div
-                  style={{
-                    marginTop: "6px",
-                  }}
-                >
-                  <CompletionBadge
-                    status={
-                      selectedReport.completion
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* FOOTER */}
             <div
               style={{
                 display: "flex",
                 justifyContent: "flex-end",
-                gap: "8px",
                 marginTop: "18px",
-                paddingTop: "14px",
-                borderTop: "1px solid #eef2f7",
               }}
             >
-              <button
-                type="button"
-                onClick={() =>
-                  handleDownload(selectedReport)
-                }
-                style={{
-                  height: "36px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "0 14px",
-                  border: "none",
-                  borderRadius: "8px",
-                  backgroundColor: "#2563eb",
-                  color: "#ffffff",
-                  fontSize: "10px",
-                  fontWeight: 700,
-                  cursor: "pointer",
-                }}
-              >
-                <Download size={13} />
-                Download
-              </button>
-
               <button
                 type="button"
                 onClick={() =>
                   setSelectedReport(null)
                 }
                 style={{
-                  height: "36px",
+                  height: "38px",
                   padding: "0 14px",
-                  border:
-                    "1px solid #dbe4ee",
+                  border: `1px solid ${colors.border}`,
                   borderRadius: "8px",
-                  backgroundColor: "#ffffff",
-                  color: "#475569",
-                  fontSize: "10px",
-                  fontWeight: 700,
+                  background:
+                    colors.surface,
+                  color: colors.text,
+                  fontSize: "13px",
+                  fontWeight: 650,
                   cursor: "pointer",
                 }}
               >
@@ -2037,82 +3344,32 @@ Completion Status: ${report.completion}
         </Modal>
       )}
 
-      {/* STYLES */}
       <style>
         {`
-          .ojt-report-action-button {
-            width: 100%;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 9px;
-            border: none;
-            border-radius: 6px;
-            background: transparent;
-            color: #475569;
-            font-size: 10px;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
-          }
+          @keyframes ojtReportsSpin {
+            from {
+              transform: rotate(0deg);
+            }
 
-          .ojt-report-action-button:hover {
-            background: #f8fafc;
-          }
-
-          .ojt-report-page-button {
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #e2e8f0;
-            border-radius: 7px;
-            background: #ffffff;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-          }
-
-          .ojt-report-page-button:hover:not(:disabled) {
-            border-color: #bfdbfe;
-            background: #eff6ff;
-            color: #2563eb;
-          }
-
-          .ojt-report-page-button:disabled {
-            color: #cbd5e1;
-            cursor: not-allowed;
-            background: #f8fafc;
-          }
-
-          .ojt-report-page-active {
-            border-color: #2563eb;
-            background: #2563eb;
-            color: #ffffff;
+            to {
+              transform: rotate(360deg);
+            }
           }
 
           @media (max-width: 1100px) {
-            .ojt-report-stat-grid {
-              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
-
-            .ojt-report-summary-grid {
-              grid-template-columns: 1fr 1fr !important;
-            }
-
             .ojt-report-filter-grid {
-              grid-template-columns: 1fr 1fr !important;
+              grid-template-columns:
+                minmax(220px, 1fr)
+                repeat(2, minmax(150px, auto)) !important;
+            }
+
+            .ojt-report-stat-grid {
+              grid-template-columns:
+                repeat(2, minmax(0, 1fr)) !important;
             }
           }
 
-          @media (max-width: 700px) {
-            .ojt-report-stat-grid {
-              grid-template-columns: 1fr !important;
-            }
-
+          @media (max-width: 800px) {
             .ojt-report-summary-grid {
               grid-template-columns: 1fr !important;
             }
@@ -2121,10 +3378,36 @@ Completion Status: ${report.completion}
               grid-template-columns: 1fr !important;
             }
 
-            .ojt-report-detail-grid,
-            .ojt-report-performance-grid,
-            .ojt-report-status-grid {
+            .ojt-report-filter-grid select {
+              width: 100%;
+              max-width: none !important;
+            }
+
+            .ojt-report-detail-metrics {
               grid-template-columns: 1fr !important;
+            }
+
+            .ojt-report-detail-grid {
+              grid-template-columns: 1fr !important;
+            }
+
+            .ojt-report-summary-detail {
+              grid-template-columns: 1fr !important;
+            }
+
+            .ojt-report-evaluation-grid {
+              grid-template-columns: 1fr !important;
+            }
+          }
+
+          @media (max-width: 640px) {
+            .ojt-report-stat-grid {
+              grid-template-columns: 1fr !important;
+            }
+
+            .ojt-report-header {
+              align-items: flex-start !important;
+              flex-direction: column !important;
             }
           }
         `}

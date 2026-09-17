@@ -53,6 +53,9 @@ app.use(
   authRoutes
 );
 
+// ======================================
+// Admin Routes
+// ======================================
 
 // Admin routes
 // const adminRoutes = require("./routes/adminRoutes");
@@ -62,8 +65,10 @@ app.use(
 //   adminRoutes
 // );
 
+// ======================================
+// Application Routes
+// ======================================
 
-// Application routes
 const applicationRoutes =
   require("./routes/applicationRoutes");
 
@@ -72,8 +77,10 @@ app.use(
   applicationRoutes
 );
 
+// ======================================
+// Announcement Routes
+// ======================================
 
-// Announcement routes
 const announcementRoutes =
   require("./routes/announcementRoutes");
 
@@ -82,8 +89,10 @@ app.use(
   announcementRoutes
 );
 
+// ======================================
+// Company Routes
+// ======================================
 
-// Company routes
 const companyRoutes =
   require("./routes/companyRoutes");
 
@@ -92,8 +101,10 @@ app.use(
   companyRoutes
 );
 
+// ======================================
+// Opportunity Routes
+// ======================================
 
-// Opportunity routes
 const opportunityRoutes =
   require("./routes/opportunityRoutes");
 
@@ -102,8 +113,10 @@ app.use(
   opportunityRoutes
 );
 
+// ======================================
+// Student Routes
+// ======================================
 
-// Student routes
 const studentRoutes =
   require("./routes/studentRoutes");
 
@@ -111,7 +124,6 @@ app.use(
   "/api/students",
   studentRoutes
 );
-
 
 // ======================================
 // Task routes
@@ -135,6 +147,9 @@ app.use(
   attendanceRoutes
 );
 
+// ======================================
+// Weekly Report Routes
+// ======================================
 
 const weeklyReportRoutes =
   require("./routes/weeklyReportRoutes");
@@ -144,6 +159,9 @@ app.use(
   weeklyReportRoutes
 );
 
+// ======================================
+// Certificate Routes
+// ======================================
 
 // ======================================
 // Certificate Routes
@@ -157,7 +175,6 @@ app.use(
   certificateRoutes
 );
 
-
 // ======================================
 // Notification Routes
 // ======================================
@@ -170,6 +187,9 @@ app.use(
   notificationRoutes
 );
 
+// ======================================
+// Assigned OJT Routes
+// ======================================
 
 // ======================================
 // Assigned OJT Routes
@@ -183,6 +203,10 @@ app.use(
   assignedOjtRoutes
 );
 
+app.use(
+  "/api/evaluations",
+  evaluationRoutes
+);
 
 // ======================================
 // Evaluation Routes
@@ -222,6 +246,9 @@ app.use(
   companyCoordinatorRoutes
 );
 
+// ======================================
+// Company Coordinator Routes
+// ======================================
 
 // ======================================
 // College Coordinator Routes
@@ -235,7 +262,39 @@ app.use(
   collegeCoordinatorRoutes
 );
 
+const mentorAssignmentRoutes =
+  require("./routes/mentorAssignmentRoutes");
 
+app.use(
+  "/api/college-coordinators/mentor-assignment",
+  mentorAssignmentRoutes
+);
+
+// ======================================
+// COLLEGE COORDINATOR ROUTES
+// ======================================
+// Keep this AFTER mentor assignment routes.
+// collegeCoordinatorRoutes contains:
+//
+// router.get("/:id", getCollegeCoordinatorById);
+//
+// Therefore this must come after more specific
+// routes such as /mentor-assignment.
+// ======================================
+
+const collegeCoordinatorRoutes =
+  require("./routes/collegeCoordinatorRoutes");
+
+app.use(
+  "/api/college-coordinators",
+  collegeCoordinatorRoutes
+);
+const settingsRoutes = require("./routes/settingsRoutes");
+
+app.use(
+  "/api/settings",
+  settingsRoutes
+);
 // ======================================
 // Test Route
 // ======================================
@@ -248,7 +307,6 @@ app.get("/", (req, res) => {
   });
 });
 
-
 // ======================================
 // 404 Route
 // ======================================
@@ -260,7 +318,6 @@ app.use((req, res) => {
       "API route not found",
   });
 });
-
 
 // ======================================
 // Error Handler
@@ -280,7 +337,6 @@ app.use(
     });
   }
 );
-
 
 // ======================================
 // Start Server
