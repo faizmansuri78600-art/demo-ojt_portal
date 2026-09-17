@@ -1,108 +1,7 @@
-// const User = require("../models/User");
-// const Faculty = require("../models/Faculty");
-// const Student = require("../models/Student");
-// const bcrypt = require("bcryptjs");
-// const generateToken = require("../utils/generateToken");
-
-// // ======================================
-// // Login User
-// // ======================================
-
-// const loginUser = async (req, res) => {
-//   try {
-//     // Check what Postman is sending
-//     console.log("Login Request Body:", req.body);
-
-//     const { email, password } = req.body;
-
-// let facultyId = null;
-
-// if (user.role === "Faculty") {
-// const faculty = await Faculty.findOne({ userId: user._id });
-
-// if (!faculty) {
-//    return res.status(404).json({
-//      success: false,
-//      message: "Faculty profile not found",
-// });
-//  }
-
-// facultyId = faculty._id;
-// }
-
-//     // Check password
-//     const isPasswordCorrect = await bcrypt.compare(
-//       password,
-//       user.passwordHash
-//     );
-
-//     if (!isPasswordCorrect) {
-//       return res.status(401).json({
-//         success: false,
-//         message: "Invalid email or password",
-//       });
-//     }
-
-//     // Generate JWT token
-//     const token = generateToken(user._id, user.role);
-
-//     // Login successful
-//     return res.status(200).json({
-//       success: true,
-//       message: "Login successful",
-//       token: token,
-//       user: {
-//         id: user._id,
-//         email: user.email,
-//         role: user.role,
-//       },
-//     });
-//   } catch (error) {
-//     console.error("Login Error:", error);
-
-//     return res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // ======================================
-// // Get All Users - Testing Only
-// // ======================================
-
-// const getUsers = async (req, res) => {
-//   try {
-//     const users = await User.find();
-
-//     return res.status(200).json({
-//       success: true,
-//       count: users.length,
-//       users: users,
-//     });
-//   } catch (error) {
-//     console.error("Get Users Error:", error);
-
-//     return res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// // ======================================
-// // Export
-// // ======================================
-
-// module.exports = {
-//   loginUser,
-//   getUsers,
-// };
-
-
 const User = require("../models/User");
-const Faculty = require("../models/Faculty");
 const Student = require("../models/Student");
+const Company = require("../models/Company");
+const CompanyCoordinator = require("../models/CompanyCoordinator");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
 
@@ -123,45 +22,28 @@ const loginUser = async (req, res) => {
       });
     }
 
-  const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-if (!user) {
-  return res.status(401).json({
-    success: false,
-    message: "Invalid email or password",
-  });
-}
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
 
-let facultyId = null;
-let facultyName = null;
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user.passwordHash
+    );
 
-if (user.role === "Faculty") {
-  const faculty = await Faculty.findOne({ userId: user._id });
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
 
-  if (!faculty) {
-    return res.status(404).json({
-      success: false,
-      message: "Faculty profile not found",
-    });
-  }
-
-  facultyId = faculty._id;
-  facultyName = faculty.name;
-}
-
-const isPasswordCorrect = await bcrypt.compare(
-  password,
-  user.passwordHash
-);
-
-if (!isPasswordCorrect) {
-  return res.status(401).json({
-    success: false,
-    message: "Invalid email or password",
-  });
-}
-
-const token = generateToken(user._id, user.role);
+    const token = generateToken(user._id, user.role);
 
     return res.status(200).json({
       success: true,
@@ -170,12 +52,10 @@ const token = generateToken(user._id, user.role);
       token: token,
 
       user: {
-  id: user._id,
-  email: user.email,
-  role: user.role,
-  facultyId: facultyId,
-  facultyName: facultyName,
-},
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error("Login Error:", error);
@@ -206,6 +86,15 @@ const registerUser = async (req, res) => {
       rollNumber,
       department,
       cgpa,
+      // Company Coordinator specific fields
+      companyName,
+      street,
+      city,
+      state,
+      zipCode,
+      website,
+      description,
+      designation,
     } = req.body;
 
     // ---------------------------------------------
@@ -240,6 +129,17 @@ const registerUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "User with this email already exists",
+      });
+    }
+
+    // ---------------------------------------------
+    // Company Coordinator requires a company name
+    // ---------------------------------------------
+
+    if (role === "Company Coordinator" && !companyName) {
+      return res.status(400).json({
+        success: false,
+        message: "Company name is required for Company Coordinator registration",
       });
     }
 
@@ -315,6 +215,40 @@ const registerUser = async (req, res) => {
     }
 
     // ---------------------------------------------
+    // Create Company + CompanyCoordinator link
+    // Only for Company Coordinator registration
+    // ---------------------------------------------
+
+    let company = null;
+    let companyCoordinator = null;
+
+    if (role === "Company Coordinator") {
+      const companyId = "C" + Date.now();
+
+      company = await Company.create({
+        _id: companyId,
+        companyName: companyName,
+        street: street || "",
+        city: city || "",
+        state: state || "",
+        zipCode: zipCode || "",
+        website: website || "",
+        description: description || "",
+        isVerified: false,
+      });
+
+      const companyCoordinatorId = "CC" + Date.now();
+
+      companyCoordinator = await CompanyCoordinator.create({
+        _id: companyCoordinatorId,
+        userId: userId,
+        companyId: companyId,
+        name: name,
+        designation: designation || "",
+      });
+    }
+
+    // ---------------------------------------------
     // Success response
     // ---------------------------------------------
 
@@ -337,6 +271,22 @@ const registerUser = async (req, res) => {
             rollNumber: student.rollNumber,
             department: student.department,
             cgpa: student.cgpa,
+          }
+        : null,
+
+      company: company
+        ? {
+            id: company._id,
+            companyName: company.companyName,
+            isVerified: company.isVerified,
+          }
+        : null,
+
+      companyCoordinator: companyCoordinator
+        ? {
+            id: companyCoordinator._id,
+            userId: companyCoordinator.userId,
+            companyId: companyCoordinator.companyId,
           }
         : null,
     });
