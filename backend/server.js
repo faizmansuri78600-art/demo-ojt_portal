@@ -1,6 +1,9 @@
-const dns=require("dns");
-dns.setServers(["8.8.8.8","1.1.1.1"]);
+const dns = require("dns");
+
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
+
 const express = require("express");
+const taskRoutes = require("./routes/taskRoutes");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
@@ -29,6 +32,9 @@ app.use(cors());
 
 app.use(express.json());
 
+// resume uploads
+app.use("/uploads", express.static("uploads"));
+
 app.use(
   express.urlencoded({
     extended: true,
@@ -40,8 +46,7 @@ app.use(
 // ======================================
 
 // Authentication routes
-const authRoutes =
-  require("./routes/authRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 app.use(
   "/api/auth",
@@ -50,13 +55,12 @@ app.use(
 
 
 // Admin routes
-const adminRoutes =
-  require("./routes/adminRoutes");
+// const adminRoutes = require("./routes/adminRoutes");
 
-app.use(
-  "/api/admin",
-  adminRoutes
-);
+// app.use(
+//   "/api/admin",
+//   adminRoutes
+// );
 
 
 // Application routes
@@ -110,6 +114,16 @@ app.use(
 
 
 // ======================================
+// Task routes
+// ======================================
+
+app.use(
+  "/api/tasks",
+  taskRoutes
+);
+
+
+// ======================================
 // Attendance Routes
 // ======================================
 
@@ -131,38 +145,95 @@ app.use(
 );
 
 
+// ======================================
+// Certificate Routes
+// ======================================
 
-
-const certificateRoutes = 
-require("./routes/certificateRoutes");
+const certificateRoutes =
+  require("./routes/certificateRoutes");
 
 app.use(
-  "/api/certificates", certificateRoutes
+  "/api/certificates",
+  certificateRoutes
 );
 
 
-const notificationRoutes = require("./routes/notificationRoutes");
-app.use("/api/notifications", notificationRoutes);
+// ======================================
+// Notification Routes
+// ======================================
+
+const notificationRoutes =
+  require("./routes/notificationRoutes");
+
+app.use(
+  "/api/notifications",
+  notificationRoutes
+);
 
 
-const assignedOjtRoutes = require("./routes/assignedOjtRoutes");
-app.use("/api/assigned-ojt", assignedOjtRoutes);
+// ======================================
+// Assigned OJT Routes
+// ======================================
+
+const assignedOjtRoutes =
+  require("./routes/assignedOjtRoutes");
+
+app.use(
+  "/api/assigned-ojt",
+  assignedOjtRoutes
+);
 
 
-const evaluationRoutes = require("./routes/evaluationRoutes");
-app.use("/api/evaluations", evaluationRoutes);
+// ======================================
+// Evaluation Routes
+// ======================================
+
+const evaluationRoutes =
+  require("./routes/evaluationRoutes");
+
+app.use(
+  "/api/evaluations",
+  evaluationRoutes
+);
 
 
-const facultyRoutes = require("./routes/facultyRoutes");
-app.use("/api/faculty", facultyRoutes);
+// ======================================
+// Faculty Routes
+// ======================================
+
+const facultyRoutes =
+  require("./routes/facultyRoutes");
+
+app.use(
+  "/api/faculty",
+  facultyRoutes
+);
 
 
-const companyCoordinatorRoutes = require("./routes/companyCoordinatorRoutes");
-app.use("/api/company-coordinators", companyCoordinatorRoutes);
+// ======================================
+// Company Coordinator Routes
+// ======================================
+
+const companyCoordinatorRoutes =
+  require("./routes/companyCoordinatorRoutes");
+
+app.use(
+  "/api/company-coordinators",
+  companyCoordinatorRoutes
+);
 
 
-const collegeCoordinatorRoutes = require("./routes/collegeCoordinatorRoutes");
-app.use("/api/college-coordinators", collegeCoordinatorRoutes);
+// ======================================
+// College Coordinator Routes
+// ======================================
+
+const collegeCoordinatorRoutes =
+  require("./routes/collegeCoordinatorRoutes");
+
+app.use(
+  "/api/college-coordinators",
+  collegeCoordinatorRoutes
+);
 
 
 // ======================================

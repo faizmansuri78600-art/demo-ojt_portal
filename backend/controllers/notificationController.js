@@ -19,6 +19,31 @@ const getAllNotifications = async (req, res) => {
     });
   }
 };
+// Get Logged-In Student's Own Notifications
+const getStudentNotifications = async (req, res) => {
+  try {
+    // req.user is set by the protect middleware from the login token —
+    // same pattern as getProfile() in studentController.js.
+    const userId = req.user._id;
+
+    const notifications = await Notification.find({ userId }).sort({
+      sentOn: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      count: notifications.length,
+      notifications,
+    });
+  } catch (error) {
+    console.error("Get Student Notifications Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch student notifications",
+    });
+  }
+};
 
 // Get Notifications By User ID
 const getNotificationsByUserId = async (req, res) => {
@@ -184,6 +209,7 @@ const deleteNotification = async (req, res) => {
 
 module.exports = {
   getAllNotifications,
+   getStudentNotifications, 
   getNotificationsByUserId,
   getUnreadNotifications,
   addNotification,

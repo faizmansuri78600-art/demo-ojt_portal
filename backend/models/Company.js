@@ -15,6 +15,10 @@ const companySchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    logoUrl: {
+  type: String,
+  default: "",
+},
 
     street: {
       type: String,
