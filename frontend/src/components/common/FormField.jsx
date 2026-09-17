@@ -9,27 +9,42 @@ export default function FormField({
   required = false,
   full = false,
   options = [],
+  disabled = false,
 }) {
+  // If the value coming from MongoDB is not already
+  // present in the dropdown options, add it automatically.
+  const selectOptions =
+    value && !options.includes(value)
+      ? [value, ...options]
+      : options;
+
   return (
     <div className={full ? "col-span-2" : ""}>
 
       {/* LABEL */}
+
       <label className="block text-[13px] font-semibold text-[#111827] mb-2">
         {label}
 
         {required && (
-          <span className="text-red-500 ml-1">*</span>
+          <span className="text-red-500 ml-1">
+            *
+          </span>
         )}
       </label>
 
       {/* DROPDOWN */}
+
       {options.length > 0 ? (
 
         <div className="relative w-full">
 
           <select
             value={value}
-            onChange={(e) => onChange?.(e.target.value)}
+            onChange={(e) =>
+              onChange?.(e.target.value)
+            }
+            disabled={disabled}
             className="
               w-full
               h-[48px]
@@ -52,7 +67,8 @@ export default function FormField({
               focus:ring-[#1E5EFF]/10
             "
           >
-            {options.map((option) => (
+
+            {selectOptions.map((option) => (
               <option
                 key={option}
                 value={option}
@@ -60,9 +76,11 @@ export default function FormField({
                 {option}
               </option>
             ))}
+
           </select>
 
           {/* CHEVRON */}
+
           <div
             className="
               absolute
@@ -86,12 +104,16 @@ export default function FormField({
 
       ) : (
 
-        /* NORMAL INPUT */
+        /* TEXT INPUT */
+
         <input
           type={type}
           value={value}
-          onChange={(e) => onChange?.(e.target.value)}
+          onChange={(e) =>
+            onChange?.(e.target.value)
+          }
           placeholder={placeholder}
+          disabled={disabled}
           className="
             w-full
             h-[48px]

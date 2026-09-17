@@ -1,15 +1,59 @@
-import { PieChart, Pie, Cell, Tooltip } from 'recharts';
+import { useEffect, useState } from 'react';
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip
+} from 'recharts';
 
-const data = [
-  { name: 'Computer Science', value: 18, color: '#1E5EFF' },
-  { name: 'Information Technology', value: 12, color: '#22C55E' },
-  { name: 'Electronics', value: 8, color: '#F59E0B' },
-  { name: 'Mechanical', value: 6, color: '#A855F7' },
-  { name: 'Other', value: 4, color: '#94A3B8' },
+const companyId = 'C001';
+
+const COLORS = [
+  '#1E5EFF',
+  '#22C55E',
+  '#F59E0B',
+  '#A855F7',
+  '#94A3B8'
 ];
 
 export default function DepartmentChart() {
-  const total = data.reduce((sum, d) => sum + d.value, 0);
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    const fetchDepartmentStats = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/companies/${companyId}/dashboard/department-stats`
+        );
+
+        const result = await response.json();
+
+        if (result.success) {
+          const formattedData = result.departments.map(
+            (department, index) => ({
+              name: department.name,
+              value: department.value,
+              color: COLORS[index % COLORS.length]
+            })
+          );
+
+          setData(formattedData);
+        }
+      } catch (error) {
+        console.error(
+          'Failed to fetch department statistics:',
+          error
+        );
+      }
+    };
+
+    fetchDepartmentStats();
+  }, []);
+
+  const total = data.reduce(
+    (sum, department) => sum + department.value,
+    0
+  );
 
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm">
@@ -62,7 +106,11 @@ export default function DepartmentChart() {
               style={{ background: d.color }}
             />
 
-            {d.name} ({((d.value / total) * 100).toFixed(1)}%)
+            {d.name} (
+            {total > 0
+              ? ((d.value / total) * 100).toFixed(1)
+              : '0.0'}
+            %)
           </li>
         ))}
       </ul>

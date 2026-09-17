@@ -303,7 +303,7 @@ const getAdminDashboard = async (req, res) => {
     const totalAdministrators = await User.countDocuments({
       role: { $regex: /^administrator$/i },
     });
-
+ 
     // ----------------------------------
     // 2. COMPANY DATA
     // ----------------------------------

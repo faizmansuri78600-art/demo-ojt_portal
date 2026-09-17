@@ -103,8 +103,225 @@ const getTopCompanies = async (req, res) => {
   }
 };
 
+// ======================================
+// Get Opportunities By Company
+// ======================================
+
+const getOpportunitiesByCompany = async (req, res) => {
+  try {
+    const { companyId } = req.params;
+
+    const opportunities = await Opportunity.find({
+      companyId: companyId,
+    }).sort({ postedOn: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: opportunities.length,
+      opportunities: opportunities,
+    });
+  } catch (error) {
+    console.error("Get Company Opportunities Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch company opportunities",
+    });
+  }
+};
+
+// ======================================
+// Add Opportunity
+// ======================================
+
+const addOpportunity = async (req, res) => {
+  try {
+    const {
+      companyId,
+      createdByCoordinatorId,
+      title,
+      description,
+      department,
+      duration,
+      location,
+      stipend,
+      vacancies,
+      lastDate,
+      skillsRequired,
+      eligibility,
+      isPaid,
+      status,
+      postedOn,
+    } = req.body;
+
+    if (!companyId || !title) {
+      return res.status(400).json({
+        success: false,
+        message: "Company ID and title are required",
+      });
+    }
+
+    const opportunity = await Opportunity.create({
+      _id: "O" + Date.now(),
+      companyId,
+      createdByCoordinatorId: createdByCoordinatorId || "",
+      title,
+      description: description || "",
+      department: department || "",
+      duration: duration || "",
+      location: location || "",
+      stipend:
+        stipend === "" || stipend === null || stipend === undefined
+          ? 0
+          : Number(stipend),
+      vacancies:
+        vacancies === "" || vacancies === null || vacancies === undefined
+          ? 0
+          : Number(vacancies),
+      lastDate: lastDate || "",
+      skillsRequired: skillsRequired || "",
+      eligibility: eligibility || "",
+      isPaid: Boolean(isPaid),
+      status: status || "Open",
+      postedOn: postedOn || new Date().toISOString().split("T")[0],
+    });
+
+    res.status(201).json({
+      success: true,
+      message: "Opportunity added successfully",
+      opportunity: opportunity,
+    });
+  } catch (error) {
+    console.error("Add Opportunity Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to add opportunity",
+    });
+  }
+};
+
+// ======================================
+// Update Opportunity
+// ======================================
+
+const updateOpportunity = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const {
+      title,
+      description,
+      department,
+      duration,
+      location,
+      stipend,
+      vacancies,
+      lastDate,
+      skillsRequired,
+      eligibility,
+      isPaid,
+      status,
+      postedOn,
+    } = req.body;
+
+    const opportunity = await Opportunity.findById(id);
+
+    if (!opportunity) {
+      return res.status(404).json({
+        success: false,
+        message: "Opportunity not found",
+      });
+    }
+
+    opportunity.title = title ?? opportunity.title;
+    opportunity.description = description ?? opportunity.description;
+    opportunity.department = department ?? opportunity.department;
+    opportunity.duration = duration ?? opportunity.duration;
+    opportunity.location = location ?? opportunity.location;
+
+    if (stipend !== undefined) {
+      opportunity.stipend =
+        stipend === "" || stipend === null ? 0 : Number(stipend);
+    }
+
+    if (vacancies !== undefined) {
+      opportunity.vacancies =
+        vacancies === "" || vacancies === null ? 0 : Number(vacancies);
+    }
+
+    opportunity.lastDate = lastDate ?? opportunity.lastDate;
+    opportunity.skillsRequired =
+      skillsRequired ?? opportunity.skillsRequired;
+    opportunity.eligibility = eligibility ?? opportunity.eligibility;
+
+    if (isPaid !== undefined) {
+      opportunity.isPaid = Boolean(isPaid);
+    }
+
+    opportunity.status = status ?? opportunity.status;
+    opportunity.postedOn = postedOn ?? opportunity.postedOn;
+
+    await opportunity.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Opportunity updated successfully",
+      opportunity: opportunity,
+    });
+  } catch (error) {
+    console.error("Update Opportunity Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update opportunity",
+    });
+  }
+};
+
+// ======================================
+// Delete Opportunity
+// ======================================
+
+const deleteOpportunity = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const opportunity = await Opportunity.findById(id);
+
+    if (!opportunity) {
+      return res.status(404).json({
+        success: false,
+        message: "Opportunity not found",
+      });
+    }
+
+    await Opportunity.findByIdAndDelete(id);
+
+    res.status(200).json({
+      success: true,
+      message: "Opportunity deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete Opportunity Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to delete opportunity",
+    });
+  }
+};
+
+// ======================================
+// Export
+// ======================================
+
 module.exports = {
   getAllOpportunities,
   getOpenOpportunities,
   getTopCompanies,
+  getOpportunitiesByCompany,
+  addOpportunity,
+  updateOpportunity,
+  deleteOpportunity,
 };
