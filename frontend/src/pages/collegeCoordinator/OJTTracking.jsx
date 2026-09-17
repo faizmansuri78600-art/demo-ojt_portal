@@ -1,2535 +1,2612 @@
-import { useMemo, useState } from "react";
+import React, {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 import {
-  Search,
-  Filter,
-  Eye,
-  MoreHorizontal,
-  ChevronRight,
-  Users,
-  CheckCircle2,
-  Clock3,
   AlertCircle,
   CalendarDays,
-  Building2,
-  UserCheck,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Eye,
+  FileText,
+  GraduationCap,
   MapPin,
-  X,
+  RefreshCw,
+  Search,
+  Target,
   TrendingUp,
-  ClipboardCheck,
-  BriefcaseBusiness,
+  UserRound,
+  Users,
+  X,
 } from "lucide-react";
 
-const initialTrackingData = [
-  {
-    id: 1,
-    student: "Aman Verma",
-    initials: "AV",
-    company: "Tech Solutions Inc.",
-    position: "Web Developer Intern",
-    department: "Web Development",
-    mentor: "Rajesh Kumar",
-    startDate: "01 May 2026",
-    endDate: "31 July 2026",
-    progress: 78,
-    attendance: 94,
-    status: "In Progress",
-    location: "Mumbai",
-    totalDays: 92,
-    completedDays: 72,
-    lastUpdate: "Today",
-  },
-  {
-    id: 2,
-    student: "Riya Shah",
-    initials: "RS",
-    company: "DataMind Pvt. Ltd.",
-    position: "Data Analyst Intern",
-    department: "Data Analytics",
-    mentor: "Priya Iyer",
-    startDate: "05 May 2026",
-    endDate: "05 August 2026",
-    progress: 72,
-    attendance: 91,
-    status: "In Progress",
-    location: "Pune",
-    totalDays: 93,
-    completedDays: 67,
-    lastUpdate: "Today",
-  },
-  {
-    id: 3,
-    student: "Aditya Patel",
-    initials: "AP",
-    company: "Creative Media",
-    position: "UI/UX Design Intern",
-    department: "UI/UX Design",
-    mentor: "Amit Verma",
-    startDate: "10 April 2026",
-    endDate: "10 July 2026",
-    progress: 88,
-    attendance: 97,
-    status: "In Progress",
-    location: "Ahmedabad",
-    totalDays: 92,
-    completedDays: 81,
-    lastUpdate: "Yesterday",
-  },
-  {
-    id: 4,
-    student: "Sneha Joshi",
-    initials: "SJ",
-    company: "CloudTech Solutions",
-    position: "Cloud Intern",
-    department: "Cloud Computing",
-    mentor: "Vivek Singh",
-    startDate: "15 May 2026",
-    endDate: "15 August 2026",
-    progress: 65,
-    attendance: 88,
-    status: "In Progress",
-    location: "Mumbai",
-    totalDays: 92,
-    completedDays: 60,
-    lastUpdate: "Today",
-  },
-  {
-    id: 5,
-    student: "Rahul Mehta",
-    initials: "RM",
-    company: "Innovatech Labs",
-    position: "Software Developer Intern",
-    department: "Software Development",
-    mentor: "Neha Kapoor",
-    startDate: "01 June 2026",
-    endDate: "31 August 2026",
-    progress: 48,
-    attendance: 82,
-    status: "Needs Attention",
-    location: "Pune",
-    totalDays: 92,
-    completedDays: 44,
-    lastUpdate: "2 days ago",
-  },
-  {
-    id: 6,
-    student: "Neha Singh",
-    initials: "NS",
-    company: "SecureNet Pvt. Ltd.",
-    position: "Cyber Security Intern",
-    department: "Cyber Security",
-    mentor: "Sanjay Shah",
-    startDate: "01 May 2026",
-    endDate: "31 July 2026",
-    progress: 84,
-    attendance: 96,
-    status: "In Progress",
-    location: "Navi Mumbai",
-    totalDays: 92,
-    completedDays: 77,
-    lastUpdate: "Today",
-  },
-  {
-    id: 7,
-    student: "Karan Mehta",
-    initials: "KM",
-    company: "Deloitte",
-    position: "Business Analyst Intern",
-    department: "Business Analytics",
-    mentor: "Anjali Desai",
-    startDate: "10 May 2026",
-    endDate: "10 August 2026",
-    progress: 70,
-    attendance: 90,
-    status: "In Progress",
-    location: "Mumbai",
-    totalDays: 93,
-    completedDays: 65,
-    lastUpdate: "Yesterday",
-  },
-  {
-    id: 8,
-    student: "Ishita Shah",
-    initials: "IS",
-    company: "HCLTech",
-    position: "Software Engineer Intern",
-    department: "Software Development",
-    mentor: "Rohan Kulkarni",
-    startDate: "15 April 2026",
-    endDate: "15 July 2026",
-    progress: 91,
-    attendance: 98,
-    status: "Completing Soon",
-    location: "Pune",
-    totalDays: 92,
-    completedDays: 84,
-    lastUpdate: "Today",
-  },
-  {
-    id: 9,
-    student: "Mohit Verma",
-    initials: "MV",
-    company: "CloudTech Solutions",
-    position: "Cloud Support Intern",
-    department: "Cloud Computing",
-    mentor: "Vivek Singh",
-    startDate: "01 June 2026",
-    endDate: "31 August 2026",
-    progress: 42,
-    attendance: 79,
-    status: "Needs Attention",
-    location: "Mumbai",
-    totalDays: 92,
-    completedDays: 39,
-    lastUpdate: "3 days ago",
-  },
-  {
-    id: 10,
-    student: "Ayesha Khan",
-    initials: "AK",
-    company: "SecureNet Pvt. Ltd.",
-    position: "Security Analyst Intern",
-    department: "Cyber Security",
-    mentor: "Sanjay Shah",
-    startDate: "05 May 2026",
-    endDate: "05 August 2026",
-    progress: 76,
-    attendance: 93,
-    status: "In Progress",
-    location: "Mumbai",
-    totalDays: 93,
-    completedDays: 71,
-    lastUpdate: "Today",
-  },
-];
+import { ojtTrackingService } from "../../services/ojtTrackingService";
+import { useCoordinatorTheme } from "../../context/CoordinatorThemeContext";
 
-const companies = [
-  "All Companies",
-  "Tech Solutions Inc.",
-  "DataMind Pvt. Ltd.",
-  "Creative Media",
-  "CloudTech Solutions",
-  "Innovatech Labs",
-  "SecureNet Pvt. Ltd.",
-  "Deloitte",
-  "HCLTech",
-];
+const PAGE_SIZE = 7;
 
-const statuses = [
+const STATUS_OPTIONS = [
   "All Status",
+  "Not Started",
   "In Progress",
-  "Needs Attention",
   "Completing Soon",
+  "Needs Attention",
   "Completed",
 ];
 
-function StatusBadge({ status }) {
-  const styles = {
-    "In Progress": {
-      background: "#eff6ff",
-      color: "#2563eb",
-    },
-    "Needs Attention": {
-      background: "#fef2f2",
-      color: "#dc2626",
-    },
-    "Completing Soon": {
-      background: "#ecfdf5",
-      color: "#059669",
-    },
-    Completed: {
-      background: "#f0fdf4",
-      color: "#16a34a",
-    },
-  };
+const safeNumber = (value, fallback = 0) => {
+  const number = Number(value);
 
-  const current =
-    styles[status] || {
-      background: "#f8fafc",
-      color: "#64748b",
-    };
+  return Number.isFinite(number)
+    ? number
+    : fallback;
+};
+
+const clampProgress = (value) => {
+  return Math.min(
+    Math.max(safeNumber(value, 0), 0),
+    100
+  );
+};
+
+const getInitials = (name = "") => {
+  const parts = String(name)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (!parts.length) return "ST";
+
+  if (parts.length === 1) {
+    return parts[0]
+      .slice(0, 2)
+      .toUpperCase();
+  }
 
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        padding: "5px 9px",
-        borderRadius: "999px",
-        backgroundColor: current.background,
-        color: current.color,
-        fontSize: "9px",
-        fontWeight: 700,
-        whiteSpace: "nowrap",
-      }}
-    >
-      {status}
-    </span>
-  );
-}
+    parts[0][0] +
+    parts[parts.length - 1][0]
+  ).toUpperCase();
+};
 
-function ProgressBar({ value }) {
-  const progressColor =
-    value >= 85
-      ? "#059669"
-      : value < 50
-      ? "#dc2626"
-      : "#2563eb";
+const formatDate = (value) => {
+  if (!value) return "—";
 
-  return (
-    <div
-      style={{
-        width: "100%",
-        minWidth: "70px",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: "5px",
-        }}
-      >
-        <span
-          style={{
-            color: "#334155",
-            fontSize: "10px",
-            fontWeight: 700,
-          }}
-        >
-          {value}%
-        </span>
-      </div>
+  const date = new Date(value);
 
-      <div
-        style={{
-          width: "100%",
-          height: "5px",
-          overflow: "hidden",
-          borderRadius: "999px",
-          backgroundColor: "#e2e8f0",
-        }}
-      >
-        <div
-          style={{
-            width: `${value}%`,
-            height: "100%",
-            borderRadius: "999px",
-            backgroundColor: progressColor,
-          }}
-        />
-      </div>
-    </div>
-  );
-}
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
 
-function AttendanceBadge({ value }) {
-  const color =
-    value >= 90
-      ? "#059669"
-      : value >= 80
-      ? "#d97706"
-      : "#dc2626";
+  return date.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
-  return (
-    <span
-      style={{
-        color,
-        fontSize: "10px",
-        fontWeight: 700,
-      }}
-    >
-      {value}%
-    </span>
-  );
-}
+const getStatus = (
+  assignmentStatus,
+  progress,
+  attendance
+) => {
+  const rawStatus = String(
+    assignmentStatus || ""
+  ).toLowerCase();
 
-function Modal({ children, onClose, width = "600px" }) {
-  return (
-    <div
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
-          onClose();
-        }
-      }}
-      style={{
-        position: "fixed",
-        inset: 0,
-        zIndex: 100,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-        backgroundColor: "rgba(15, 23, 42, 0.45)",
-        backdropFilter: "blur(2px)",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: width,
-          maxHeight: "90vh",
-          overflowY: "auto",
-          borderRadius: "16px",
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 20px 50px rgba(15, 23, 42, 0.18)",
-        }}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
+  if (
+    rawStatus === "completed" ||
+    rawStatus === "complete" ||
+    progress >= 100
+  ) {
+    return "Completed";
+  }
 
-function ModalHeader({
-  title,
-  subtitle,
-  onClose,
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: "15px",
-        padding: "18px 20px",
-        borderBottom: "1px solid #eef2f7",
-      }}
-    >
-      <div>
-        <h2
-          style={{
-            margin: 0,
-            color: "#1e293b",
-            fontSize: "17px",
-            fontWeight: 750,
-          }}
-        >
-          {title}
-        </h2>
+  if (
+    rawStatus === "not started" ||
+    rawStatus === "not_started"
+  ) {
+    return "Not Started";
+  }
 
-        <p
-          style={{
-            margin: "5px 0 0",
-            color: "#94a3b8",
-            fontSize: "11px",
-          }}
-        >
-          {subtitle}
-        </p>
-      </div>
+  if (progress >= 85) {
+    return "Completing Soon";
+  }
 
-      <button
-        type="button"
-        onClick={onClose}
-        style={{
-          width: "32px",
-          height: "32px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "none",
-          borderRadius: "8px",
-          backgroundColor: "#f8fafc",
-          color: "#64748b",
-          cursor: "pointer",
-        }}
-      >
-        <X size={16} />
-      </button>
-    </div>
-  );
-}
+  if (
+    progress < 50 ||
+    attendance < 80
+  ) {
+    return "Needs Attention";
+  }
 
-export default function OJTTracking() {
-  const [trackingData, setTrackingData] =
-    useState(initialTrackingData);
+  return "In Progress";
+};
 
-  const [searchTerm, setSearchTerm] =
+const getStatusIcon = (status) => {
+  if (status === "Completed") {
+    return <CheckCircle2 size={13} />;
+  }
+
+  if (status === "Needs Attention") {
+    return <AlertCircle size={13} />;
+  }
+
+  if (status === "Completing Soon") {
+    return <Target size={13} />;
+  }
+
+  if (status === "In Progress") {
+    return <TrendingUp size={13} />;
+  }
+
+  return <Clock3 size={13} />;
+};
+
+const OJTTracking = () => {
+  const { colors, darkMode } =
+    useCoordinatorTheme();
+
+  const [students, setStudents] = useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [refreshing, setRefreshing] =
+    useState(false);
+
+  const [error, setError] = useState("");
+
+  const [search, setSearch] =
     useState("");
 
-  const [selectedCompany, setSelectedCompany] =
-    useState("All Companies");
+  const [
+    departmentFilter,
+    setDepartmentFilter,
+  ] = useState("All Departments");
 
-  const [selectedStatus, setSelectedStatus] =
-    useState("All Status");
+  const [
+    statusFilter,
+    setStatusFilter,
+  ] = useState("All Status");
 
   const [currentPage, setCurrentPage] =
     useState(1);
 
-  const [actionStudentId, setActionStudentId] =
-    useState(null);
+  const [
+    selectedStudent,
+    setSelectedStudent,
+  ] = useState(null);
 
-  const [selectedStudent, setSelectedStudent] =
-    useState(null);
+  const [
+    showDetailsModal,
+    setShowDetailsModal,
+  ] = useState(false);
 
-  const studentsPerPage = 6;
+  const [
+    showProgressModal,
+    setShowProgressModal,
+  ] = useState(false);
 
-  const filteredStudents = useMemo(() => {
-    const search =
-      searchTerm.trim().toLowerCase();
+  const [
+    progressValue,
+    setProgressValue,
+  ] = useState(0);
 
-    return trackingData.filter((student) => {
-      const matchesSearch =
-        !search ||
-        student.student
-          .toLowerCase()
-          .includes(search) ||
-        student.company
-          .toLowerCase()
-          .includes(search) ||
-        student.position
-          .toLowerCase()
-          .includes(search) ||
-        student.mentor
-          .toLowerCase()
-          .includes(search);
+  const [
+    savingProgress,
+    setSavingProgress,
+  ] = useState(false);
 
-      const matchesCompany =
-        selectedCompany ===
-          "All Companies" ||
-        student.company === selectedCompany;
+  const loadTrackingData = async (
+    showRefresh = false
+  ) => {
+    try {
+      setError("");
 
-      const matchesStatus =
-        selectedStatus === "All Status" ||
-        student.status === selectedStatus;
+      if (showRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
 
-      return (
-        matchesSearch &&
-        matchesCompany &&
-        matchesStatus
+      const response =
+        await ojtTrackingService.getTrackingStudents();
+
+      if (
+        response &&
+        response.success === false
+      ) {
+        throw new Error(
+          response.message ||
+            "Failed to load OJT tracking data"
+        );
+      }
+
+      let data = [];
+
+      if (Array.isArray(response)) {
+        data = response;
+      } else if (
+        Array.isArray(response?.trackingData)
+      ) {
+        data = response.trackingData;
+      } else if (
+        Array.isArray(response?.data)
+      ) {
+        data = response.data;
+      } else if (
+        Array.isArray(
+          response?.data?.trackingData
+        )
+      ) {
+        data =
+          response.data.trackingData;
+      }
+
+      setStudents(data);
+    } catch (err) {
+      console.error(
+        "OJT tracking error:",
+        err
       );
-    });
-  }, [
-    trackingData,
-    searchTerm,
-    selectedCompany,
-    selectedStatus,
-  ]);
+
+      setError(
+        err?.message ||
+          "Failed to load OJT tracking data"
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadTrackingData();
+  }, []);
+
+  const normalizedStudents =
+    useMemo(() => {
+      return students.map(
+        (student, index) => {
+          const progress =
+            clampProgress(
+              student.progress
+            );
+
+          const attendance =
+            safeNumber(
+              student.attendance
+            );
+
+          const status = getStatus(
+            student.assignmentStatus ||
+              student.status,
+            progress,
+            attendance
+          );
+
+          return {
+            ...student,
+
+            _rowId:
+              student.id ||
+              student.assignmentId ||
+              `tracking-${index}`,
+
+            assignmentId:
+              student.assignmentId ||
+              student.id ||
+              "",
+
+            applicationId:
+              student.applicationId || "",
+
+            studentId:
+              student.studentId || "",
+
+            studentName:
+              student.student ||
+              student.studentName ||
+              "Unknown Student",
+
+            initials:
+              student.initials ||
+              getInitials(
+                student.student ||
+                  student.studentName
+              ),
+
+            rollNumber:
+              student.rollNumber || "N/A",
+
+            department:
+              student.department || "N/A",
+
+            companyName:
+              student.company ||
+              student.companyName ||
+              "Company not found",
+
+            companyId:
+              student.companyId || "",
+
+            opportunityTitle:
+              student.position ||
+              student.opportunityTitle ||
+              "Opportunity not found",
+
+            mentorName:
+              student.mentor ||
+              student.mentorName ||
+              "Unknown Mentor",
+
+            mentorDepartment:
+              student.mentorDepartment || "",
+
+            startDate:
+              student.startDate || "",
+
+            endDate:
+              student.endDate || "",
+
+            progress,
+
+            attendance,
+
+            attendancePresent:
+              safeNumber(
+                student.attendancePresent
+              ),
+
+            attendanceAbsent:
+              safeNumber(
+                student.attendanceAbsent
+              ),
+
+            attendanceLeave:
+              safeNumber(
+                student.attendanceLeave
+              ),
+
+            status,
+
+            assignmentStatus:
+              student.assignmentStatus ||
+              "Assigned",
+
+            location:
+              student.location ||
+              "Not specified",
+
+            totalDays:
+              safeNumber(
+                student.totalDays
+              ),
+
+            completedDays:
+              safeNumber(
+                student.completedDays
+              ),
+
+            weeklyReports:
+              safeNumber(
+                student.weeklyReports
+              ),
+
+            lastUpdate:
+              student.lastUpdate ||
+              "Not available",
+
+            cgpa:
+              student.cgpa ?? null,
+          };
+        }
+      );
+    }, [students]);
+
+  const departments =
+    useMemo(() => {
+      const values =
+        normalizedStudents
+          .map(
+            (student) =>
+              student.department
+          )
+          .filter(Boolean);
+
+      return [
+        "All Departments",
+        ...Array.from(
+          new Set(values)
+        ).sort(),
+      ];
+    }, [normalizedStudents]);
+
+  const filteredStudents =
+    useMemo(() => {
+      const keyword =
+        search.trim().toLowerCase();
+
+      return normalizedStudents.filter(
+        (student) => {
+          const matchesSearch =
+            !keyword ||
+            String(
+              student.studentName
+            )
+              .toLowerCase()
+              .includes(keyword) ||
+            String(
+              student.rollNumber
+            )
+              .toLowerCase()
+              .includes(keyword) ||
+            String(
+              student.department
+            )
+              .toLowerCase()
+              .includes(keyword) ||
+            String(
+              student.companyName
+            )
+              .toLowerCase()
+              .includes(keyword) ||
+            String(
+              student.mentorName
+            )
+              .toLowerCase()
+              .includes(keyword) ||
+            String(
+              student.opportunityTitle
+            )
+              .toLowerCase()
+              .includes(keyword);
+
+          const matchesDepartment =
+            departmentFilter ===
+              "All Departments" ||
+            student.department ===
+              departmentFilter;
+
+          const matchesStatus =
+            statusFilter === "All Status" ||
+            student.status === statusFilter;
+
+          return (
+            matchesSearch &&
+            matchesDepartment &&
+            matchesStatus
+          );
+        }
+      );
+    }, [
+      normalizedStudents,
+      search,
+      departmentFilter,
+      statusFilter,
+    ]);
 
   const totalPages = Math.max(
     1,
     Math.ceil(
       filteredStudents.length /
-        studentsPerPage
+        PAGE_SIZE
     )
   );
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages
-  );
-
-  const startIndex =
-    (safeCurrentPage - 1) *
-    studentsPerPage;
-
   const paginatedStudents =
-    filteredStudents.slice(
-      startIndex,
-      startIndex + studentsPerPage
+    useMemo(() => {
+      const start =
+        (currentPage - 1) *
+        PAGE_SIZE;
+
+      return filteredStudents.slice(
+        start,
+        start + PAGE_SIZE
+      );
+    }, [
+      filteredStudents,
+      currentPage,
+    ]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    search,
+    departmentFilter,
+    statusFilter,
+  ]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [
+    currentPage,
+    totalPages,
+  ]);
+
+  const stats = useMemo(() => {
+    const total =
+      normalizedStudents.length;
+
+    const completed =
+      normalizedStudents.filter(
+        (student) =>
+          student.status === "Completed"
+      ).length;
+
+    const inProgress =
+      normalizedStudents.filter(
+        (student) =>
+          student.status === "In Progress"
+      ).length;
+
+    const completingSoon =
+      normalizedStudents.filter(
+        (student) =>
+          student.status ===
+          "Completing Soon"
+      ).length;
+
+    const attention =
+      normalizedStudents.filter(
+        (student) =>
+          student.status ===
+          "Needs Attention"
+      ).length;
+
+    const totalProgress =
+      normalizedStudents.reduce(
+        (sum, student) =>
+          sum + student.progress,
+        0
+      );
+
+    const averageProgress = total
+      ? Math.round(
+          totalProgress / total
+        )
+      : 0;
+
+    const averageAttendance = total
+      ? Math.round(
+          normalizedStudents.reduce(
+            (sum, student) =>
+              sum + student.attendance,
+            0
+          ) / total
+        )
+      : 0;
+
+    return {
+      total,
+      completed,
+      inProgress,
+      completingSoon,
+      attention,
+      averageProgress,
+      averageAttendance,
+    };
+  }, [normalizedStudents]);
+
+  const openDetails = (student) => {
+    setSelectedStudent(student);
+    setShowDetailsModal(true);
+  };
+
+  const closeDetails = () => {
+    setShowDetailsModal(false);
+    setSelectedStudent(null);
+  };
+
+  const openProgress = (student) => {
+    setSelectedStudent(student);
+
+    setProgressValue(
+      clampProgress(student.progress)
     );
 
-  const totalStudents = trackingData.length;
+    setShowDetailsModal(false);
+    setShowProgressModal(true);
+  };
 
-  const activeStudents =
-    trackingData.filter(
-      (student) =>
-        student.status === "In Progress"
-    ).length;
+  const closeProgress = () => {
+    if (savingProgress) return;
 
-  const attentionStudents =
-    trackingData.filter(
-      (student) =>
-        student.status ===
-        "Needs Attention"
-    ).length;
+    setShowProgressModal(false);
+    setSelectedStudent(null);
+    setProgressValue(0);
+  };
 
-  const completedSoonStudents =
-    trackingData.filter(
-      (student) =>
-        student.status ===
-        "Completing Soon"
-    ).length;
+  const handleProgressUpdate = async (
+    event
+  ) => {
+    event.preventDefault();
 
-  const averageProgress =
-    totalStudents === 0
-      ? 0
-      : Math.round(
-          trackingData.reduce(
-            (total, student) =>
-              total + student.progress,
-            0
-          ) / totalStudents
+    if (!selectedStudent) return;
+
+    const id =
+      selectedStudent.assignmentId ||
+      selectedStudent.id;
+
+    if (!id) {
+      setError(
+        "Unable to identify the OJT assignment."
+      );
+      return;
+    }
+
+    try {
+      setSavingProgress(true);
+      setError("");
+
+      const response =
+        await ojtTrackingService.updateTrackingProgress(
+          id,
+          {
+            progress:
+              Number(progressValue),
+          }
         );
 
-  const averageAttendance =
-    totalStudents === 0
-      ? 0
-      : Math.round(
-          trackingData.reduce(
-            (total, student) =>
-              total + student.attendance,
-            0
-          ) / totalStudents
+      if (
+        response?.success === false
+      ) {
+        throw new Error(
+          response.message ||
+            "Failed to update progress"
         );
+      }
+
+      setShowProgressModal(false);
+      setSelectedStudent(null);
+
+      await loadTrackingData(true);
+    } catch (err) {
+      console.error(
+        "Update OJT progress error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to update OJT progress"
+      );
+    } finally {
+      setSavingProgress(false);
+    }
+  };
 
   const clearFilters = () => {
-    setSearchTerm("");
-    setSelectedCompany("All Companies");
-    setSelectedStatus("All Status");
+    setSearch("");
+    setDepartmentFilter(
+      "All Departments"
+    );
+    setStatusFilter("All Status");
     setCurrentPage(1);
   };
 
-  const updateProgress = (
-    studentId,
-    newProgress
-  ) => {
-    const progress = Math.min(
-      100,
-      Math.max(0, Number(newProgress))
-    );
-
-    setTrackingData((current) =>
-      current.map((student) => {
-        if (student.id !== studentId) {
-          return student;
-        }
-
-        let status = student.status;
-
-        if (progress >= 100) {
-          status = "Completed";
-        } else if (progress >= 85) {
-          status = "Completing Soon";
-        } else if (progress < 50) {
-          status = "Needs Attention";
-        } else {
-          status = "In Progress";
-        }
-
-        return {
-          ...student,
-          progress,
-          status,
-          lastUpdate: "Just now",
-        };
-      })
-    );
-
-    setSelectedStudent((current) => {
-      if (
-        !current ||
-        current.id !== studentId
-      ) {
-        return current;
-      }
-
-      let status = current.status;
-
-      if (progress >= 100) {
-        status = "Completed";
-      } else if (progress >= 85) {
-        status = "Completing Soon";
-      } else if (progress < 50) {
-        status = "Needs Attention";
-      } else {
-        status = "In Progress";
-      }
-
+  const getStatusStyles = (status) => {
+    if (status === "Completed") {
       return {
-        ...current,
-        progress,
-        status,
-        lastUpdate: "Just now",
+        background: colors.successSoft,
+        color: colors.success,
+        border: `1px solid ${colors.success}35`,
       };
-    });
+    }
+
+    if (status === "Needs Attention") {
+      return {
+        background: colors.dangerSoft,
+        color: colors.danger,
+        border: `1px solid ${colors.danger}35`,
+      };
+    }
+
+    if (status === "Completing Soon") {
+      return {
+        background: colors.warningSoft,
+        color: colors.warning,
+        border: `1px solid ${colors.warning}35`,
+      };
+    }
+
+    if (status === "In Progress") {
+      return {
+        background: colors.primarySoft,
+        color: colors.primary,
+        border: `1px solid ${colors.primary}35`,
+      };
+    }
+
+    return {
+      background: colors.surfaceMuted,
+      color: colors.textSecondary,
+      border: `1px solid ${colors.border}`,
+    };
   };
+
+  const statCards = [
+    {
+      label: "Total OJT Students",
+      value: stats.total,
+      icon: <Users size={21} />,
+      background: colors.primarySoft,
+      iconColor: colors.primary,
+    },
+    {
+      label: "Completed",
+      value: stats.completed,
+      icon: <CheckCircle2 size={21} />,
+      background: colors.successSoft,
+      iconColor: colors.success,
+    },
+    {
+      label: "In Progress",
+      value: stats.inProgress,
+      icon: <TrendingUp size={21} />,
+      background: colors.infoSoft,
+      iconColor: colors.info,
+    },
+    {
+      label: "Needs Attention",
+      value: stats.attention,
+      icon: <AlertCircle size={21} />,
+      background: colors.dangerSoft,
+      iconColor: colors.danger,
+    },
+  ];
 
   return (
     <div
+      className="ojt-tracking-page"
       style={{
-        width: "100%",
-        minWidth: 0,
-        color: "#0f172a",
+        "--workspace": colors.workspace,
+        "--surface": colors.surface,
+        "--surface-muted":
+          colors.surfaceMuted,
+        "--text": colors.text,
+        "--text-secondary":
+          colors.textSecondary,
+        "--text-muted": colors.textMuted,
+        "--border": colors.border,
+        "--border-light":
+          colors.borderLight,
+        "--primary": colors.primary,
+        "--primary-hover":
+          colors.primaryHover,
       }}
     >
-      {/* =====================================================
-          BREADCRUMB
-      ====================================================== */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "7px",
-          marginBottom: "12px",
-          fontSize: "12px",
-        }}
-      >
-        <span
-          style={{
-            color: "#2563eb",
-            fontWeight: 700,
-          }}
-        >
-          Dashboard
-        </span>
+      <style>{`
+        * {
+          box-sizing: border-box;
+        }
 
-        <ChevronRight
-          size={14}
-          color="#cbd5e1"
-        />
+        .ojt-tracking-page {
+          width: 100%;
+          min-height: 100vh;
+          padding: 30px 32px 42px;
+          background: var(--workspace);
+          color: var(--text);
+          font-family:
+            "Inter",
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
+          letter-spacing: -0.01em;
+        }
 
-        <span
-          style={{
-            color: "#64748b",
-          }}
-        >
-          OJT Tracking
-        </span>
-      </div>
+        .tracking-container {
+          width: 100%;
+          max-width: 1500px;
+          margin: 0 auto;
+        }
 
-      {/* =====================================================
-          PAGE HEADER
-      ====================================================== */}
-      <section
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: "20px",
-          marginBottom: "20px",
-        }}
-      >
-        <div>
-          <div
-            style={{
-              marginBottom: "6px",
-              color: "#2563eb",
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "1px",
-              textTransform: "uppercase",
-            }}
-          >
-            OJT Management
-          </div>
+        .breadcrumb {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          margin-bottom: 8px;
+          color: var(--text-secondary);
+          font-size: 13px;
+          line-height: 20px;
+        }
 
-          <h1
-            style={{
-              margin: 0,
-              color: "#0f172a",
-              fontSize:
-                "clamp(26px, 3vw, 32px)",
-              lineHeight: "1.1",
-              fontWeight: 800,
-              letterSpacing: "-0.8px",
-            }}
-          >
-            OJT Tracking
-          </h1>
+        .breadcrumb-current {
+          color: var(--text);
+          font-weight: 600;
+        }
 
-          <p
-            style={{
-              margin: "7px 0 0",
-              color: "#64748b",
-              fontSize: "13px",
-            }}
-          >
-            Monitor student internship progress,
-            attendance and overall OJT status.
-          </p>
-        </div>
+        .page-header {
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
+          gap: 20px;
+          margin-bottom: 25px;
+        }
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            padding: "10px 13px",
-            border:
-              "1px solid #dbeafe",
-            borderRadius: "10px",
-            backgroundColor: "#eff6ff",
-            color: "#2563eb",
-          }}
-        >
-          <ClipboardCheck size={17} />
+        .page-title {
+          margin: 0;
+          color: var(--text);
+          font-size: 28px;
+          line-height: 36px;
+          font-weight: 700;
+          letter-spacing: -0.025em;
+        }
 
-          <div>
-            <div
-              style={{
-                fontSize: "9px",
-                fontWeight: 700,
-                textTransform: "uppercase",
-                letterSpacing: "0.5px",
-              }}
-            >
-              Tracking Status
-            </div>
+        .page-description {
+          margin: 6px 0 0;
+          color: var(--text-secondary);
+          font-size: 14px;
+          line-height: 22px;
+        }
 
-            <strong
-              style={{
-                display: "block",
-                marginTop: "2px",
-                fontSize: "11px",
-              }}
-            >
-              Live Monitoring
-            </strong>
-          </div>
-        </div>
-      </section>
+        .refresh-button {
+          min-height: 40px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 7px;
+          padding: 0 14px;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          background: var(--surface);
+          color: var(--text-secondary);
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition:
+            background .18s ease,
+            border-color .18s ease;
+        }
 
-      {/* =====================================================
-          STATISTICS
-      ====================================================== */}
-      <section
-        className="ojt-stat-grid"
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(4, minmax(0, 1fr))",
-          gap: "12px",
-          marginBottom: "18px",
-        }}
-      >
-        {[
-          {
-            title: "Total Students",
-            value: totalStudents,
-            subtitle:
-              "Students under OJT",
-            icon: Users,
-            background: "#eff6ff",
-            color: "#2563eb",
-          },
-          {
-            title: "In Progress",
-            value: activeStudents,
-            subtitle:
-              "Currently active OJT",
-            icon: Clock3,
-            background: "#ecfdf5",
-            color: "#059669",
-          },
-          {
-            title: "Needs Attention",
-            value: attentionStudents,
-            subtitle:
-              "Require coordinator review",
-            icon: AlertCircle,
-            background: "#fef2f2",
-            color: "#dc2626",
-          },
-          {
-            title: "Average Progress",
-            value: `${averageProgress}%`,
-            subtitle: `${completedSoonStudents} completing soon`,
-            icon: TrendingUp,
-            background: "#f5f3ff",
-            color: "#7c3aed",
-          },
-        ].map((stat) => {
-          const Icon = stat.icon;
+        .refresh-button:hover {
+          background: var(--surface-muted);
+          border-color: var(--text-muted);
+        }
 
-          return (
-            <div
-              key={stat.title}
-              style={{
-                minWidth: 0,
-                padding: "16px",
-                border:
-                  "1px solid #e2e8f0",
-                borderRadius: "13px",
-                backgroundColor: "#ffffff",
-                boxShadow:
-                  "0 2px 8px rgba(15, 23, 42, 0.035)",
-              }}
-            >
-              <div
-                style={{
-                  width: "39px",
-                  height: "39px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "10px",
-                  backgroundColor:
-                    stat.background,
-                  color: stat.color,
-                }}
-              >
-                <Icon size={19} />
-              </div>
+        .stats-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(4, minmax(0, 1fr));
+          gap: 16px;
+          margin-bottom: 22px;
+        }
 
-              <div
-                style={{
-                  marginTop: "10px",
-                  color: "#64748b",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                }}
-              >
-                {stat.title}
-              </div>
+        .stat-card {
+          min-height: 118px;
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          padding: 19px 20px;
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          background: var(--surface);
+          box-shadow:
+            0 1px 2px rgba(15, 23, 42, .04);
+        }
 
-              <div
-                style={{
-                  marginTop: "4px",
-                  color: "#0f172a",
-                  fontSize: "25px",
-                  lineHeight: "1",
-                  fontWeight: 800,
-                }}
-              >
-                {stat.value}
-              </div>
+        .stat-icon {
+          width: 46px;
+          height: 46px;
+          flex: 0 0 46px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 10px;
+        }
 
-              <div
-                style={{
-                  marginTop: "5px",
-                  color: "#94a3b8",
-                  fontSize: "9px",
-                }}
-              >
-                {stat.subtitle}
-              </div>
-            </div>
-          );
-        })}
-      </section>
+        .stat-label {
+          margin: 0 0 4px;
+          color: var(--text-secondary);
+          font-size: 13px;
+          line-height: 19px;
+          font-weight: 500;
+        }
 
-      {/* =====================================================
-          SUMMARY STRIP
-      ====================================================== */}
-      <section
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "1.5fr 1fr",
-          gap: "12px",
-          marginBottom: "18px",
-        }}
-        className="ojt-summary-grid"
-      >
-        <div
-          style={{
-            padding: "15px 17px",
-            border:
-              "1px solid #dbeafe",
-            borderRadius: "12px",
-            backgroundColor: "#eff6ff",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent:
-                "space-between",
-              gap: "15px",
-              marginBottom: "9px",
-            }}
-          >
-            <div>
-              <strong
-                style={{
-                  color: "#1e3a8a",
-                  fontSize: "12px",
-                }}
-              >
-                Overall OJT Progress
-              </strong>
+        .stat-value {
+          margin: 0;
+          color: var(--text);
+          font-size: 26px;
+          line-height: 32px;
+          font-weight: 700;
+        }
 
-              <div
-                style={{
-                  marginTop: "3px",
-                  color: "#64748b",
-                  fontSize: "10px",
-                }}
-              >
-                Average progress across all
-                active students
-              </div>
-            </div>
+        .secondary-stats {
+          display: grid;
+          grid-template-columns:
+            repeat(3, minmax(0, 1fr));
+          gap: 16px;
+          margin-bottom: 22px;
+        }
 
-            <strong
-              style={{
-                color: "#2563eb",
-                fontSize: "16px",
-              }}
-            >
-              {averageProgress}%
-            </strong>
-          </div>
+        .secondary-stat {
+          padding: 16px 18px;
+          border: 1px solid var(--border);
+          border-radius: 11px;
+          background: var(--surface);
+        }
 
-          <div
-            style={{
-              width: "100%",
-              height: "8px",
-              overflow: "hidden",
-              borderRadius: "999px",
-              backgroundColor: "#dbeafe",
-            }}
-          >
-            <div
-              style={{
-                width: `${averageProgress}%`,
-                height: "100%",
-                borderRadius: "999px",
-                backgroundColor: "#2563eb",
-              }}
-            />
-          </div>
-        </div>
+        .secondary-stat-top {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 10px;
+        }
 
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            padding: "15px 17px",
-            border:
-              "1px solid #e2e8f0",
-            borderRadius: "12px",
-            backgroundColor: "#ffffff",
-          }}
-        >
-          <div
-            style={{
-              width: "38px",
-              height: "38px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              borderRadius: "9px",
-              backgroundColor: "#ecfdf5",
-              color: "#059669",
-            }}
-          >
-            <CalendarDays size={18} />
-          </div>
+        .secondary-stat-label {
+          color: var(--text-secondary);
+          font-size: 13px;
+          font-weight: 500;
+        }
 
-          <div>
-            <div
-              style={{
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
-              }}
-            >
-              Average Attendance
-            </div>
+        .secondary-stat-value {
+          color: var(--text);
+          font-size: 20px;
+          font-weight: 700;
+        }
 
-            <strong
-              style={{
-                display: "block",
-                marginTop: "3px",
-                color: "#0f172a",
-                fontSize: "20px",
-              }}
-            >
-              {averageAttendance}%
-            </strong>
-          </div>
-        </div>
-      </section>
+        .error-banner {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          margin-bottom: 18px;
+          padding: 12px 14px;
+          border: 1px solid ${colors.danger}45;
+          border-radius: 9px;
+          background: ${colors.dangerSoft};
+          color: ${colors.danger};
+          font-size: 13px;
+          line-height: 20px;
+        }
 
-      {/* =====================================================
-          TRACKING TABLE
-      ====================================================== */}
-      <section
-        style={{
-          width: "100%",
-          minWidth: 0,
-          overflow: "hidden",
-          border:
-            "1px solid #e2e8f0",
-          borderRadius: "14px",
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 2px 8px rgba(15, 23, 42, 0.035)",
-        }}
-      >
-        <div
-          style={{
-            padding: "15px 18px",
-            borderBottom:
-              "1px solid #eef2f7",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent:
-                "space-between",
-              gap: "15px",
-            }}
-          >
-            <div>
-              <h2
-                style={{
-                  margin: 0,
-                  color: "#1e293b",
-                  fontSize: "15px",
-                  fontWeight: 750,
-                }}
-              >
-                Student OJT Tracking
-              </h2>
+        .error-close {
+          margin-left: auto;
+          padding: 0;
+          border: none;
+          background: transparent;
+          color: ${colors.danger};
+          cursor: pointer;
+        }
 
-              <p
-                style={{
-                  margin: "4px 0 0",
-                  color: "#94a3b8",
-                  fontSize: "10px",
-                }}
-              >
-                Monitor progress and attendance
-                of every student
-              </p>
-            </div>
+        .directory-card {
+          overflow: hidden;
+          border: 1px solid var(--border);
+          border-radius: 13px;
+          background: var(--surface);
+          box-shadow:
+            0 1px 2px rgba(15, 23, 42, .04);
+        }
 
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "5px",
-                color: "#64748b",
-                fontSize: "10px",
-              }}
-            >
-              <Filter size={13} />
-              Filters
-            </div>
-          </div>
+        .directory-header {
+          padding: 20px 21px;
+          border-bottom: 1px solid var(--border);
+        }
 
-          {/* FILTERS */}
-          <div
-            className="ojt-filter-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns:
-                "minmax(240px, 1fr) auto auto auto",
-              gap: "9px",
-              marginTop: "14px",
-            }}
-          >
-            <div
-              style={{
-                height: "38px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor: "#ffffff",
-                boxSizing: "border-box",
-              }}
-            >
-              <Search
-                size={16}
-                color="#94a3b8"
-              />
+        .section-heading {
+          margin: 0;
+          color: var(--text);
+          font-size: 17px;
+          line-height: 24px;
+          font-weight: 700;
+        }
 
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(event) => {
-                  setSearchTerm(
-                    event.target.value
-                  );
-                  setCurrentPage(1);
-                }}
-                placeholder="Search student, company, mentor..."
-                style={{
-                  width: "100%",
-                  minWidth: 0,
-                  border: "none",
-                  outline: "none",
-                  background: "transparent",
-                  color: "#334155",
-                  fontSize: "11px",
-                }}
-              />
-            </div>
+        .section-description {
+          margin: 4px 0 17px;
+          color: var(--text-secondary);
+          font-size: 13px;
+          line-height: 20px;
+        }
 
-            <select
-              value={selectedCompany}
-              onChange={(event) => {
-                setSelectedCompany(
-                  event.target.value
-                );
-                setCurrentPage(1);
-              }}
-              style={{
-                height: "38px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor: "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
-                cursor: "pointer",
-                outline: "none",
-              }}
-            >
-              {companies.map(
-                (company) => (
-                  <option
-                    key={company}
-                    value={company}
-                  >
-                    {company}
-                  </option>
-                )
-              )}
-            </select>
+        .filters {
+          display: grid;
+          grid-template-columns:
+            minmax(250px, 1.6fr)
+            minmax(170px, 1fr)
+            minmax(150px, .9fr)
+            auto;
+          gap: 10px;
+          align-items: center;
+        }
 
-            <select
-              value={selectedStatus}
-              onChange={(event) => {
-                setSelectedStatus(
-                  event.target.value
-                );
-                setCurrentPage(1);
-              }}
-              style={{
-                height: "38px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor: "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
-                cursor: "pointer",
-                outline: "none",
-              }}
-            >
-              {statuses.map(
-                (status) => (
-                  <option
-                    key={status}
-                    value={status}
-                  >
-                    {status}
-                  </option>
-                )
-              )}
-            </select>
+        .search-wrapper {
+          position: relative;
+        }
 
-            <button
-              type="button"
-              onClick={clearFilters}
-              style={{
-                height: "38px",
-                padding: "0 12px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor: "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 700,
-                cursor: "pointer",
-              }}
-            >
-              Clear
-            </button>
-          </div>
-        </div>
+        .search-icon {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: var(--text-muted);
+          pointer-events: none;
+        }
 
-        {/* RESULT COUNT */}
-        <div
-          style={{
-            padding: "10px 16px",
-            backgroundColor: "#f8fafc",
-            borderBottom:
-              "1px solid #eef2f7",
-            color: "#64748b",
-            fontSize: "10px",
-          }}
-        >
-          Showing{" "}
-          <strong
-            style={{
-              color: "#334155",
-            }}
-          >
-            {filteredStudents.length === 0
-              ? 0
-              : startIndex + 1}
-            -
-            {Math.min(
-              startIndex +
-                studentsPerPage,
-              filteredStudents.length
-            )}
-          </strong>{" "}
-          of{" "}
-          <strong
-            style={{
-              color: "#334155",
-            }}
-          >
-            {filteredStudents.length}
-          </strong>{" "}
-          students
-        </div>
+        .search-input,
+        .filter-select {
+          width: 100%;
+          height: 40px;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          outline: none;
+          background: var(--surface);
+          color: var(--text);
+          font-family: inherit;
+          font-size: 14px;
+          transition:
+            border-color .18s ease,
+            box-shadow .18s ease;
+        }
 
-        {/* TABLE */}
-        <div
-          style={{
-            width: "100%",
-            overflowX: "auto",
-          }}
-        >
-          <table
-            style={{
-              width: "100%",
-              minWidth: "1120px",
-              borderCollapse: "collapse",
-            }}
-          >
-            <thead>
-              <tr>
-                {[
-                  "Student",
-                  "Company / Position",
-                  "Mentor",
-                  "Progress",
-                  "Attendance",
-                  "OJT Period",
-                  "Status",
-                  "Action",
-                ].map((heading) => (
-                  <th
-                    key={heading}
-                    style={{
-                      padding: "10px 13px",
-                      backgroundColor: "#f8fafc",
-                      borderBottom:
-                        "1px solid #e2e8f0",
-                      color: "#94a3b8",
-                      fontSize: "9px",
-                      fontWeight: 750,
-                      textAlign: "left",
-                      textTransform:
-                        "uppercase",
-                      letterSpacing:
-                        "0.45px",
-                      whiteSpace:
-                        "nowrap",
-                    }}
-                  >
-                    {heading}
-                  </th>
-                ))}
-              </tr>
-            </thead>
+        .search-input {
+          padding: 0 12px 0 37px;
+        }
 
-            <tbody>
-              {paginatedStudents.length >
-              0 ? (
-                paginatedStudents.map(
-                  (student) => (
-                    <tr
-                      key={student.id}
-                    >
-                      {/* STUDENT */}
-                      <td
-                        style={{
-                          padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display:
-                              "flex",
-                            alignItems:
-                              "center",
-                            gap: "9px",
-                          }}
-                        >
-                          <div
-                            style={{
-                              width:
-                                "34px",
-                              height:
-                                "34px",
-                              minWidth:
-                                "34px",
-                              display:
-                                "flex",
-                              alignItems:
-                                "center",
-                              justifyContent:
-                                "center",
-                              borderRadius:
-                                "9px",
-                              backgroundColor:
-                                "#eff6ff",
-                              color:
-                                "#2563eb",
-                              fontSize:
-                                "9px",
-                              fontWeight:
-                                800,
-                            }}
-                          >
-                            {
-                              student.initials
-                            }
-                          </div>
+        .filter-select {
+          padding: 0 34px 0 12px;
+        }
 
-                          <div>
-                            <strong
-                              style={{
-                                display:
-                                  "block",
-                                color:
-                                  "#334155",
-                                fontSize:
-                                  "11px",
-                                fontWeight:
-                                  700,
-                                whiteSpace:
-                                  "nowrap",
-                              }}
-                            >
-                              {
-                                student.student
-                              }
-                            </strong>
+        .search-input::placeholder {
+          color: var(--text-muted);
+        }
 
-                            <span
-                              style={{
-                                display:
-                                  "block",
-                                marginTop:
-                                  "2px",
-                                color:
-                                  "#94a3b8",
-                                fontSize:
-                                  "9px",
-                              }}
-                            >
-                              Student
-                            </span>
-                          </div>
-                        </div>
-                      </td>
+        .search-input:focus,
+        .filter-select:focus {
+          border-color: var(--primary);
+          box-shadow:
+            0 0 0 3px ${colors.primary}18;
+        }
 
-                      {/* COMPANY */}
-                      <td
-                        style={{
-                          padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display:
-                              "flex",
-                            alignItems:
-                              "center",
-                            gap: "6px",
-                          }}
-                        >
-                          <Building2
-                            size={13}
-                            color="#94a3b8"
-                          />
+        .clear-button {
+          height: 40px;
+          padding: 0 13px;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          background: var(--surface);
+          color: var(--text-secondary);
+          font-family: inherit;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+        }
 
-                          <div>
-                            <strong
-                              style={{
-                                display:
-                                  "block",
-                                color:
-                                  "#475569",
-                                fontSize:
-                                  "10px",
-                                fontWeight:
-                                  650,
-                                whiteSpace:
-                                  "nowrap",
-                              }}
-                            >
-                              {
-                                student.company
-                              }
-                            </strong>
+        .clear-button:hover {
+          background: var(--surface-muted);
+        }
 
-                            <span
-                              style={{
-                                display:
-                                  "block",
-                                marginTop:
-                                  "2px",
-                                color:
-                                  "#94a3b8",
-                                fontSize:
-                                  "9px",
-                                whiteSpace:
-                                  "nowrap",
-                              }}
-                            >
-                              {
-                                student.position
-                              }
-                            </span>
-                          </div>
-                        </div>
-                      </td>
+        .table-wrap {
+          width: 100%;
+          overflow-x: auto;
+        }
 
-                      {/* MENTOR */}
-                      <td
-                        style={{
-                          padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display:
-                              "flex",
-                            alignItems:
-                              "center",
-                            gap: "6px",
-                            color:
-                              "#64748b",
-                            fontSize:
-                              "10px",
-                            whiteSpace:
-                              "nowrap",
-                          }}
-                        >
-                          <UserCheck
-                            size={13}
-                            color="#94a3b8"
-                          />
+        .tracking-table {
+          width: 100%;
+          border-collapse: collapse;
+          min-width: 1050px;
+        }
 
-                          {
-                            student.mentor
-                          }
-                        </div>
-                      </td>
+        .tracking-table th {
+          padding: 12px 16px;
+          border-bottom: 1px solid var(--border);
+          background: var(--surface-muted);
+          color: var(--text-secondary);
+          font-size: 12px;
+          line-height: 18px;
+          font-weight: 700;
+          text-align: left;
+          white-space: nowrap;
+        }
 
-                      {/* PROGRESS */}
-                      <td
-                        style={{
-                          width:
-                            "130px",
-                          padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
-                        }}
-                      >
-                        <ProgressBar
-                          value={
-                            student.progress
-                          }
-                        />
-                      </td>
+        .tracking-table td {
+          padding: 14px 16px;
+          border-bottom: 1px solid var(--border-light);
+          color: var(--text);
+          font-size: 14px;
+          line-height: 20px;
+          vertical-align: middle;
+        }
 
-                      {/* ATTENDANCE */}
-                      <td
-                        style={{
-                          padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display:
-                              "flex",
-                            alignItems:
-                              "center",
-                            gap: "5px",
-                          }}
-                        >
-                          <CalendarDays
-                            size={12}
-                            color="#94a3b8"
-                          />
+        .tracking-row {
+          cursor: pointer;
+          transition: background .15s ease;
+        }
 
-                          <AttendanceBadge
-                            value={
-                              student.attendance
-                            }
-                          />
-                        </div>
-                      </td>
+        .tracking-row:hover td {
+          background: ${colors.primarySoft};
+        }
 
-                      {/* PERIOD */}
-                      <td
-                        style={{
-                          padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
-                        }}
-                      >
-                        <div
-                          style={{
-                            color:
-                              "#64748b",
-                            fontSize:
-                              "9px",
-                            whiteSpace:
-                              "nowrap",
-                          }}
-                        >
-                          {
-                            student.startDate
-                          }
-                        </div>
+        .student-cell {
+          display: flex;
+          align-items: center;
+          gap: 11px;
+          min-width: 190px;
+        }
 
-                        <div
-                          style={{
-                            marginTop:
-                              "3px",
-                            color:
-                              "#94a3b8",
-                            fontSize:
-                              "9px",
-                            whiteSpace:
-                              "nowrap",
-                          }}
-                        >
-                          to{" "}
-                          {
-                            student.endDate
-                          }
-                        </div>
-                      </td>
+        .student-avatar {
+          width: 38px;
+          height: 38px;
+          flex: 0 0 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: ${colors.primarySoft};
+          color: ${colors.primary};
+          font-size: 12px;
+          font-weight: 700;
+        }
 
-                      {/* STATUS */}
-                      <td
-                        style={{
-                          padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
-                        }}
-                      >
-                        <StatusBadge
-                          status={
-                            student.status
-                          }
-                        />
-                      </td>
+        .student-name {
+          color: var(--text);
+          font-weight: 600;
+        }
 
-                      {/* ACTION */}
-                      <td
-                        style={{
-                          position:
-                            "relative",
-                          padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
-                        }}
-                      >
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setActionStudentId(
-                              actionStudentId ===
-                                student.id
-                                ? null
-                                : student.id
-                            )
-                          }
-                          style={{
-                            width:
-                              "30px",
-                            height:
-                              "30px",
-                            display:
-                              "flex",
-                            alignItems:
-                              "center",
-                            justifyContent:
-                              "center",
-                            border:
-                              "none",
-                            borderRadius:
-                              "7px",
-                            backgroundColor:
-                              "#f8fafc",
-                            color:
-                              "#64748b",
-                            cursor:
-                              "pointer",
-                          }}
-                        >
-                          <MoreHorizontal
-                            size={16}
-                          />
-                        </button>
+        .student-meta {
+          margin-top: 2px;
+          color: var(--text-secondary);
+          font-size: 12px;
+        }
 
-                        {actionStudentId ===
-                          student.id && (
-                          <div
-                            style={{
-                              position:
-                                "absolute",
-                              right:
-                                "13px",
-                              top:
-                                "45px",
-                              zIndex:
-                                20,
-                              width:
-                                "180px",
-                              padding:
-                                "5px",
-                              border:
-                                "1px solid #e2e8f0",
-                              borderRadius:
-                                "9px",
-                              backgroundColor:
-                                "#ffffff",
-                              boxShadow:
-                                "0 10px 25px rgba(15, 23, 42, 0.12)",
-                            }}
-                          >
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedStudent(
-                                  student
-                                );
-                                setActionStudentId(
-                                  null
-                                );
-                              }}
-                              className="ojt-action-button"
-                            >
-                              <Eye
-                                size={
-                                  14
-                                }
-                              />
-                              View Tracking
-                            </button>
+        .company-name {
+          color: var(--text);
+          font-weight: 600;
+        }
 
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedStudent(
-                                  student
-                                );
-                                setActionStudentId(
-                                  null
-                                );
-                              }}
-                              className="ojt-action-button"
-                            >
-                              <TrendingUp
-                                size={
-                                  14
-                                }
-                              />
-                              Update Progress
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  )
-                )
-              ) : (
-                <tr>
-                  <td
-                    colSpan="8"
-                    style={{
-                      padding:
-                        "55px 20px",
-                      textAlign:
-                        "center",
-                      color:
-                        "#94a3b8",
-                      fontSize:
-                        "11px",
-                    }}
-                  >
-                    <ClipboardCheck
-                      size={30}
-                      color="#cbd5e1"
-                      style={{
-                        marginBottom:
-                          "8px",
-                      }}
-                    />
+        .position-text {
+          max-width: 180px;
+          color: var(--text-secondary);
+          font-size: 13px;
+        }
 
-                    <div>
-                      No OJT records found
-                    </div>
+        .mentor-cell {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          color: var(--text);
+        }
 
-                    <div
-                      style={{
-                        marginTop:
-                          "4px",
-                        fontSize:
-                          "10px",
-                      }}
-                    >
-                      Try changing your
-                      search or filters.
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        .progress-cell {
+          min-width: 120px;
+        }
 
-        {/* PAGINATION */}
-        <div
-          style={{
-            minHeight: "58px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent:
-              "space-between",
-            gap: "12px",
-            padding:
-              "10px 16px",
-            borderTop:
-              "1px solid #eef2f7",
-          }}
-        >
-          <span
-            style={{
-              color:
-                "#94a3b8",
-              fontSize:
-                "10px",
-            }}
-          >
-            Page{" "}
-            {safeCurrentPage}{" "}
-            of {totalPages}
-          </span>
+        .progress-top {
+          display: flex;
+          justify-content: space-between;
+          gap: 8px;
+          margin-bottom: 6px;
+        }
 
-          <div
-            style={{
-              display:
-                "flex",
-              alignItems:
-                "center",
-              gap: "5px",
-            }}
-          >
-            <button
-              type="button"
-              disabled={
-                safeCurrentPage ===
-                1
-              }
-              onClick={() =>
-                setCurrentPage(
-                  (page) =>
-                    Math.max(
-                      1,
-                      page - 1
-                    )
-                )
-              }
-              className="ojt-page-button"
-            >
-              ‹
-            </button>
+        .progress-value {
+          color: var(--text);
+          font-weight: 700;
+        }
 
-            {Array.from(
-              {
-                length:
-                  totalPages,
-              },
-              (_, index) =>
-                index + 1
-            ).map((page) => (
-              <button
-                key={page}
-                type="button"
-                onClick={() =>
-                  setCurrentPage(
-                    page
-                  )
-                }
-                className={`ojt-page-button ${
-                  safeCurrentPage ===
-                  page
-                    ? "ojt-page-active"
-                    : ""
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+        .progress-track {
+          width: 100%;
+          height: 6px;
+          overflow: hidden;
+          border-radius: 999px;
+          background: var(--border);
+        }
 
-            <button
-              type="button"
-              disabled={
-                safeCurrentPage ===
-                totalPages
-              }
-              onClick={() =>
-                setCurrentPage(
-                  (page) =>
-                    Math.min(
-                      totalPages,
-                      page + 1
-                    )
-                )
-              }
-              className="ojt-page-button"
-            >
-              ›
-            </button>
-          </div>
-        </div>
-      </section>
+        .progress-fill {
+          height: 100%;
+          border-radius: inherit;
+          background: ${colors.primary};
+          transition: width .2s ease;
+        }
 
-      {/* =====================================================
-          TRACKING DETAILS MODAL
-      ====================================================== */}
-      {selectedStudent && (
-        <Modal
-          onClose={() =>
-            setSelectedStudent(null)
+        .progress-fill.completed {
+          background: ${colors.success};
+        }
+
+        .progress-fill.low {
+          background: ${colors.danger};
+        }
+
+        .attendance-text {
+          color: var(--text);
+          font-weight: 600;
+        }
+
+        .status-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          min-height: 27px;
+          padding: 0 8px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 600;
+          white-space: nowrap;
+        }
+
+        .action-button {
+          width: 34px;
+          height: 34px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--border);
+          border-radius: 7px;
+          background: var(--surface);
+          color: var(--text-secondary);
+          cursor: pointer;
+        }
+
+        .action-button:hover {
+          border-color: var(--primary);
+          color: var(--primary);
+          background: var(--surface-muted);
+        }
+
+        .table-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 15px;
+          padding: 14px 18px;
+          border-top: 1px solid var(--border);
+        }
+
+        .result-count {
+          color: var(--text-secondary);
+          font-size: 12px;
+        }
+
+        .pagination {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+        }
+
+        .page-button {
+          min-width: 32px;
+          height: 32px;
+          padding: 0 8px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border: 1px solid var(--border);
+          border-radius: 7px;
+          background: var(--surface);
+          color: var(--text-secondary);
+          font-family: inherit;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .page-button:hover:not(:disabled) {
+          border-color: var(--primary);
+          color: var(--primary);
+        }
+
+        .page-button.active {
+          border-color: var(--primary);
+          background: var(--primary);
+          color: white;
+        }
+
+        .page-button:disabled {
+          opacity: .45;
+          cursor: not-allowed;
+        }
+
+        .loading-state,
+        .empty-state {
+          min-height: 260px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 9px;
+          padding: 30px;
+          color: var(--text-secondary);
+          text-align: center;
+        }
+
+        .loading-icon {
+          animation: spin 1s linear infinite;
+          color: var(--primary);
+        }
+
+        .empty-icon {
+          color: var(--text-muted);
+        }
+
+        .empty-title {
+          color: var(--text);
+          font-size: 14px;
+          font-weight: 700;
+        }
+
+        .empty-text {
+          max-width: 430px;
+          color: var(--text-secondary);
+          font-size: 13px;
+          line-height: 20px;
+        }
+
+        .modal-overlay {
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
+          background: rgba(2, 6, 23, .58);
+        }
+
+        .modal {
+          width: min(720px, 100%);
+          max-height: calc(100vh - 40px);
+          overflow-y: auto;
+          border: 1px solid var(--border);
+          border-radius: 14px;
+          background: var(--surface);
+          color: var(--text);
+          box-shadow:
+            0 24px 70px rgba(0, 0, 0, .25);
+        }
+
+        .modal.small {
+          width: min(470px, 100%);
+        }
+
+        .modal-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 15px;
+          padding: 18px 20px;
+          border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+          margin: 0;
+          color: var(--text);
+          font-size: 17px;
+          font-weight: 700;
+        }
+
+        .modal-close {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border: none;
+          border-radius: 7px;
+          background: transparent;
+          color: var(--text-secondary);
+          cursor: pointer;
+        }
+
+        .modal-close:hover {
+          background: var(--surface-muted);
+          color: var(--text);
+        }
+
+        .modal-body {
+          padding: 20px;
+        }
+
+        .profile-header {
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          margin-bottom: 22px;
+        }
+
+        .large-avatar {
+          width: 58px;
+          height: 58px;
+          flex: 0 0 58px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: ${colors.primarySoft};
+          color: ${colors.primary};
+          font-size: 17px;
+          font-weight: 700;
+        }
+
+        .profile-name {
+          margin: 0;
+          color: var(--text);
+          font-size: 18px;
+          font-weight: 700;
+        }
+
+        .profile-meta {
+          margin-top: 4px;
+          color: var(--text-secondary);
+          font-size: 13px;
+        }
+
+        .detail-grid {
+          display: grid;
+          grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+          gap: 12px;
+        }
+
+        .detail-item {
+          padding: 13px 14px;
+          border: 1px solid var(--border);
+          border-radius: 9px;
+          background: var(--surface-muted);
+        }
+
+        .detail-label {
+          margin-bottom: 4px;
+          color: var(--text-secondary);
+          font-size: 12px;
+          font-weight: 500;
+        }
+
+        .detail-value {
+          color: var(--text);
+          font-size: 14px;
+          font-weight: 600;
+          word-break: break-word;
+        }
+
+        .progress-summary {
+          margin-top: 18px;
+          padding: 16px;
+          border: 1px solid var(--border);
+          border-radius: 10px;
+          background: var(--surface-muted);
+        }
+
+        .progress-summary-head {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 9px;
+        }
+
+        .progress-summary-title {
+          color: var(--text);
+          font-size: 13px;
+          font-weight: 700;
+        }
+
+        .progress-summary-value {
+          color: var(--primary);
+          font-size: 16px;
+          font-weight: 700;
+        }
+
+        .modal-actions {
+          display: flex;
+          justify-content: flex-end;
+          gap: 9px;
+          margin-top: 20px;
+        }
+
+        .secondary-button,
+        .primary-button {
+          min-height: 40px;
+          padding: 0 15px;
+          border-radius: 8px;
+          font-family: inherit;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .secondary-button {
+          border: 1px solid var(--border);
+          background: var(--surface);
+          color: var(--text-secondary);
+        }
+
+        .secondary-button:hover {
+          background: var(--surface-muted);
+        }
+
+        .primary-button {
+          border: 1px solid var(--primary);
+          background: var(--primary);
+          color: white;
+        }
+
+        .primary-button:hover {
+          background: var(--primary-hover);
+          border-color: var(--primary-hover);
+        }
+
+        .primary-button:disabled {
+          opacity: .6;
+          cursor: not-allowed;
+        }
+
+        .progress-form-label {
+          display: block;
+          margin-bottom: 9px;
+          color: var(--text);
+          font-size: 13px;
+          font-weight: 600;
+        }
+
+        .progress-number {
+          margin-bottom: 14px;
+          color: var(--primary);
+          font-size: 28px;
+          font-weight: 700;
+          text-align: center;
+        }
+
+        .progress-range {
+          width: 100%;
+          accent-color: ${colors.primary};
+          cursor: pointer;
+        }
+
+        .range-labels {
+          display: flex;
+          justify-content: space-between;
+          margin-top: 6px;
+          color: var(--text-muted);
+          font-size: 11px;
+        }
+
+        .modal-note {
+          margin-top: 14px;
+          padding: 11px 12px;
+          border-radius: 8px;
+          background: ${colors.infoSoft};
+          color: ${colors.info};
+          font-size: 12px;
+          line-height: 19px;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
           }
-          width="650px"
-        >
-          <ModalHeader
-            title="OJT Tracking Details"
-            subtitle="Student internship progress and monitoring"
-            onClose={() =>
-              setSelectedStudent(null)
+        }
+
+        @media (max-width: 1100px) {
+          .stats-grid {
+            grid-template-columns:
+              repeat(2, minmax(0, 1fr));
+          }
+
+          .filters {
+            grid-template-columns:
+              repeat(2, minmax(0, 1fr));
+          }
+
+          .clear-button {
+            width: 100%;
+          }
+        }
+
+        @media (max-width: 760px) {
+          .ojt-tracking-page {
+            padding: 22px 16px 32px;
+          }
+
+          .page-header {
+            flex-direction: column;
+          }
+
+          .refresh-button {
+            width: 100%;
+          }
+
+          .stats-grid,
+          .secondary-stats {
+            grid-template-columns: 1fr;
+          }
+
+          .filters {
+            grid-template-columns: 1fr;
+          }
+
+          .detail-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .table-footer {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+
+          .pagination {
+            width: 100%;
+            justify-content: flex-end;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .page-title {
+            font-size: 24px;
+            line-height: 31px;
+          }
+
+          .directory-header {
+            padding: 16px;
+          }
+
+          .modal-overlay {
+            padding: 10px;
+          }
+
+          .modal-body {
+            padding: 16px;
+          }
+        }
+      `}</style>
+
+      <div className="tracking-container">
+        <div className="breadcrumb">
+          <span>College Coordinator</span>
+          <span>/</span>
+          <span className="breadcrumb-current">
+            OJT Tracking
+          </span>
+        </div>
+
+        <div className="page-header">
+          <div>
+            <h1 className="page-title">
+              OJT Tracking
+            </h1>
+
+            <p className="page-description">
+              Monitor student OJT progress,
+              attendance, mentors and
+              completion status.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="refresh-button"
+            onClick={() =>
+              loadTrackingData(true)
             }
-          />
-
-          <div
-            style={{
-              padding: "20px",
-            }}
+            disabled={refreshing}
           >
-            {/* STUDENT HEADER */}
+            <RefreshCw
+              size={15}
+              className={
+                refreshing
+                  ? "loading-icon"
+                  : ""
+              }
+            />
+            {refreshing
+              ? "Refreshing..."
+              : "Refresh"}
+          </button>
+        </div>
+
+        {error && (
+          <div className="error-banner">
+            <AlertCircle size={17} />
+
+            <span>{error}</span>
+
+            <button
+              type="button"
+              className="error-close"
+              onClick={() => setError("")}
+              aria-label="Close error"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        <div className="stats-grid">
+          {statCards.map((stat) => (
             <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "13px",
-                padding: "14px",
-                borderRadius: "11px",
-                backgroundColor: "#f8fafc",
-              }}
+              className="stat-card"
+              key={stat.label}
             >
               <div
+                className="stat-icon"
                 style={{
-                  width: "50px",
-                  height: "50px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "12px",
-                  backgroundColor: "#eff6ff",
-                  color: "#2563eb",
-                  fontSize: "13px",
-                  fontWeight: 800,
+                  background:
+                    stat.background,
+                  color: stat.iconColor,
                 }}
               >
-                {
-                  selectedStudent.initials
-                }
+                {stat.icon}
               </div>
 
-              <div
-                style={{
-                  flex: 1,
-                }}
-              >
-                <h3
-                  style={{
-                    margin: 0,
-                    color: "#1e293b",
-                    fontSize: "16px",
-                    fontWeight: 750,
-                  }}
-                >
-                  {
-                    selectedStudent.student
-                  }
-                </h3>
+              <div>
+                <p className="stat-label">
+                  {stat.label}
+                </p>
 
-                <div
-                  style={{
-                    marginTop: "5px",
-                    color: "#64748b",
-                    fontSize: "10px",
-                  }}
-                >
-                  {
-                    selectedStudent.position
-                  }
-                </div>
-              </div>
-
-              <StatusBadge
-                status={
-                  selectedStudent.status
-                }
-              />
-            </div>
-
-            {/* INFORMATION */}
-            <div
-              className="ojt-detail-grid"
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "1fr 1fr",
-                gap: "10px",
-                marginTop: "15px",
-              }}
-            >
-              {[
-                {
-                  icon: Building2,
-                  label: "Company",
-                  value:
-                    selectedStudent.company,
-                },
-                {
-                  icon: UserCheck,
-                  label: "Mentor",
-                  value:
-                    selectedStudent.mentor,
-                },
-                {
-                  icon: BriefcaseBusiness,
-                  label: "Position",
-                  value:
-                    selectedStudent.position,
-                },
-                {
-                  icon: MapPin,
-                  label: "Location",
-                  value:
-                    selectedStudent.location,
-                },
-                {
-                  icon: CalendarDays,
-                  label: "Start Date",
-                  value:
-                    selectedStudent.startDate,
-                },
-                {
-                  icon: CalendarDays,
-                  label: "End Date",
-                  value:
-                    selectedStudent.endDate,
-                },
-              ].map(
-                ({
-                  icon: Icon,
-                  label,
-                  value,
-                }) => (
-                  <div
-                    key={label}
-                    style={{
-                      padding:
-                        "12px",
-                      border:
-                        "1px solid #edf2f7",
-                      borderRadius:
-                        "10px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display:
-                          "flex",
-                        alignItems:
-                          "center",
-                        gap: "7px",
-                        color:
-                          "#94a3b8",
-                        fontSize:
-                          "9px",
-                        fontWeight:
-                          700,
-                        textTransform:
-                          "uppercase",
-                      }}
-                    >
-                      <Icon
-                        size={13}
-                      />
-
-                      {label}
-                    </div>
-
-                    <div
-                      style={{
-                        marginTop:
-                          "6px",
-                        color:
-                          "#334155",
-                        fontSize:
-                          "11px",
-                        fontWeight:
-                          650,
-                      }}
-                    >
-                      {value}
-                    </div>
-                  </div>
-                )
-              )}
-            </div>
-
-            {/* PROGRESS + ATTENDANCE */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "1fr 1fr",
-                gap: "10px",
-                marginTop: "15px",
-              }}
-              className="ojt-progress-grid"
-            >
-              <div
-                style={{
-                  padding: "14px",
-                  border:
-                    "1px solid #dbeafe",
-                  borderRadius: "10px",
-                  backgroundColor: "#eff6ff",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent:
-                      "space-between",
-                    marginBottom:
-                      "8px",
-                  }}
-                >
-                  <strong
-                    style={{
-                      color:
-                        "#334155",
-                      fontSize:
-                        "11px",
-                    }}
-                  >
-                    OJT Progress
-                  </strong>
-
-                  <strong
-                    style={{
-                      color:
-                        "#2563eb",
-                      fontSize:
-                        "15px",
-                    }}
-                  >
-                    {
-                      selectedStudent.progress
-                    }%
-                  </strong>
-                </div>
-
-                <div
-                  style={{
-                    width: "100%",
-                    height: "8px",
-                    overflow:
-                      "hidden",
-                    borderRadius:
-                      "999px",
-                    backgroundColor:
-                      "#dbeafe",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${selectedStudent.progress}%`,
-                      height: "100%",
-                      borderRadius:
-                        "999px",
-                      backgroundColor:
-                        "#2563eb",
-                    }}
-                  />
-                </div>
-
-                <div
-                  style={{
-                    marginTop:
-                      "7px",
-                    color:
-                      "#64748b",
-                    fontSize:
-                      "9px",
-                  }}
-                >
-                  {
-                    selectedStudent.completedDays
-                  }{" "}
-                  of{" "}
-                  {
-                    selectedStudent.totalDays
-                  }{" "}
-                  days completed
-                </div>
-              </div>
-
-              <div
-                style={{
-                  padding: "14px",
-                  border:
-                    "1px solid #d1fae5",
-                  borderRadius: "10px",
-                  backgroundColor:
-                    "#ecfdf5",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent:
-                      "space-between",
-                    marginBottom:
-                      "8px",
-                  }}
-                >
-                  <strong
-                    style={{
-                      color:
-                        "#334155",
-                      fontSize:
-                        "11px",
-                    }}
-                  >
-                    Attendance
-                  </strong>
-
-                  <strong
-                    style={{
-                      color:
-                        selectedStudent.attendance >=
-                        90
-                          ? "#059669"
-                          : "#d97706",
-                      fontSize:
-                        "15px",
-                    }}
-                  >
-                    {
-                      selectedStudent.attendance
-                    }%
-                  </strong>
-                </div>
-
-                <div
-                  style={{
-                    width: "100%",
-                    height: "8px",
-                    overflow:
-                      "hidden",
-                    borderRadius:
-                      "999px",
-                    backgroundColor:
-                      "#d1fae5",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: `${selectedStudent.attendance}%`,
-                      height: "100%",
-                      borderRadius:
-                        "999px",
-                      backgroundColor:
-                        selectedStudent.attendance >=
-                        90
-                          ? "#059669"
-                          : "#d97706",
-                    }}
-                  />
-                </div>
-
-                <div
-                  style={{
-                    marginTop:
-                      "7px",
-                    color:
-                      "#64748b",
-                    fontSize:
-                      "9px",
-                  }}
-                >
-                  Overall attendance
-                  percentage
-                </div>
+                <p className="stat-value">
+                  {stat.value}
+                </p>
               </div>
             </div>
+          ))}
+        </div>
 
-            {/* UPDATE PROGRESS */}
-            <div
-              style={{
-                marginTop: "16px",
-                padding: "14px",
-                border:
-                  "1px solid #e2e8f0",
-                borderRadius: "10px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent:
-                    "space-between",
-                  marginBottom:
-                    "9px",
-                }}
-              >
-                <strong
-                  style={{
-                    color:
-                      "#334155",
-                    fontSize:
-                      "11px",
-                  }}
-                >
-                  Update Progress
-                </strong>
-
-                <span
-                  style={{
-                    color:
-                      "#94a3b8",
-                    fontSize:
-                      "9px",
-                  }}
-                >
-                  Frontend preview
-                </span>
-              </div>
-
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={
-                  selectedStudent.progress
-                }
-                onChange={(event) =>
-                  updateProgress(
-                    selectedStudent.id,
-                    event.target.value
-                  )
-                }
-                style={{
-                  width: "100%",
-                  cursor:
-                    "pointer",
-                }}
-              />
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent:
-                    "space-between",
-                  marginTop:
-                    "4px",
-                  color:
-                    "#94a3b8",
-                  fontSize:
-                    "8px",
-                }}
-              >
-                <span>0%</span>
-                <span>50%</span>
-                <span>100%</span>
-              </div>
-            </div>
-
-            {/* FOOTER */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent:
-                  "space-between",
-                gap: "10px",
-                marginTop: "18px",
-                paddingTop: "14px",
-                borderTop:
-                  "1px solid #eef2f7",
-              }}
-            >
-              <span
-                style={{
-                  color: "#94a3b8",
-                  fontSize: "9px",
-                }}
-              >
-                Last update:{" "}
-                {
-                  selectedStudent.lastUpdate
-                }
+        <div className="secondary-stats">
+          <div className="secondary-stat">
+            <div className="secondary-stat-top">
+              <span className="secondary-stat-label">
+                Completing Soon
               </span>
 
-              <button
-                type="button"
-                onClick={() =>
-                  setSelectedStudent(
-                    null
-                  )
-                }
+              <span
+                className="secondary-stat-value"
                 style={{
-                  height: "36px",
-                  padding: "0 15px",
-                  border:
-                    "1px solid #dbe4ee",
-                  borderRadius: "8px",
-                  backgroundColor:
-                    "#ffffff",
-                  color: "#475569",
-                  fontSize: "10px",
-                  fontWeight: 700,
-                  cursor: "pointer",
+                  color: colors.warning,
                 }}
               >
-                Close
+                {stats.completingSoon}
+              </span>
+            </div>
+          </div>
+
+          <div className="secondary-stat">
+            <div className="secondary-stat-top">
+              <span className="secondary-stat-label">
+                Average Progress
+              </span>
+
+              <span
+                className="secondary-stat-value"
+                style={{
+                  color: colors.primary,
+                }}
+              >
+                {stats.averageProgress}%
+              </span>
+            </div>
+          </div>
+
+          <div className="secondary-stat">
+            <div className="secondary-stat-top">
+              <span className="secondary-stat-label">
+                Average Attendance
+              </span>
+
+              <span
+                className="secondary-stat-value"
+                style={{
+                  color:
+                    stats.averageAttendance >=
+                    80
+                      ? colors.success
+                      : colors.warning,
+                }}
+              >
+                {stats.averageAttendance}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <section className="directory-card">
+          <div className="directory-header">
+            <h2 className="section-heading">
+              OJT STUDENT TRACKING
+            </h2>
+
+            <p className="section-description">
+              Track assigned students,
+              mentors, attendance and
+              OJT progress.
+            </p>
+
+            <div className="filters">
+              <div className="search-wrapper">
+                <Search
+                  size={16}
+                  className="search-icon"
+                />
+
+                <input
+                  type="text"
+                  className="search-input"
+                  value={search}
+                  onChange={(event) =>
+                    setSearch(
+                      event.target.value
+                    )
+                  }
+                  placeholder="Search student, roll no., company, mentor..."
+                />
+              </div>
+
+              <select
+                className="filter-select"
+                value={departmentFilter}
+                onChange={(event) =>
+                  setDepartmentFilter(
+                    event.target.value
+                  )
+                }
+              >
+                {departments.map(
+                  (department) => (
+                    <option
+                      key={department}
+                      value={department}
+                    >
+                      {department}
+                    </option>
+                  )
+                )}
+              </select>
+
+              <select
+                className="filter-select"
+                value={statusFilter}
+                onChange={(event) =>
+                  setStatusFilter(
+                    event.target.value
+                  )
+                }
+              >
+                {STATUS_OPTIONS.map(
+                  (status) => (
+                    <option
+                      key={status}
+                      value={status}
+                    >
+                      {status}
+                    </option>
+                  )
+                )}
+              </select>
+
+              <button
+                type="button"
+                className="clear-button"
+                onClick={clearFilters}
+              >
+                Clear Filters
               </button>
             </div>
           </div>
-        </Modal>
-      )}
 
-      {/* =====================================================
-          STYLES
-      ====================================================== */}
-      <style>
-        {`
-          .ojt-action-button {
-            width: 100%;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 9px;
-            border: none;
-            border-radius: 6px;
-            background: transparent;
-            color: #475569;
-            font-size: 10px;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
-          }
+          {loading ? (
+            <div className="loading-state">
+              <RefreshCw
+                size={26}
+                className="loading-icon"
+              />
 
-          .ojt-action-button:hover {
-            background: #f8fafc;
-          }
+              <div className="empty-title">
+                Loading OJT tracking...
+              </div>
 
-          .ojt-page-button {
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #e2e8f0;
-            border-radius: 7px;
-            background: #ffffff;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-          }
+              <div className="empty-text">
+                Fetching current student
+                progress from the database.
+              </div>
+            </div>
+          ) : filteredStudents.length ===
+            0 ? (
+            <div className="empty-state">
+              <Users
+                size={34}
+                className="empty-icon"
+              />
 
-          .ojt-page-button:hover:not(:disabled) {
-            border-color: #bfdbfe;
-            background: #eff6ff;
-            color: #2563eb;
-          }
+              <div className="empty-title">
+                No OJT students found
+              </div>
 
-          .ojt-page-button:disabled {
-            color: #cbd5e1;
-            cursor: not-allowed;
-            background: #f8fafc;
-          }
+              <div className="empty-text">
+                No tracking records match
+                your current search and
+                filter criteria.
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="table-wrap">
+                <table className="tracking-table">
+                  <thead>
+                    <tr>
+                      <th>STUDENT</th>
+                      <th>COMPANY</th>
+                      <th>POSITION</th>
+                      <th>MENTOR</th>
+                      <th>PROGRESS</th>
+                      <th>ATTENDANCE</th>
+                      <th>STATUS</th>
+                      <th>ACTION</th>
+                    </tr>
+                  </thead>
 
-          .ojt-page-active {
-            border-color: #2563eb;
-            background: #2563eb;
-            color: #ffffff;
-          }
+                  <tbody>
+                    {paginatedStudents.map(
+                      (student) => {
+                        const progressClass =
+                          student.progress >=
+                          100
+                            ? "completed"
+                            : student.progress <
+                              30
+                            ? "low"
+                            : "";
 
-          @media (max-width: 1050px) {
-            .ojt-stat-grid {
-              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
+                        return (
+                          <tr
+                            key={
+                              student._rowId
+                            }
+                            className="tracking-row"
+                            onClick={() =>
+                              openDetails(
+                                student
+                              )
+                            }
+                          >
+                            <td>
+                              <div className="student-cell">
+                                <div className="student-avatar">
+                                  {
+                                    student.initials
+                                  }
+                                </div>
 
-            .ojt-summary-grid {
-              grid-template-columns: 1fr !important;
-            }
+                                <div>
+                                  <div className="student-name">
+                                    {
+                                      student.studentName
+                                    }
+                                  </div>
 
-            .ojt-filter-grid {
-              grid-template-columns: 1fr 1fr !important;
-            }
-          }
+                                  <div className="student-meta">
+                                    {
+                                      student.rollNumber
+                                    }
+                                    {" • "}
+                                    {
+                                      student.department
+                                    }
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
 
-          @media (max-width: 700px) {
-            .ojt-stat-grid {
-              grid-template-columns: 1fr !important;
-            }
+                            <td>
+                              <div className="company-name">
+                                {
+                                  student.companyName
+                                }
+                              </div>
+                            </td>
 
-            .ojt-filter-grid {
-              grid-template-columns: 1fr !important;
-            }
+                            <td>
+                              <div className="position-text">
+                                {
+                                  student.opportunityTitle
+                                }
+                              </div>
+                            </td>
 
-            .ojt-detail-grid,
-            .ojt-progress-grid {
-              grid-template-columns: 1fr !important;
-            }
-          }
-        `}
-      </style>
+                            <td>
+                              <div className="mentor-cell">
+                                <UserRound
+                                  size={15}
+                                  color={
+                                    colors.textSecondary
+                                  }
+                                />
+
+                                <span>
+                                  {
+                                    student.mentorName
+                                  }
+                                </span>
+                              </div>
+                            </td>
+
+                            <td>
+                              <div className="progress-cell">
+                                <div className="progress-top">
+                                  <span className="progress-value">
+                                    {
+                                      student.progress
+                                    }
+                                    %
+                                  </span>
+                                </div>
+
+                                <div className="progress-track">
+                                  <div
+                                    className={`progress-fill ${progressClass}`}
+                                    style={{
+                                      width: `${student.progress}%`,
+                                    }}
+                                  />
+                                </div>
+                              </div>
+                            </td>
+
+                            <td>
+                              <span className="attendance-text">
+                                {
+                                  student.attendance
+                                }
+                                %
+                              </span>
+                            </td>
+
+                            <td>
+                              <span
+                                className="status-badge"
+                                style={getStatusStyles(
+                                  student.status
+                                )}
+                              >
+                                {getStatusIcon(
+                                  student.status
+                                )}
+
+                                {
+                                  student.status
+                                }
+                              </span>
+                            </td>
+
+                            <td
+                              onClick={(event) =>
+                                event.stopPropagation()
+                              }
+                            >
+                              <button
+                                type="button"
+                                className="action-button"
+                                onClick={() =>
+                                  openDetails(
+                                    student
+                                  )
+                                }
+                                title="View details"
+                              >
+                                <Eye
+                                  size={16}
+                                />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      }
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="table-footer">
+                <div className="result-count">
+                  Showing{" "}
+                  {Math.min(
+                    (currentPage - 1) *
+                      PAGE_SIZE +
+                      1,
+                    filteredStudents.length
+                  )}
+                  {" - "}
+                  {Math.min(
+                    currentPage *
+                      PAGE_SIZE,
+                    filteredStudents.length
+                  )}{" "}
+                  of{" "}
+                  {filteredStudents.length}{" "}
+                  students
+                </div>
+
+                <div className="pagination">
+                  <button
+                    type="button"
+                    className="page-button"
+                    disabled={
+                      currentPage === 1
+                    }
+                    onClick={() =>
+                      setCurrentPage(
+                        (page) =>
+                          Math.max(
+                            page - 1,
+                            1
+                          )
+                      )
+                    }
+                  >
+                    <ChevronLeft
+                      size={15}
+                    />
+                  </button>
+
+                  {Array.from(
+                    {
+                      length: totalPages,
+                    },
+                    (_, index) =>
+                      index + 1
+                  ).map((page) => (
+                    <button
+                      type="button"
+                      key={page}
+                      className={`page-button ${
+                        currentPage === page
+                          ? "active"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        setCurrentPage(page)
+                      }
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                  <button
+                    type="button"
+                    className="page-button"
+                    disabled={
+                      currentPage ===
+                      totalPages
+                    }
+                    onClick={() =>
+                      setCurrentPage(
+                        (page) =>
+                          Math.min(
+                            page + 1,
+                            totalPages
+                          )
+                      )
+                    }
+                  >
+                    <ChevronRight
+                      size={15}
+                    />
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </section>
+      </div>
+
+      {showDetailsModal &&
+        selectedStudent && (
+          <div
+            className="modal-overlay"
+            onMouseDown={(event) => {
+              if (
+                event.target ===
+                event.currentTarget
+              ) {
+                closeDetails();
+              }
+            }}
+          >
+            <div className="modal">
+              <div className="modal-header">
+                <h2 className="modal-title">
+                  OJT Student Details
+                </h2>
+
+                <button
+                  type="button"
+                  className="modal-close"
+                  onClick={closeDetails}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="modal-body">
+                <div className="profile-header">
+                  <div className="large-avatar">
+                    {
+                      selectedStudent.initials
+                    }
+                  </div>
+
+                  <div>
+                    <h3 className="profile-name">
+                      {
+                        selectedStudent.studentName
+                      }
+                    </h3>
+
+                    <div className="profile-meta">
+                      {
+                        selectedStudent.rollNumber
+                      }
+                      {" • "}
+                      {
+                        selectedStudent.department
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div className="detail-grid">
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Student ID
+                    </div>
+
+                    <div className="detail-value">
+                      {
+                        selectedStudent.studentId ||
+                        "—"
+                      }
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      CGPA
+                    </div>
+
+                    <div className="detail-value">
+                      {selectedStudent.cgpa ??
+                        "—"}
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Company
+                    </div>
+
+                    <div className="detail-value">
+                      {
+                        selectedStudent.companyName
+                      }
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Position
+                    </div>
+
+                    <div className="detail-value">
+                      {
+                        selectedStudent.opportunityTitle
+                      }
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Mentor
+                    </div>
+
+                    <div className="detail-value">
+                      {
+                        selectedStudent.mentorName
+                      }
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Location
+                    </div>
+
+                    <div className="detail-value">
+                      {
+                        selectedStudent.location
+                      }
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Start Date
+                    </div>
+
+                    <div className="detail-value">
+                      {formatDate(
+                        selectedStudent.startDate
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      End Date
+                    </div>
+
+                    <div className="detail-value">
+                      {formatDate(
+                        selectedStudent.endDate
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Attendance
+                    </div>
+
+                    <div className="detail-value">
+                      {
+                        selectedStudent.attendance
+                      }
+                      %
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Weekly Reports
+                    </div>
+
+                    <div className="detail-value">
+                      {
+                        selectedStudent.weeklyReports
+                      }
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Completed Days
+                    </div>
+
+                    <div className="detail-value">
+                      {
+                        selectedStudent.completedDays
+                      }
+                      {" / "}
+                      {
+                        selectedStudent.totalDays
+                      }
+                    </div>
+                  </div>
+
+                  <div className="detail-item">
+                    <div className="detail-label">
+                      Last Update
+                    </div>
+
+                    <div className="detail-value">
+                      {
+                        selectedStudent.lastUpdate
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div className="progress-summary">
+                  <div className="progress-summary-head">
+                    <span className="progress-summary-title">
+                      OJT Progress
+                    </span>
+
+                    <span className="progress-summary-value">
+                      {
+                        selectedStudent.progress
+                      }
+                      %
+                    </span>
+                  </div>
+
+                  <div className="progress-track">
+                    <div
+                      className={`progress-fill ${
+                        selectedStudent.progress >=
+                        100
+                          ? "completed"
+                          : selectedStudent
+                              .progress < 30
+                          ? "low"
+                          : ""
+                      }`}
+                      style={{
+                        width: `${selectedStudent.progress}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div className="modal-actions">
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    onClick={closeDetails}
+                  >
+                    Close
+                  </button>
+
+                  <button
+                    type="button"
+                    className="primary-button"
+                    onClick={() =>
+                      openProgress(
+                        selectedStudent
+                      )
+                    }
+                  >
+                    <TrendingUp
+                      size={15}
+                      style={{
+                        marginRight: 6,
+                        verticalAlign:
+                          "middle",
+                      }}
+                    />
+                    Update Progress
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+      {showProgressModal &&
+        selectedStudent && (
+          <div
+            className="modal-overlay"
+            onMouseDown={(event) => {
+              if (
+                event.target ===
+                event.currentTarget &&
+                !savingProgress
+              ) {
+                closeProgress();
+              }
+            }}
+          >
+            <div className="modal small">
+              <div className="modal-header">
+                <h2 className="modal-title">
+                  Update OJT Progress
+                </h2>
+
+                <button
+                  type="button"
+                  className="modal-close"
+                  onClick={closeProgress}
+                  disabled={savingProgress}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <form
+                onSubmit={
+                  handleProgressUpdate
+                }
+              >
+                <div className="modal-body">
+                  <div className="profile-header">
+                    <div className="large-avatar">
+                      {
+                        selectedStudent.initials
+                      }
+                    </div>
+
+                    <div>
+                      <h3 className="profile-name">
+                        {
+                          selectedStudent.studentName
+                        }
+                      </h3>
+
+                      <div className="profile-meta">
+                        {
+                          selectedStudent.companyName
+                        }
+                      </div>
+                    </div>
+                  </div>
+
+                  <label className="progress-form-label">
+                    OJT Completion Percentage
+                  </label>
+
+                  <div className="progress-number">
+                    {progressValue}%
+                  </div>
+
+                  <input
+                    type="range"
+                    className="progress-range"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={progressValue}
+                    onChange={(event) =>
+                      setProgressValue(
+                        Number(
+                          event.target.value
+                        )
+                      )
+                    }
+                    disabled={
+                      savingProgress
+                    }
+                  />
+
+                  <div className="range-labels">
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
+                  </div>
+
+                  <div className="modal-note">
+                    Updating this value will
+                    save the OJT progress to
+                    MongoDB and refresh the
+                    tracking records.
+                  </div>
+
+                  <div className="modal-actions">
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={
+                        closeProgress
+                      }
+                      disabled={
+                        savingProgress
+                      }
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="primary-button"
+                      disabled={
+                        savingProgress
+                      }
+                    >
+                      {savingProgress ? (
+                        <>
+                          <RefreshCw
+                            size={14}
+                            className="loading-icon"
+                            style={{
+                              marginRight: 6,
+                              verticalAlign:
+                                "middle",
+                            }}
+                          />
+                          Saving...
+                        </>
+                      ) : (
+                        "Save Progress"
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
     </div>
   );
-}
+};
+
+export default OJTTracking;

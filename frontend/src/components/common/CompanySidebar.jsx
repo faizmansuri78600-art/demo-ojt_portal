@@ -1,220 +1,451 @@
-import {
-  House,
-  Building2,
-  Briefcase,
-  Users,
-  ClipboardCheck,
-  Star,
-  Settings,
-  LogOut,
-  Headphones,
-} from 'lucide-react';
+// import {
+//   House,
+//   Building2,
+//   Briefcase,
+//   Users,
+//   ClipboardCheck,
+//   Star,
+//   Settings,
+//   LogOut,
+//   Headphones,
+// } from 'lucide-react';
 
-import logo from "../../assets/aisc-logo.png";
-import { useNavigate } from "react-router-dom";
+// import logo from "../../assets/aisc-logo.png";
+// import { useNavigate } from "react-router-dom";
 
-const menuItems = [
-  { icon: House, label: 'Dashboard' },
-  { icon: Building2, label: 'Company Profile' },
-  { icon: Briefcase, label: 'Manage OJT Opportunities' },
-  { icon: Users, label: 'Applications & Students' },
-  { icon: ClipboardCheck, label: 'Attendance' },
-  { icon: Star, label: 'Evaluation' },
-  { icon: ClipboardCheck, label: 'Certificate' },
-  { icon: Settings, label: 'Notifications and Settings' },
-];
+// const menuItems = [
+//   { icon: House, label: 'Dashboard' },
+//   { icon: Building2, label: 'Company Profile' },
+//   { icon: Briefcase, label: 'Manage OJT Opportunities' },
+//   { icon: Users, label: 'Applications & Students' },
+//   { icon: ClipboardCheck, label: 'Attendance' },
+//   { icon: Star, label: 'Evaluation' },
+//   { icon: ClipboardCheck, label: 'Certificate' },
+//   { icon: Settings, label: 'Notifications and Settings' },
+// ];
 
-export default function CompanySidebar() {
-  const navigate = useNavigate();
+// export default function CompanySidebar() {
+//   const navigate = useNavigate();
 
-  return (
-    <aside className="w-[250px] h-screen sticky top-0 bg-[#0B3091] flex flex-col px-4 py-5 text-white shrink-0">
+//   return (
+//     <aside className="w-[250px] h-screen sticky top-0 bg-[#0B3091] flex flex-col px-4 py-5 text-white shrink-0">
 
-      {/* LOGO */}
-      <div className="flex items-center gap-3 px-1 mb-8">
+//       {/* LOGO */}
+//       <div className="flex items-center gap-3 px-1 mb-8">
 
-        <img
-          src={logo}
-          alt="AISC OJT Portal"
-          className="w-11 h-11 object-contain"
-        />
+//         <img
+//           src={logo}
+//           alt="AISC OJT Portal"
+//           className="w-11 h-11 object-contain"
+//         />
 
-        <div>
-          <h1 className="text-[15px] font-bold leading-tight">
-            AISC OJT PORTAL
-          </h1>
+//         <div>
+//           <h1 className="text-[15px] font-bold leading-tight">
+//             AISC OJT PORTAL
+//           </h1>
 
-          <p className="text-[9px] uppercase tracking-wide opacity-70">
-            Design System
-          </p>
-        </div>
+//           <p className="text-[9px] uppercase tracking-wide opacity-70">
+//             Design System
+//           </p>
+//         </div>
 
-      </div>
+//       </div>
 
-      {/* COMPANY MODULE */}
-      <div>
+//       {/* COMPANY MODULE */}
+//       <div>
 
-        <p className="text-[10px] uppercase tracking-wider opacity-60 mb-4 px-1">
-          Company Module
-        </p>
+//         <p className="text-[10px] uppercase tracking-wider opacity-60 mb-4 px-1">
+//           Company Module
+//         </p>
 
-        {/* MAIN MENU */}
-        <nav className="flex flex-col gap-2">
+//         {/* MAIN MENU */}
+//         <nav className="flex flex-col gap-2">
 
-          {menuItems.map(({ icon: Icon, label }) => {
+//           {menuItems.map(({ icon: Icon, label }) => {
 
-            const currentPath = window.location.pathname;
+//             const currentPath = window.location.pathname;
 
-            const isActive =
-              (label === "Dashboard" && currentPath === "/company/CompanyDashboard") ||
-              (label === "Company Profile" && currentPath === "/company/company-profile") ||
-              (label === "Manage OJT Opportunities" && currentPath === "/company/manage-ojt-opportunities") ||
-              (label === "Certificate" && currentPath === "/company/certificate") ||
-              (label === "Evaluation" && currentPath === "/company/evaluation") ||
-              (label === "Applications & Students" && currentPath === "/company/applications-students") ||
-              (label === "Notifications and Settings" && currentPath === "/company/notifications-settings");
+//             const isActive =
+//               (label === "Dashboard" && currentPath === "/company/CompanyDashboard") ||
+//               (label === "Company Profile" && currentPath === "/company/company-profile") ||
+//               (label === "Manage OJT Opportunities" && currentPath === "/company/manage-ojt-opportunities") ||
+//               (label === "Certificate" && currentPath === "/company/certificate") ||
+//               (label === "Evaluation" && currentPath === "/company/evaluation") ||
+//               (label === "Applications & Students" && currentPath === "/company/applications-students") ||
+//               (label === "Notifications and Settings" && currentPath === "/company/notifications-settings");
 
-            return (
-              <div
-                key={label}
+//             return (
+//               <div
+//                 key={label}
 
-                onClick={() => {
+//                 onClick={() => {
 
-                  if (label === "Dashboard") {
-                    navigate("/company/CompanyDashboard");
-                  }
+//                   if (label === "Dashboard") {
+//                     navigate("/company/CompanyDashboard");
+//                   }
 
-                  if (label === "Company Profile") {
-                    navigate("/company/company-profile");
-                  }
+//                   if (label === "Company Profile") {
+//                     navigate("/company/company-profile");
+//                   }
 
-                  if (label === "Manage OJT Opportunities") {
-                    navigate("/company/manage-ojt-opportunities");
-                  }
+//                   if (label === "Manage OJT Opportunities") {
+//                     navigate("/company/manage-ojt-opportunities");
+//                   }
 
-                  if (label === "Certificate") {
-                    navigate("/company/certificate");
-                  }
+//                   if (label === "Certificate") {
+//                     navigate("/company/certificate");
+//                   }
 
-                  if (label === "Applications & Students") {
-                    navigate("/company/applications-students");
-                  }
+//                   if (label === "Applications & Students") {
+//                     navigate("/company/applications-students");
+//                   }
 
-                  if (label === "Evaluation") {
-                    navigate("/company/evaluation");
-                  }
+//                   if (label === "Evaluation") {
+//                     navigate("/company/evaluation");
+//                   }
 
-                  if (label === "Notifications and Settings") {
-                    navigate("/company/notifications-settings");
-                  }
+//                   if (label === "Notifications and Settings") {
+//                     navigate("/company/notifications-settings");
+//                   }
 
-                }}
+//                 }}
 
-                className={`
-                  flex
-                  items-center
-                  gap-4
-                  min-h-[48px]
-                  px-4
-                  rounded-xl
-                  cursor-pointer
-                  text-[13px]
-                  font-medium
-                  transition-all
-                  duration-200
+//                 className={`
+//                   flex
+//                   items-center
+//                   gap-4
+//                   min-h-[48px]
+//                   px-4
+//                   rounded-xl
+//                   cursor-pointer
+//                   text-[13px]
+//                   font-medium
+//                   transition-all
+//                   duration-200
 
-                  ${
-                    isActive
-                      ? "bg-[#1E5EFF] text-white"
-                      : "text-white hover:bg-[#1634AA]"
-                  }
-                `}
-              >
+//                   ${
+//                     isActive
+//                       ? "bg-[#1E5EFF] text-white"
+//                       : "text-white hover:bg-[#1634AA]"
+//                   }
+//                 `}
+//               >
 
-                <Icon
-                  size={19}
-                  strokeWidth={1.8}
-                />
+//                 <Icon
+//                   size={19}
+//                   strokeWidth={1.8}
+//                 />
 
-                <span>
-                  {label}
-                </span>
+//                 <span>
+//                   {label}
+//                 </span>
 
-              </div>
-            );
-          })}
+//               </div>
+//             );
+//           })}
 
-        </nav>
+//         </nav>
 
-        {/* LOGOUT */}
-        <div className="mt-4">
+//         {/* LOGOUT */}
+//         <div className="mt-4">
 
-          <div
-            className="
-              flex
-              items-center
-              gap-4
-              min-h-[48px]
-              px-4
-              rounded-xl
-              cursor-pointer
-              text-[13px]
-              font-medium
-              hover:bg-[#1634AA]
-              transition-all
-              duration-200
-            "
-          >
+//           <div
+//             className="
+//               flex
+//               items-center
+//               gap-4
+//               min-h-[48px]
+//               px-4
+//               rounded-xl
+//               cursor-pointer
+//               text-[13px]
+//               font-medium
+//               hover:bg-[#1634AA]
+//               transition-all
+//               duration-200
+//             "
+//           >
 
-            <LogOut
-              size={19}
-              strokeWidth={1.8}
-            />
+//             <LogOut
+//               size={19}
+//               strokeWidth={1.8}
+//             />
 
-            <span>
-              Logout
-            </span>
+//             <span>
+//               Logout
+//             </span>
 
-          </div>
+//           </div>
 
-        </div>
+//         </div>
 
-      </div>
+//       </div>
 
-      {/* NEED HELP */}
-      <div className="mt-auto mb-2 bg-[#1634AA] rounded-[18px] p-5">
+//       {/* NEED HELP */}
+//       <div className="mt-auto mb-2 bg-[#1634AA] rounded-[18px] p-5">
 
-        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
+//         <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3">
 
-          <Headphones
-            size={22}
-          />
+//           <Headphones
+//             size={22}
+//           />
 
-        </div>
+//         </div>
 
-        <p className="text-[13px] leading-snug mb-4">
-          Need Help? We're here to help you.
-        </p>
+//         <p className="text-[13px] leading-snug mb-4">
+//           Need Help? We're here to help you.
+//         </p>
 
-        <button
-          className="
-            w-full
-            bg-white
-            text-[#0B3091]
-            text-[13px]
-            font-medium
-            px-3
-            py-3
-            rounded-lg
-            hover:bg-slate-100
-            transition-colors
-          "
-        >
-          Contact Support →
-        </button>
+//         <button
+//           className="
+//             w-full
+//             bg-white
+//             text-[#0B3091]
+//             text-[13px]
+//             font-medium
+//             px-3
+//             py-3
+//             rounded-lg
+//             hover:bg-slate-100
+//             transition-colors
+//           "
+//         >
+//           Contact Support →
+//         </button>
 
-      </div>
+//       </div>
 
-    </aside>
-  );
+//     </aside>
+//   );
+// }
+
+import { 
+  House, 
+  Building2, 
+  Briefcase, 
+  Users, 
+  ClipboardCheck, 
+  Star, 
+  Settings, 
+  LogOut, 
+  Headphones, 
+} from 'lucide-react'; 
+ 
+import logo from "../../assets/aisc-logo.png"; 
+import { useNavigate } from "react-router-dom"; 
+ 
+const menuItems = [ 
+  { icon: House, label: 'Dashboard' }, 
+  { icon: Building2, label: 'Company Profile' }, 
+  { icon: Briefcase, label: 'Manage OJT Opportunities' }, 
+  { icon: Users, label: 'Applications & Students' }, 
+  { icon: ClipboardCheck, label: 'Attendance' }, 
+  { icon: Star, label: 'Evaluation' }, 
+  { icon: ClipboardCheck, label: 'Certificate' }, 
+  { icon: Settings, label: 'Notifications and Settings' }, 
+]; 
+ 
+export default function CompanySidebar() { 
+  const navigate = useNavigate(); 
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
+
+    navigate("/login");
+  }
+ 
+  return ( 
+    <aside className="w-[250px] h-screen sticky top-0 bg-[#0B3091] flex flex-col px-4 py-5 text-white shrink-0"> 
+ 
+      {/* LOGO */} 
+      <div className="flex items-center gap-3 px-1 mb-8"> 
+ 
+        <img 
+          src={logo} 
+          alt="AISC OJT Portal" 
+          className="w-11 h-11 object-contain" 
+        /> 
+ 
+        <div> 
+          <h1 className="text-[15px] font-bold leading-tight"> 
+            AISC OJT PORTAL 
+          </h1> 
+ 
+          <p className="text-[9px] uppercase tracking-wide opacity-70"> 
+            Design System 
+          </p> 
+        </div> 
+ 
+      </div> 
+ 
+      {/* COMPANY MODULE */} 
+      <div> 
+ 
+        <p className="text-[10px] uppercase tracking-wider opacity-60 mb-4 px-1"> 
+          Company Module 
+        </p> 
+ 
+        {/* MAIN MENU */} 
+        <nav className="flex flex-col gap-2"> 
+ 
+          {menuItems.map(({ icon: Icon, label }) => { 
+ 
+            const currentPath = window.location.pathname; 
+ 
+            const isActive = 
+              (label === "Dashboard" && currentPath === "/company/CompanyDashboard") || 
+              (label === "Company Profile" && currentPath === "/company/company-profile") || 
+              (label === "Manage OJT Opportunities" && currentPath === "/company/manage-ojt-opportunities") || 
+              (label === "Certificate" && currentPath === "/company/certificate") || 
+              (label === "Evaluation" && currentPath === "/company/evaluation") || 
+              (label === "Applications & Students" && currentPath === "/company/applications-students") || 
+              (label === "Notifications and Settings" && currentPath === "/company/notifications-settings"); 
+ 
+            return ( 
+              <div 
+                key={label} 
+ 
+                onClick={() => { 
+ 
+                  if (label === "Dashboard") { 
+                    navigate("/company/CompanyDashboard"); 
+                  } 
+ 
+                  if (label === "Company Profile") { 
+                    navigate("/company/company-profile"); 
+                  } 
+ 
+                  if (label === "Manage OJT Opportunities") { 
+                    navigate("/company/manage-ojt-opportunities"); 
+                  } 
+ 
+                  if (label === "Certificate") { 
+                    navigate("/company/certificate"); 
+                  } 
+ 
+                  if (label === "Applications & Students") { 
+                    navigate("/company/applications-students"); 
+                  } 
+ 
+                  if (label === "Evaluation") { 
+                    navigate("/company/evaluation"); 
+                  } 
+ 
+                  if (label === "Notifications and Settings") { 
+                    navigate("/company/notifications-settings"); 
+                  } 
+ 
+                }} 
+ 
+                className={` 
+                  flex 
+                  items-center 
+                  gap-4 
+                  min-h-[48px] 
+                  px-4 
+                  rounded-xl 
+                  cursor-pointer 
+                  text-[13px] 
+                  font-medium 
+                  transition-all 
+                  duration-200 
+ 
+                  ${ 
+                    isActive 
+                      ? "bg-[#1E5EFF] text-white" 
+                      : "text-white hover:bg-[#1634AA]" 
+                  } 
+                `} 
+              > 
+ 
+                <Icon 
+                  size={19} 
+                  strokeWidth={1.8} 
+                /> 
+ 
+                <span> 
+                  {label} 
+                </span> 
+ 
+              </div> 
+            ); 
+          })} 
+ 
+        </nav> 
+ 
+        {/* LOGOUT */} 
+        <div className="mt-4"> 
+ 
+          <div 
+            onClick={handleLogout}
+            className=" 
+              flex 
+              items-center 
+              gap-4 
+              min-h-[48px] 
+              px-4 
+              rounded-xl 
+              cursor-pointer 
+              text-[13px] 
+              font-medium 
+              hover:bg-[#1634AA] 
+              transition-all 
+              duration-200 
+            " 
+          > 
+ 
+            <LogOut 
+              size={19} 
+              strokeWidth={1.8} 
+            /> 
+ 
+            <span> 
+              Logout 
+            </span> 
+ 
+          </div> 
+ 
+        </div> 
+ 
+      </div> 
+ 
+      {/* NEED HELP */} 
+      <div className="mt-auto mb-2 bg-[#1634AA] rounded-[18px] p-5"> 
+ 
+        <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center mb-3"> 
+ 
+          <Headphones 
+            size={22} 
+          /> 
+ 
+        </div> 
+ 
+        <p className="text-[13px] leading-snug mb-4"> 
+          Need Help? We're here to help you. 
+        </p> 
+ 
+        <button 
+          className=" 
+            w-full 
+            bg-white 
+            text-[#0B3091] 
+            text-[13px] 
+            font-medium 
+            px-3 
+            py-3 
+            rounded-lg 
+            hover:bg-slate-100 
+            transition-colors 
+          " 
+        > 
+          Contact Support → 
+        </button> 
+ 
+      </div> 
+ 
+    </aside> 
+  ); 
 }

@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 import Header from "../../components/common/SHeader";
 import Sidebar from "../../components/common/SSidebar";
@@ -12,6 +12,8 @@ import Capgemini from "../../assets/logos/Capgemini.png";
 import AccentureLogo from "../../assets/logos/AccentureLogo.png";
 import TechM from "../../assets/logos/TechM.png";
 import HCLTechLogo from "../../assets/logos/HCLTechLogo.png";
+
+import { getMyApplications } from "../../services/StudentServices";
 
 import {
   ChevronRight,
@@ -103,104 +105,49 @@ export default function MyApplication() {
   // ====================================================
   // APPLICATION DATA
   // ====================================================
-  const [applications, setApplications] = useState([
-    {
-      id: 1,
-      company: "Tata Consultancy Services",
-      role: "Python Developer Intern",
-      location: "Pune, Maharashtra",
-      appliedDate: "17 May 2025",
-      interviewDate: "24 May 2025, 10:00 AM",
-      status: "Under Review",
-      duration: "3 Months",
-      stipend: "₹5,000 / Month",
-      skills: ["Python", "Django", "SQL", "REST API"],
-    },
-    {
-      id: 2,
-      company: "Infosys Limited",
-      role: "Web Development Intern",
-      location: "Bangalore, Karnataka",
-      appliedDate: "16 May 2025",
-      interviewDate: "23 May 2025, 02:00 PM",
-      status: "Applied",
-      duration: "4 Months",
-      stipend: "₹12,000 / Month",
-      skills: ["HTML", "CSS", "JavaScript"],
-    },
-    {
-      id: 3,
-      company: "Wipro Technologies",
-      role: "Data Analytics Intern",
-      location: "Hyderabad, Telangana",
-      appliedDate: "15 May 2025",
-      interviewDate: "22 May 2025, 11:00 AM",
-      status: "Selected",
-      duration: "3 Months",
-      stipend: "₹14,000 / Month",
-      skills: ["Python", "Excel", "Power BI"],
-    },
-    {
-      id: 4,
-      company: "Cognizant",
-      role: "Software Engineering Intern",
-      location: "Chennai, Tamil Nadu",
-      appliedDate: "14 May 2025",
-      interviewDate: "21 May 2025, 03:30 PM",
-      status: "Rejected",
-      duration: "6 Months",
-      stipend: "₹16,000 / Month",
-      skills: ["Java", "Spring Boot", "MySQL", "Git"],
-    },
-    {
-      id: 5,
-      company: "Capgemini",
-      role: "Java Developer Intern",
-      location: "Mumbai, Maharashtra",
-      appliedDate: "12 May 2025",
-      interviewDate: "-",
-      status: "Applied",
-      duration: "4 Months",
-      stipend: "₹10,000 / Month",
-      skills: ["Java", "SQL", "Spring"],
-    },
-    {
-      id: 6,
-      company: "Accenture",
-      role: "Cloud Computing Intern",
-      location: "Pune, Maharashtra",
-      appliedDate: "10 May 2025",
-      interviewDate: "-",
-      status: "Rejected",
-      duration: "3 Months",
-      stipend: "₹12,000 / Month",
-      skills: ["Cloud", "AWS", "Azure"],
-    },
-    {
-      id: 7,
-      company: "Tech Mahindra",
-      role: "QA Testing Intern",
-      location: "Noida, Uttar Pradesh",
-      appliedDate: "08 May 2025",
-      interviewDate: "-",
-      status: "Applied",
-      duration: "3 Months",
-      stipend: "₹8,000 / Month",
-      skills: ["Testing", "Selenium", "Java"],
-    },
-    {
-      id: 8,
-      company: "HCL Technologies",
-      role: "DevOps Intern",
-      location: "Noida, Uttar Pradesh",
-      appliedDate: "04 May 2025",
-      interviewDate: "18 May 2025, 01:00 PM",
-      status: "Under Review",
-      duration: "6 Months",
-      stipend: "₹15,000 / Month",
-      skills: ["Docker", "Git", "Linux", "CI/CD"],
-    },
-  ]);
+  const [applications, setApplications] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadApplications = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const data = await getMyApplications();
+
+        const formattedApplications = (data.applications || []).map((app) => ({
+          id: app.applicationId,
+          company: app.company || "",
+          role: app.jobRole || "",
+          location: app.location || "",
+          appliedDate: app.appliedOn
+            ? new Date(app.appliedOn).toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "short",
+                year: "numeric",
+              })
+            : "-",
+          interviewDate: "-",
+          status: app.status || "Applied",
+          duration: "-",
+          stipend: "-",
+          skills: [],
+        }));
+
+        setApplications(formattedApplications);
+      } catch (err) {
+        console.error("Failed to load applications:", err);
+        setError(err.message || "Failed to load applications");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadApplications();
+  }, []);
   // ====================================================
   // SELECTED APPLICATION FOR MODAL
   // ====================================================
@@ -371,73 +318,57 @@ export default function MyApplication() {
   // TIMELINE
   // ====================================================
 
-  const timeline = [
-    {
-      title: "Under Review",
-      company: "Tata Consultancy Services",
-      role: "Python Developer Intern",
-      date: "17 May 2025, 09:30 AM",
-      icon: Clock,
-      color: "text-orange-500",
-      bg: "bg-orange-50",
-    },
-
-    {
-      title: "Selected for Interview",
-      company: "Wipro Technologies",
-      role: "Data Analytics Intern",
-      date: "15 May 2025, 11:15 AM",
-      icon: CheckCircle2,
-      color: "text-green-600",
-      bg: "bg-green-50",
-    },
-
-    {
-      title: "Application Rejected",
-      company: "Cognizant",
-      role: "Software Engineering Intern",
-      date: "14 May 2025, 02:40 PM",
-      icon: XCircle,
-      color: "text-red-500",
-      bg: "bg-red-50",
-    },
-
-    {
-      title: "Application Submitted",
-      company: "Infosys Limited",
-      role: "Web Development Intern",
-      date: "16 May 2025, 04:20 PM",
-      icon: Send,
-      color: "text-blue-600",
-      bg: "bg-blue-50",
-    },
-  ];
+  const timeline = applications.slice(0, 4).map((app) => ({
+    title:
+      app.status === "Selected"
+        ? "Application Selected"
+        : app.status === "Rejected"
+        ? "Application Rejected"
+        : app.status === "Under Review"
+        ? "Under Review"
+        : "Application Submitted",
+    company: app.company,
+    role: app.role,
+    date: app.appliedDate,
+    icon:
+      app.status === "Selected"
+        ? CheckCircle2
+        : app.status === "Rejected"
+        ? XCircle
+        : app.status === "Under Review"
+        ? Clock
+        : Send,
+    color:
+      app.status === "Selected"
+        ? "text-green-600"
+        : app.status === "Rejected"
+        ? "text-red-500"
+        : app.status === "Under Review"
+        ? "text-orange-500"
+        : "text-blue-600",
+    bg:
+      app.status === "Selected"
+        ? "bg-green-50"
+        : app.status === "Rejected"
+        ? "bg-red-50"
+        : app.status === "Under Review"
+        ? "bg-orange-50"
+        : "bg-blue-50",
+  }));
 
   // ====================================================
   // TOP APPLIED COMPANIES
   // ====================================================
 
-  const topAppliedCompanies = [
-    {
-      name: "Tata Consultancy Services",
-      count: 5,
-    },
+  const companyCounts = applications.reduce((acc, app) => {
+    acc[app.company] = (acc[app.company] || 0) + 1;
+    return acc;
+  }, {});
 
-    {
-      name: "Infosys Limited",
-      count: 4,
-    },
-
-    {
-      name: "Wipro Technologies",
-      count: 2,
-    },
-
-    {
-      name: "Others",
-      count: 3,
-    },
-  ];
+  const topAppliedCompanies = Object.entries(companyCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4)
+    .map(([name, count]) => ({ name, count }));
 
   const maxCount = Math.max(
     ...topAppliedCompanies.map((c) => c.count)

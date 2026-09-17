@@ -9,18 +9,26 @@ import CoSidebar from "../components/common/CoSidebar";
 import CoTopNavbar from "../components/common/CoTopNavbar";
 import Footer from "../components/common/Footer";
 
-export default function CoordinatorLayout() {
+import {
+  CoordinatorThemeProvider,
+  useCoordinatorTheme,
+} from "../context/CoordinatorThemeContext";
+
+function CoordinatorWorkspace() {
   const [sidebarCollapsed, setSidebarCollapsed] =
     useState(false);
 
   const [mobileSidebarOpen, setMobileSidebarOpen] =
     useState(false);
 
-  const [darkMode, setDarkMode] =
-    useState(false);
-
   const location = useLocation();
   const navigate = useNavigate();
+
+  const {
+    darkMode,
+    toggleTheme,
+    colors,
+  } = useCoordinatorTheme();
 
   const sidebarWidth = sidebarCollapsed
     ? 76
@@ -32,156 +40,144 @@ export default function CoordinatorLayout() {
   };
 
   return (
-    <div className={darkMode ? "dark" : ""}>
+    <div
+      style={{
+        width: "100%",
+        minHeight: "100vh",
+        overflowX: "hidden",
+        backgroundColor: colors.workspace,
+        color: colors.text,
+        fontFamily:
+          '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        WebkitFontSmoothing: "antialiased",
+        MozOsxFontSmoothing: "grayscale",
+        letterSpacing: "-0.01em",
+        transition:
+          "background-color 200ms ease, color 200ms ease",
+      }}
+    >
+      {/* =====================================================
+          DESKTOP SIDEBAR
+      ====================================================== */}
+      <div className="hidden lg:block">
+        <CoSidebar
+          collapsed={sidebarCollapsed}
+          activePath={location.pathname}
+          onCollapse={() =>
+            setSidebarCollapsed(
+              (value) => !value
+            )
+          }
+          onNavigate={handleNavigation}
+        />
+      </div>
+
+      {/* =====================================================
+          MOBILE OVERLAY
+      ====================================================== */}
+      {mobileSidebarOpen && (
+        <div
+          className="fixed inset-0 z-40 lg:hidden"
+          style={{
+            backgroundColor:
+              "rgba(15, 23, 42, 0.45)",
+          }}
+          onClick={() =>
+            setMobileSidebarOpen(false)
+          }
+        />
+      )}
+
+      {/* =====================================================
+          MOBILE SIDEBAR
+      ====================================================== */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 lg:hidden ${
+          mobileSidebarOpen
+            ? "translate-x-0"
+            : "-translate-x-full"
+        }`}
+      >
+        <CoSidebar
+          collapsed={false}
+          activePath={location.pathname}
+          onCollapse={() =>
+            setMobileSidebarOpen(false)
+          }
+          onNavigate={handleNavigation}
+        />
+      </div>
+
+      {/* =====================================================
+          MAIN APPLICATION AREA
+      ====================================================== */}
       <div
         style={{
-          width: "100%",
+          width: `calc(100% - ${sidebarWidth}px)`,
           minHeight: "100vh",
+          marginLeft: `${sidebarWidth}px`,
+          transition:
+            "margin-left 250ms ease, width 250ms ease",
+          boxSizing: "border-box",
           overflowX: "hidden",
-          backgroundColor: "#f8fafc",
-          color: "#0f172a",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
+        {/* =================================================
+            TOP NAVBAR
+        ================================================== */}
+        <CoTopNavbar
+          onMenuClick={() =>
+            setMobileSidebarOpen(true)
+          }
+          darkMode={darkMode}
+          onThemeToggle={toggleTheme}
+        />
 
-        {/* =====================================================
-            DESKTOP SIDEBAR
-        ====================================================== */}
-
-        <div className="hidden lg:block">
-          <CoSidebar
-            collapsed={sidebarCollapsed}
-            activePath={location.pathname}
-            onCollapse={() =>
-              setSidebarCollapsed(
-                (value) => !value
-              )
-            }
-            onNavigate={handleNavigation}
-          />
-        </div>
-
-
-        {/* =====================================================
-            MOBILE OVERLAY
-        ====================================================== */}
-
-        {mobileSidebarOpen && (
-          <div
-            className="fixed inset-0 z-40 bg-slate-900/40 lg:hidden"
-            onClick={() =>
-              setMobileSidebarOpen(false)
-            }
-          />
-        )}
-
-
-        {/* =====================================================
-            MOBILE SIDEBAR
-        ====================================================== */}
-
-        <div
-          className={`fixed inset-y-0 left-0 z-50 transition-transform duration-300 lg:hidden ${
-            mobileSidebarOpen
-              ? "translate-x-0"
-              : "-translate-x-full"
-          }`}
-        >
-          <CoSidebar
-            collapsed={false}
-            activePath={location.pathname}
-            onCollapse={() =>
-              setMobileSidebarOpen(false)
-            }
-            onNavigate={handleNavigation}
-          />
-        </div>
-
-
-        {/* =====================================================
-            MAIN APPLICATION AREA
-        ====================================================== */}
-
-        <div
+        {/* =================================================
+            PAGE CONTENT
+        ================================================== */}
+        <main
           style={{
-            width: `calc(100% - ${sidebarWidth}px)`,
-            minHeight: "100vh",
-            marginLeft: `${sidebarWidth}px`,
-            transition:
-              "margin-left 250ms ease, width 250ms ease",
+            width: "100%",
+            maxWidth: "100%",
+            minWidth: 0,
+            padding: "24px",
             boxSizing: "border-box",
             overflowX: "hidden",
-
-            display: "flex",
-            flexDirection: "column",
+            flex: 1,
+            backgroundColor: colors.workspace,
+            transition:
+              "background-color 200ms ease",
           }}
         >
-
-
-          {/* =================================================
-              TOP NAVBAR
-          ================================================== */}
-
-          <CoTopNavbar
-            onMenuClick={() =>
-              setMobileSidebarOpen(true)
-            }
-            darkMode={darkMode}
-            onThemeToggle={() =>
-              setDarkMode(
-                (value) => !value
-              )
-            }
-          />
-
-
-          {/* =================================================
-              PAGE CONTENT
-          ================================================== */}
-
-          <main
+          <div
             style={{
               width: "100%",
-              maxWidth: "100%",
+              maxWidth: "1600px",
               minWidth: 0,
-
-              padding: "24px",
-
+              margin: "0 auto",
               boxSizing: "border-box",
-              overflowX: "hidden",
-
-              flex: 1,
             }}
           >
-            <div
-              style={{
-                width: "100%",
-                maxWidth: "1600px",
-                minWidth: 0,
+            <Outlet />
+          </div>
+        </main>
 
-                margin: "0 auto",
-
-                boxSizing: "border-box",
-              }}
-            >
-
-              {/* React Router renders coordinator pages here */}
-              <Outlet />
-
-            </div>
-          </main>
-
-
-          {/* =================================================
-              COORDINATOR FOOTER
-              
-              Footer is INSIDE the main coordinator area.
-              Therefore it will not go behind the sidebar.
-          ================================================== */}
-
-          <Footer />
-
-        </div>
+        {/* =================================================
+            FOOTER
+        ================================================== */}
+        <Footer />
       </div>
     </div>
+  );
+}
+
+export default function CoordinatorLayout() {
+  return (
+    <CoordinatorThemeProvider>
+      <CoordinatorWorkspace />
+    </CoordinatorThemeProvider>
   );
 }

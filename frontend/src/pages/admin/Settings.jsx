@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   FaCog,
@@ -28,14 +28,20 @@ import {
 } from "react-icons/fa";
 
 function Settings() {
+  // =====================================================
+  // API
+  // =====================================================
 
-  // =========================
-  // FORM DATA
-  // =========================
+  const API_URL = "http://localhost:5000";
 
-  const [formData, setFormData] = useState({
+  // =====================================================
+  // DEFAULT SETTINGS
+  // =====================================================
+
+  const defaultSettings = {
     portalName: "AISC OJT Portal",
-    tagline: "Connecting Students, Companies & Opportunities",
+    tagline:
+      "Connecting Students, Companies & Opportunities",
     organization:
       "Abeda Inamdar Senior College Of Arts, Science & Commerce",
     address:
@@ -46,69 +52,298 @@ function Settings() {
     dateFormat: "DD MMM YYYY (17 May 2025)",
     timeFormat: "12 Hour (02:30 PM)",
     maxFileSize: "10 MB",
-    allowedFiles: "jpg, png, pdf, doc, docx, xls, xlsx",
-  });
+    allowedFiles:
+      "jpg, png, pdf, doc, docx, xls, xlsx",
+    autoUpdate: true,
+    daylightSaving: false,
+  };
 
-  // =========================
-  // TOGGLE STATES
-  // =========================
+  // =====================================================
+  // FORM DATA
+  // =====================================================
 
-  const [autoUpdate, setAutoUpdate] = useState(true);
-  const [daylightSaving, setDaylightSaving] = useState(false);
+  const [formData, setFormData] =
+    useState(defaultSettings);
 
-  // =========================
-  // ACTIVE TAB
-  // =========================
+  // =====================================================
+  // STATES
+  // =====================================================
 
-  const [activeTab, setActiveTab] = useState("General Settings");
+  const [activeTab, setActiveTab] =
+    useState("General Settings");
 
-  // =========================
+  const [loading, setLoading] =
+    useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [resetting, setResetting] =
+    useState(false);
+
+  const [message, setMessage] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
+
+  // =====================================================
+  // FETCH SETTINGS
+  // =====================================================
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  const fetchSettings = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      setMessage("");
+
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        setError(
+          "Admin token not found. Please login again."
+        );
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/settings`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to fetch settings"
+        );
+      }
+
+      if (data.settings) {
+        setFormData({
+          ...defaultSettings,
+          ...data.settings,
+        });
+      }
+    } catch (err) {
+      console.error(
+        "Fetch Settings Error:",
+        err
+      );
+
+      setError(
+        err.message ||
+          "Failed to load settings"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // =====================================================
   // HANDLE INPUT
-  // =========================
+  // =====================================================
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
   };
 
-  // =========================
-  // RESET
-  // =========================
+  // =====================================================
+  // RESET TO DEFAULT
+  // =====================================================
 
-  const handleReset = () => {
-    setFormData({
-      portalName: "AISC OJT Portal",
-      tagline: "Connecting Students, Companies & Opportunities",
-      organization:
-        "Abeda Inamdar Senior College Of Arts, Science & Commerce",
-      address:
-        "2390-B, K.B. Hidayatullah Road, Azam Campus, Pune - 411001, Maharashtra, India",
-      email: "ojtportal@aisc.edu.in",
-      phone: "+91 20 2646 6121",
-      timezone: "(GMT+05:30) Asia / Kolkata",
-      dateFormat: "DD MMM YYYY (17 May 2025)",
-      timeFormat: "12 Hour (02:30 PM)",
-      maxFileSize: "10 MB",
-      allowedFiles: "jpg, png, pdf, doc, docx, xls, xlsx",
-    });
+  const handleReset = async () => {
+    const confirmed = window.confirm(
+      "Are you sure you want to reset all settings to default?"
+    );
 
-    setAutoUpdate(true);
-    setDaylightSaving(false);
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setResetting(true);
+      setError("");
+      setMessage("");
+
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        setError(
+          "Admin token not found. Please login again."
+        );
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/settings/reset`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to reset settings"
+        );
+      }
+
+      if (data.settings) {
+        setFormData({
+          ...defaultSettings,
+          ...data.settings,
+        });
+      }
+
+      setMessage(
+        "Settings reset to default successfully!"
+      );
+    } catch (err) {
+      console.error(
+        "Reset Settings Error:",
+        err
+      );
+
+      setError(
+        err.message ||
+          "Failed to reset settings"
+      );
+    } finally {
+      setResetting(false);
+    }
   };
 
-  // =========================
-  // SAVE
-  // =========================
+  // =====================================================
+  // SAVE SETTINGS
+  // =====================================================
 
-  const handleSave = () => {
-    alert("Settings saved successfully!");
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      setError("");
+      setMessage("");
+
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        setError(
+          "Admin token not found. Please login again."
+        );
+        return;
+      }
+
+      const response = await fetch(
+        `${API_URL}/api/settings`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            portalName:
+              formData.portalName,
+
+            tagline:
+              formData.tagline,
+
+            organization:
+              formData.organization,
+
+            address:
+              formData.address,
+
+            email:
+              formData.email,
+
+            phone:
+              formData.phone,
+
+            timezone:
+              formData.timezone,
+
+            dateFormat:
+              formData.dateFormat,
+
+            timeFormat:
+              formData.timeFormat,
+
+            maxFileSize:
+              formData.maxFileSize,
+
+            allowedFiles:
+              formData.allowedFiles,
+
+            autoUpdate:
+              formData.autoUpdate,
+
+            daylightSaving:
+              formData.daylightSaving,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Failed to save settings"
+        );
+      }
+
+      if (data.settings) {
+        setFormData({
+          ...defaultSettings,
+          ...data.settings,
+        });
+      }
+
+      setMessage(
+        "Settings saved successfully!"
+      );
+    } catch (err) {
+      console.error(
+        "Save Settings Error:",
+        err
+      );
+
+      setError(
+        err.message ||
+          "Failed to save settings"
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
-  // =========================
+  // =====================================================
   // TABS
-  // =========================
+  // =====================================================
 
   const tabs = [
     {
@@ -141,29 +376,93 @@ function Settings() {
     },
   ];
 
+  // =====================================================
+  // CURRENT DATE
+  // =====================================================
+
+  const currentDate =
+    new Date().toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }
+    );
+
+  // =====================================================
+  // CURRENT TIME
+  // =====================================================
+
+  const currentTime =
+    new Date().toLocaleTimeString(
+      "en-IN",
+      {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }
+    );
+
+  // =====================================================
+  // LOADING SCREEN
+  // =====================================================
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+
+        <div className="text-center">
+
+          <div className="w-10 h-10 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
+
+          <p className="text-gray-600">
+            Loading system settings...
+          </p>
+
+        </div>
+
+      </div>
+    );
+  }
+
+  // =====================================================
+  // MAIN UI
+  // =====================================================
+
   return (
     <div className="min-h-screen bg-gray-50">
 
-      {/* ================================================= */}
-      {/* MAIN CONTENT */}
-      {/* ================================================= */}
-
       <main className="p-6 lg:p-8">
 
-        {/* ================= HEADER ================= */}
+        {/* ================================================= */}
+        {/* HEADER */}
+        {/* ================================================= */}
 
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-5">
 
           <div>
+
             <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
               System Settings
             </h1>
 
             <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
-              <span>Dashboard</span>
-              <span>›</span>
-              <span>System Settings</span>
+
+              <span>
+                Dashboard
+              </span>
+
+              <span>
+                ›
+              </span>
+
+              <span>
+                System Settings
+              </span>
+
             </div>
+
           </div>
 
           {/* BUTTONS */}
@@ -172,23 +471,59 @@ function Settings() {
 
             <button
               onClick={handleReset}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
+              disabled={resetting || saving}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition disabled:opacity-50"
             >
+
               <FaUndo />
-              Reset to Default
+
+              {resetting
+                ? "Resetting..."
+                : "Reset to Default"}
+
             </button>
 
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition shadow-sm"
+              disabled={saving || resetting}
+              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition shadow-sm disabled:opacity-50"
             >
+
               <FaSave />
-              Save Changes
+
+              {saving
+                ? "Saving..."
+                : "Save Changes"}
+
             </button>
 
           </div>
+
         </div>
 
+        {/* ================================================= */}
+        {/* SUCCESS MESSAGE */}
+        {/* ================================================= */}
+
+        {message && (
+
+          <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg mb-5 text-sm">
+            {message}
+          </div>
+
+        )}
+
+        {/* ================================================= */}
+        {/* ERROR MESSAGE */}
+        {/* ================================================= */}
+
+        {error && (
+
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-5 text-sm">
+            {error}
+          </div>
+
+        )}
 
         {/* ================================================= */}
         {/* TABS */}
@@ -202,38 +537,45 @@ function Settings() {
 
               <button
                 key={tab.name}
-                onClick={() => setActiveTab(tab.name)}
+                onClick={() =>
+                  setActiveTab(tab.name)
+                }
                 className={`flex items-center gap-2 px-5 py-4 text-sm font-medium border-b-2 transition ${
                   activeTab === tab.name
                     ? "text-blue-600 border-blue-600"
                     : "text-gray-600 border-transparent hover:text-blue-600"
                 }`}
               >
+
                 {tab.icon}
+
                 {tab.name}
+
               </button>
 
             ))}
 
           </div>
+
         </div>
 
-
         {/* ================================================= */}
-        {/* GENERAL SETTINGS TAB */}
+        {/* GENERAL SETTINGS */}
         {/* ================================================= */}
 
-        {activeTab === "General Settings" && (
+        {activeTab ===
+          "General Settings" && (
 
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
             {/* ================================================= */}
-            {/* LEFT - GENERAL SETTINGS */}
+            {/* LEFT */}
             {/* ================================================= */}
 
             <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
 
               <div className="mb-5">
+
                 <h2 className="text-lg font-bold text-slate-900">
                   General Settings
                 </h2>
@@ -241,8 +583,8 @@ function Settings() {
                 <p className="text-sm text-gray-500 mt-1">
                   Manage basic information about the OJT Portal.
                 </p>
-              </div>
 
+              </div>
 
               {/* PORTAL NAME */}
 
@@ -254,7 +596,6 @@ function Settings() {
                 onChange={handleChange}
               />
 
-
               {/* TAGLINE */}
 
               <SettingInput
@@ -264,7 +605,6 @@ function Settings() {
                 value={formData.tagline}
                 onChange={handleChange}
               />
-
 
               {/* ORGANIZATION */}
 
@@ -276,12 +616,13 @@ function Settings() {
                 onChange={handleChange}
               />
 
-
               {/* ADDRESS */}
 
               <div className="flex gap-3 mb-4">
 
-                <IconBox icon={<FaMapMarkerAlt />} />
+                <IconBox
+                  icon={<FaMapMarkerAlt />}
+                />
 
                 <div className="flex-1">
 
@@ -301,7 +642,6 @@ function Settings() {
 
               </div>
 
-
               {/* EMAIL */}
 
               <SettingInput
@@ -312,7 +652,6 @@ function Settings() {
                 onChange={handleChange}
               />
 
-
               {/* PHONE */}
 
               <SettingInput
@@ -322,7 +661,6 @@ function Settings() {
                 value={formData.phone}
                 onChange={handleChange}
               />
-
 
               {/* TIMEZONE */}
 
@@ -340,7 +678,6 @@ function Settings() {
                 ]}
               />
 
-
               {/* DATE FORMAT */}
 
               <SettingSelect
@@ -356,7 +693,6 @@ function Settings() {
                   "YYYY-MM-DD",
                 ]}
               />
-
 
               {/* TIME FORMAT */}
 
@@ -374,13 +710,11 @@ function Settings() {
 
             </div>
 
-
             {/* ================================================= */}
-            {/* RIGHT SIDE */}
+            {/* RIGHT */}
             {/* ================================================= */}
 
             <div className="space-y-5">
-
 
               {/* ================================================= */}
               {/* DATE & TIME */}
@@ -396,10 +730,11 @@ function Settings() {
                   Configure the system date and time preferences.
                 </p>
 
-
                 {/* DATE */}
 
-                <SettingRow icon={<FaCalendarAlt />}>
+                <SettingRow
+                  icon={<FaCalendarAlt />}
+                >
 
                   <div className="flex-1">
 
@@ -411,9 +746,9 @@ function Settings() {
 
                       <input
                         type="text"
-                        value="May 17, 2025"
+                        value={currentDate}
                         readOnly
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm bg-gray-50"
                       />
 
                       <FaCalendarAlt className="absolute right-3 top-3 text-gray-500" />
@@ -424,10 +759,11 @@ function Settings() {
 
                 </SettingRow>
 
-
                 {/* TIME */}
 
-                <SettingRow icon={<FaClock />}>
+                <SettingRow
+                  icon={<FaClock />}
+                >
 
                   <div className="flex-1">
 
@@ -439,9 +775,9 @@ function Settings() {
 
                       <input
                         type="text"
-                        value="02:30:45 PM"
+                        value={currentTime}
                         readOnly
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm"
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2.5 pr-10 text-sm bg-gray-50"
                       />
 
                       <FaClock className="absolute right-3 top-3 text-gray-500" />
@@ -452,14 +788,16 @@ function Settings() {
 
                 </SettingRow>
 
-
                 {/* AUTO UPDATE */}
 
-                <SettingRow icon={<FaSyncAlt />}>
+                <SettingRow
+                  icon={<FaSyncAlt />}
+                >
 
                   <div className="flex items-center justify-between w-full">
 
                     <div>
+
                       <p className="text-sm font-medium text-slate-800">
                         Auto Update Time
                       </p>
@@ -467,25 +805,38 @@ function Settings() {
                       <p className="text-xs text-gray-500 mt-1">
                         Automatically sync time with server
                       </p>
+
                     </div>
 
                     <Toggle
-                      value={autoUpdate}
-                      onChange={() => setAutoUpdate(!autoUpdate)}
+                      value={
+                        formData.autoUpdate
+                      }
+                      onChange={() =>
+                        setFormData(
+                          (previous) => ({
+                            ...previous,
+                            autoUpdate:
+                              !previous.autoUpdate,
+                          })
+                        )
+                      }
                     />
 
                   </div>
 
                 </SettingRow>
 
-
                 {/* DAYLIGHT */}
 
-                <SettingRow icon={<FaSun />}>
+                <SettingRow
+                  icon={<FaSun />}
+                >
 
                   <div className="flex items-center justify-between w-full">
 
                     <div>
+
                       <p className="text-sm font-medium text-slate-800">
                         Daylight Saving Time
                       </p>
@@ -493,12 +844,21 @@ function Settings() {
                       <p className="text-xs text-gray-500 mt-1">
                         Enable daylight saving time
                       </p>
+
                     </div>
 
                     <Toggle
-                      value={daylightSaving}
+                      value={
+                        formData.daylightSaving
+                      }
                       onChange={() =>
-                        setDaylightSaving(!daylightSaving)
+                        setFormData(
+                          (previous) => ({
+                            ...previous,
+                            daylightSaving:
+                              !previous.daylightSaving,
+                          })
+                        )
                       }
                     />
 
@@ -507,7 +867,6 @@ function Settings() {
                 </SettingRow>
 
               </div>
-
 
               {/* ================================================= */}
               {/* FILE UPLOAD */}
@@ -523,14 +882,15 @@ function Settings() {
                   Configure file upload preferences and restrictions.
                 </p>
 
-
                 {/* MAX SIZE */}
 
                 <SettingSelect
                   icon={<FaUpload />}
                   label="Maximum File Size"
                   name="maxFileSize"
-                  value={formData.maxFileSize}
+                  value={
+                    formData.maxFileSize
+                  }
                   onChange={handleChange}
                   options={[
                     "5 MB",
@@ -540,23 +900,25 @@ function Settings() {
                   ]}
                 />
 
-
                 {/* ALLOWED TYPES */}
 
                 <SettingInput
                   icon={<FaFileAlt />}
                   label="Allowed File Types"
                   name="allowedFiles"
-                  value={formData.allowedFiles}
+                  value={
+                    formData.allowedFiles
+                  }
                   onChange={handleChange}
                 />
-
 
                 {/* STORAGE */}
 
                 <div className="flex gap-3 mt-5">
 
-                  <IconBox icon={<FaDatabase />} />
+                  <IconBox
+                    icon={<FaDatabase />}
+                  />
 
                   <div className="flex-1">
 
@@ -570,7 +932,9 @@ function Settings() {
 
                         <div
                           className="h-full bg-blue-600 rounded-full"
-                          style={{ width: "24.5%" }}
+                          style={{
+                            width: "24.5%",
+                          }}
                         ></div>
 
                       </div>
@@ -591,7 +955,6 @@ function Settings() {
 
               </div>
 
-
               {/* ================================================= */}
               {/* SYSTEM INFORMATION */}
               {/* ================================================= */}
@@ -606,20 +969,13 @@ function Settings() {
                   Important system information and status.
                 </p>
 
-
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-
-
-                  {/* VERSION */}
 
                   <InfoCard
                     icon={<FaServer />}
                     title="System Version"
                     value="v1.0.0"
                   />
-
-
-                  {/* DATABASE */}
 
                   <InfoCard
                     icon={<FaDatabase />}
@@ -628,9 +984,6 @@ function Settings() {
                     success
                   />
 
-
-                  {/* SERVER */}
-
                   <InfoCard
                     icon={<FaServer />}
                     title="Server Status"
@@ -638,14 +991,11 @@ function Settings() {
                     success
                   />
 
-
-                  {/* BACKUP */}
-
                   <InfoCard
                     icon={<FaShieldVirus />}
                     title="Last Backup"
-                    value="May 16, 2025"
-                    smallValue="11:30 PM"
+                    value="Not Available"
+                    smallValue="Backend not connected"
                   />
 
                 </div>
@@ -658,17 +1008,25 @@ function Settings() {
 
         )}
 
-
         {/* ================================================= */}
         {/* OTHER TABS */}
         {/* ================================================= */}
 
-        {activeTab !== "General Settings" && (
+        {activeTab !==
+          "General Settings" && (
 
           <div className="bg-white border border-gray-200 rounded-xl p-10 text-center shadow-sm">
 
-            <div className="text-5xl text-blue-500 mb-4">
-              {tabs.find((tab) => tab.name === activeTab)?.icon}
+            <div className="text-5xl text-blue-500 mb-4 flex justify-center">
+
+              {
+                tabs.find(
+                  (tab) =>
+                    tab.name ===
+                    activeTab
+                )?.icon
+              }
+
             </div>
 
             <h2 className="text-xl font-bold text-slate-900">
@@ -682,7 +1040,6 @@ function Settings() {
           </div>
 
         )}
-
 
         {/* ================================================= */}
         {/* FOOTER */}
@@ -774,11 +1131,16 @@ function SettingSelect({
           className="w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm bg-white outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
 
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
+          {options.map(
+            (option) => (
+              <option
+                key={option}
+                value={option}
+              >
+                {option}
+              </option>
+            )
+          )}
 
         </select>
 
@@ -806,7 +1168,10 @@ function IconBox({ icon }) {
 /* SETTING ROW */
 /* ================================================= */
 
-function SettingRow({ icon, children }) {
+function SettingRow({
+  icon,
+  children,
+}) {
   return (
     <div className="flex gap-3 mb-4">
 
@@ -825,19 +1190,26 @@ function SettingRow({ icon, children }) {
 /* TOGGLE */
 /* ================================================= */
 
-function Toggle({ value, onChange }) {
+function Toggle({
+  value,
+  onChange,
+}) {
   return (
     <button
       type="button"
       onClick={onChange}
       className={`relative w-11 h-6 rounded-full transition ${
-        value ? "bg-blue-600" : "bg-gray-300"
+        value
+          ? "bg-blue-600"
+          : "bg-gray-300"
       }`}
     >
 
       <span
         className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition ${
-          value ? "left-6" : "left-1"
+          value
+            ? "left-6"
+            : "left-1"
         }`}
       ></span>
 
@@ -870,7 +1242,9 @@ function InfoCard({
 
       <p
         className={`text-sm font-semibold mt-1 ${
-          success ? "text-green-600" : "text-slate-800"
+          success
+            ? "text-green-600"
+            : "text-slate-800"
         }`}
       >
         {value}

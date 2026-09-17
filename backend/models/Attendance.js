@@ -2,26 +2,29 @@ const mongoose = require("mongoose");
 
 const attendanceSchema = new mongoose.Schema(
   {
-    assignedOjtId: {
+    studentId: {
       type: String,
-      ref: "AssignOjt",
+      required: true,
     },
 
     date: {
       type: Date,
+      required: true,
     },
 
     status: {
-      type: String, // e.g. "Present", "Absent"
-    },
-
-    hoursLogged: {
-      type: Number,
+      type: String,
+      enum: ["Present", "Absent", "Leave"],
+      required: true,
     },
   },
   {
-    collection: "attendence",
+    timestamps: true,
   }
 );
 
-module.exports = mongoose.model("Attendance", attendanceSchema);
+module.exports = mongoose.model(
+  "Attendance",
+  attendanceSchema,
+  "attendance"
+);
