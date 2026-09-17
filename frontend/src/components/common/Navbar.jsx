@@ -251,6 +251,12 @@ function Navbar() {
       icon: BriefcaseBusiness,
       color: "text-purple-600",
     },
+    {
+      name: "Company",
+      path: "/login?role=company",
+      icon: BriefcaseBusiness,
+      color: "text-purple-600",
+    }
   ];
 
   return (

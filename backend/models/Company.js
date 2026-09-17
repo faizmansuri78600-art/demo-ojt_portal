@@ -29,11 +29,7 @@ const companySchema = new mongoose.Schema(
       type: String,
     },
 
-    industry: {
-      type: String,
-    },
-
-    headOffice: {
+    companyPhone: {
       type: String,
     },
     logoUrl: {
