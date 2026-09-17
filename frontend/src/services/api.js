@@ -39,19 +39,9 @@ export const api = {
     });
 
     if (!response.ok) {
-      throw new Error("Something went wrong");
-    }
+      const error = await response.json().catch(() => ({}));
 
-    return response.json();
-  },
-
-  async delete(endpoint) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: "DELETE",
-    });
-
-    if (!response.ok) {
-      throw new Error("Something went wrong");
+      throw new Error(error.message || "Something went wrong");
     }
 
     return response.json();

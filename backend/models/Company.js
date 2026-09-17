@@ -18,28 +18,24 @@ const companySchema = new mongoose.Schema(
       trim: true,
     },
 
+    yearOfEstablishment: {
+      type: String,
+    },
+
+    registrationNumber: {
+      type: String,
+    },
+
+    companySize: {
+      type: String,
+    },
+
     industry: {
       type: String,
-      default: "Other",
-      trim: true,
     },
 
-    contactPerson: {
+    headOffice: {
       type: String,
-      default: "",
-      trim: true,
-    },
-
-    email: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-
-    phone: {
-      type: String,
-      default: "",
-      trim: true,
     },
 
     street: {
@@ -66,16 +62,44 @@ const companySchema = new mongoose.Schema(
       trim: true,
     },
 
+    country: {
+      type: String,
+    },
+
     website: {
       type: String,
       default: "",
       trim: true,
     },
 
+    contactPerson: {
+      type: String,
+    },
+
+    alternateEmail: {
+      type: String,
+    },
+
+    email: {
+      type: String,
+    },
+
+    mobileNumber: {
+      type: String,
+    },
+
+    phoneNumber: {
+      type: String,
+    },
+
     description: {
       type: String,
       default: "",
       trim: true,
+    },
+
+    logoUrl: {
+      type: String,
     },
 
     isVerified: {
