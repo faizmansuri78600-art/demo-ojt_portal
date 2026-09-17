@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-const protect = (req, res, next) => {
+const protect = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -21,11 +22,32 @@ const protect = (req, res, next) => {
       process.env.JWT_SECRET
     );
 
-    // Store user information
-    req.user = decoded;
+    // Check user ID from token
+    if (!decoded.userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token",
+      });
+    }
+
+    // Get actual user document from MongoDB
+    const user = await User.findById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Store actual Mongoose user document
+    req.user = user;
 
     next();
+
   } catch (error) {
+    console.error("Auth Middleware Error:", error);
+
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",

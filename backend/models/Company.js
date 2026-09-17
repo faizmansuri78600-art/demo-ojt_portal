@@ -37,6 +37,10 @@ const companySchema = new mongoose.Schema(
     headOffice: {
       type: String,
     },
+    logoUrl: {
+  type: String,
+  default: "",
+},
 
     street: {
       type: String,
