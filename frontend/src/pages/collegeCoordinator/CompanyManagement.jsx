@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-
+import { useEffect, useMemo, useState } from "react";
 import {
   Building2,
   CheckCircle2,
@@ -19,154 +18,18 @@ import {
   Mail,
   Phone,
   Users,
+  Loader2,
+  RefreshCw,
+  Code2,
+  Briefcase,
+  Landmark,
+  HeartPulse,
+  Factory,
+  Building,
 } from "lucide-react";
 
-const initialCompanies = [
-  {
-    id: 1,
-    name: "TCS",
-    industry: "Information Technology",
-    location: "Mumbai",
-    contactPerson: "Rahul Mehta",
-    email: "rahul.mehta@tcs.com",
-    phone: "+91 98765 43210",
-    opportunities: 8,
-    students: 18,
-    status: "Approved",
-  },
-  {
-    id: 2,
-    name: "Infosys",
-    industry: "Information Technology",
-    location: "Pune",
-    contactPerson: "Priya Shah",
-    email: "priya.shah@infosys.com",
-    phone: "+91 98765 43111",
-    opportunities: 6,
-    students: 14,
-    status: "Approved",
-  },
-  {
-    id: 3,
-    name: "Wipro",
-    industry: "Information Technology",
-    location: "Pune",
-    contactPerson: "Amit Joshi",
-    email: "amit.joshi@wipro.com",
-    phone: "+91 98765 43222",
-    opportunities: 5,
-    students: 10,
-    status: "Pending",
-  },
-  {
-    id: 4,
-    name: "Accenture",
-    industry: "Consulting & Technology",
-    location: "Mumbai",
-    contactPerson: "Neha Patel",
-    email: "neha.patel@accenture.com",
-    phone: "+91 98765 43333",
-    opportunities: 7,
-    students: 16,
-    status: "Approved",
-  },
-  {
-    id: 5,
-    name: "Capgemini",
-    industry: "Information Technology",
-    location: "Pune",
-    contactPerson: "Sahil Verma",
-    email: "sahil.verma@capgemini.com",
-    phone: "+91 98765 43444",
-    opportunities: 4,
-    students: 9,
-    status: "Approved",
-  },
-  {
-    id: 6,
-    name: "Tech Mahindra",
-    industry: "Information Technology",
-    location: "Mumbai",
-    contactPerson: "Karan Singh",
-    email: "karan.singh@techmahindra.com",
-    phone: "+91 98765 43555",
-    opportunities: 3,
-    students: 7,
-    status: "Pending",
-  },
-  {
-    id: 7,
-    name: "Deloitte",
-    industry: "Consulting",
-    location: "Mumbai",
-    contactPerson: "Anjali Desai",
-    email: "anjali.desai@deloitte.com",
-    phone: "+91 98765 43666",
-    opportunities: 5,
-    students: 12,
-    status: "Approved",
-  },
-  {
-    id: 8,
-    name: "Reliance Industries",
-    industry: "Conglomerate",
-    location: "Mumbai",
-    contactPerson: "Vivek Kapoor",
-    email: "vivek.kapoor@ril.com",
-    phone: "+91 98765 43777",
-    opportunities: 4,
-    students: 11,
-    status: "Approved",
-  },
-  {
-    id: 9,
-    name: "HCLTech",
-    industry: "Information Technology",
-    location: "Pune",
-    contactPerson: "Rohan Kulkarni",
-    email: "rohan.kulkarni@hcltech.com",
-    phone: "+91 98765 43888",
-    opportunities: 6,
-    students: 13,
-    status: "Approved",
-  },
-  {
-    id: 10,
-    name: "IBM",
-    industry: "Information Technology",
-    location: "Mumbai",
-    contactPerson: "Sneha Rao",
-    email: "sneha.rao@ibm.com",
-    phone: "+91 98765 43999",
-    opportunities: 5,
-    students: 10,
-    status: "Pending",
-  },
-  {
-    id: 11,
-    name: "KPMG",
-    industry: "Consulting",
-    location: "Mumbai",
-    contactPerson: "Aditya Shah",
-    email: "aditya.shah@kpmg.com",
-    phone: "+91 98765 43001",
-    opportunities: 3,
-    students: 6,
-    status: "Approved",
-  },
-  {
-    id: 12,
-    name: "Cognizant",
-    industry: "Information Technology",
-    location: "Pune",
-    contactPerson: "Meera Nair",
-    email: "meera.nair@cognizant.com",
-    phone: "+91 98765 43002",
-    opportunities: 7,
-    students: 15,
-    status: "Approved",
-  },
-];
+import { collegeCoordinatorService } from "../../services/collegeCoordinatorService";
+import { useCoordinatorTheme } from "../../context/CoordinatorThemeContext";
 
 const industryOptions = [
   "All Industries",
@@ -174,6 +37,10 @@ const industryOptions = [
   "Consulting",
   "Consulting & Technology",
   "Conglomerate",
+  "Finance",
+  "Healthcare",
+  "Manufacturing",
+  "Other",
 ];
 
 const statusOptions = [
@@ -184,15 +51,17 @@ const statusOptions = [
 ];
 
 const emptyCompany = {
-  name: "",
+  companyName: "",
   industry: "Information Technology",
-  location: "",
+  street: "",
+  city: "",
+  state: "",
+  zipCode: "",
+  website: "",
+  description: "",
   contactPerson: "",
   email: "",
   phone: "",
-  opportunities: 1,
-  students: 0,
-  status: "Pending",
 };
 
 function getInitials(name = "") {
@@ -205,23 +74,152 @@ function getInitials(name = "") {
     .toUpperCase();
 }
 
-function StatusBadge({ status }) {
-  const styles = {
+function getStatus(company) {
+  if (company.status) {
+    return company.status;
+  }
+
+  return company.isVerified
+    ? "Approved"
+    : "Pending";
+}
+
+function normalizeCompany(company) {
+  return {
+    ...company,
+    name:
+      company.companyName ||
+      company.name ||
+      "Unnamed Company",
+
+    industry:
+      company.industry ||
+      "Other",
+
+    location:
+      [company.city, company.state]
+        .filter(Boolean)
+        .join(", ") ||
+      company.location ||
+      "Not provided",
+
+    contactPerson:
+      company.contactPerson ||
+      "Not provided",
+
+    email:
+      company.email ||
+      "Not provided",
+
+    phone:
+      company.phone ||
+      "Not provided",
+
+    opportunities: Number(
+      company.opportunities || 0
+    ),
+
+    students: Number(
+      company.students || 0
+    ),
+
+    status: getStatus(company),
+  };
+}
+
+function getIndustryIcon(industry) {
+  const value = String(
+    industry || ""
+  ).toLowerCase();
+
+  if (
+    value.includes("information") ||
+    value.includes("technology") ||
+    value.includes("software") ||
+    value.includes("it")
+  ) {
+    return Code2;
+  }
+
+  if (
+    value.includes("consult")
+  ) {
+    return Briefcase;
+  }
+
+  if (
+    value.includes("finance") ||
+    value.includes("bank") ||
+    value.includes("insurance")
+  ) {
+    return Landmark;
+  }
+
+  if (
+    value.includes("health") ||
+    value.includes("medical") ||
+    value.includes("hospital") ||
+    value.includes("pharma")
+  ) {
+    return HeartPulse;
+  }
+
+  if (
+    value.includes("manufactur") ||
+    value.includes("engineering") ||
+    value.includes("automotive") ||
+    value.includes("production")
+  ) {
+    return Factory;
+  }
+
+  if (
+    value.includes("conglomerate") ||
+    value.includes("corporate")
+  ) {
+    return Building;
+  }
+
+  return BriefcaseBusiness;
+}
+
+function getStatusColors(status, colors) {
+  const map = {
     Approved: {
-      background: "#ecfdf5",
-      color: "#059669",
+      background:
+        colors.successSoft,
+      color: colors.success,
     },
+
     Pending: {
-      background: "#fff7ed",
-      color: "#d97706",
+      background:
+        colors.warningSoft,
+      color: colors.warning,
     },
+
     Rejected: {
-      background: "#fef2f2",
-      color: "#dc2626",
+      background:
+        colors.dangerSoft,
+      color: colors.danger,
     },
   };
 
-  const current = styles[status] || styles.Pending;
+  return (
+    map[status] || {
+      background:
+        colors.surfaceMuted,
+      color:
+        colors.textSecondary,
+    }
+  );
+}
+
+function StatusBadge({ status, colors }) {
+  const current =
+    getStatusColors(
+      status,
+      colors
+    );
 
   return (
     <span
@@ -230,10 +228,11 @@ function StatusBadge({ status }) {
         alignItems: "center",
         padding: "5px 9px",
         borderRadius: "999px",
-        backgroundColor: current.background,
+        backgroundColor:
+          current.background,
         color: current.color,
-        fontSize: "10px",
-        lineHeight: "1",
+        fontSize: "12px",
+        lineHeight: "18px",
         fontWeight: 700,
         whiteSpace: "nowrap",
       }}
@@ -243,24 +242,67 @@ function StatusBadge({ status }) {
   );
 }
 
-function Modal({ children, onClose, width = "520px" }) {
+function CompanyIcon({
+  company,
+  colors,
+  large = false,
+}) {
+  const Icon = getIndustryIcon(
+    company?.industry
+  );
+
+  return (
+    <div
+      style={{
+        width: large ? "52px" : "42px",
+        height: large ? "52px" : "42px",
+        flexShrink: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        borderRadius: large
+          ? "13px"
+          : "10px",
+        backgroundColor:
+          colors.primarySoft,
+        color: colors.primary,
+      }}
+    >
+      <Icon
+        size={large ? 23 : 19}
+      />
+    </div>
+  );
+}
+
+function Modal({
+  children,
+  onClose,
+  width = "560px",
+  colors,
+}) {
   return (
     <div
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) {
+        if (
+          event.target ===
+          event.currentTarget
+        ) {
           onClose();
         }
       }}
       style={{
         position: "fixed",
         inset: 0,
-        zIndex: 100,
+        zIndex: 1000,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         padding: "20px",
-        backgroundColor: "rgba(15, 23, 42, 0.45)",
-        backdropFilter: "blur(2px)",
+        backgroundColor:
+          "rgba(2, 6, 23, 0.68)",
+        backdropFilter:
+          "blur(3px)",
       }}
     >
       <div
@@ -270,9 +312,12 @@ function Modal({ children, onClose, width = "520px" }) {
           maxHeight: "90vh",
           overflowY: "auto",
           borderRadius: "16px",
-          backgroundColor: "#ffffff",
+          backgroundColor:
+            colors.surface,
+          color: colors.text,
+          border: `1px solid ${colors.border}`,
           boxShadow:
-            "0 20px 50px rgba(15, 23, 42, 0.18)",
+            "0 20px 50px rgba(0,0,0,.30)",
         }}
       >
         {children}
@@ -281,42 +326,48 @@ function Modal({ children, onClose, width = "520px" }) {
   );
 }
 
-function ModalHeader({ title, subtitle, onClose }) {
+function ModalHeader({
+  title,
+  subtitle,
+  onClose,
+  colors,
+}) {
   return (
     <div
       style={{
         display: "flex",
         alignItems: "flex-start",
-        justifyContent: "space-between",
+        justifyContent:
+          "space-between",
         gap: "15px",
         padding: "18px 20px",
-        borderBottom: "1px solid #eef2f7",
+        borderBottom: `1px solid ${colors.border}`,
       }}
     >
       <div>
         <h2
           style={{
             margin: 0,
-            color: "#1e293b",
+            color: colors.text,
             fontSize: "17px",
-            fontWeight: 750,
+            lineHeight: "24px",
+            fontWeight: 700,
           }}
         >
           {title}
         </h2>
 
-        {subtitle && (
-          <p
-            style={{
-              margin: "5px 0 0",
-              color: "#94a3b8",
-              fontSize: "11px",
-              lineHeight: "1.5",
-            }}
-          >
-            {subtitle}
-          </p>
-        )}
+        <p
+          style={{
+            margin: "5px 0 0",
+            color:
+              colors.textSecondary,
+            fontSize: "13px",
+            lineHeight: "19px",
+          }}
+        >
+          {subtitle}
+        </p>
       </div>
 
       <button
@@ -327,11 +378,14 @@ function ModalHeader({ title, subtitle, onClose }) {
           height: "32px",
           display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          border: "none",
+          justifyContent:
+            "center",
+          border: `1px solid ${colors.border}`,
           borderRadius: "8px",
-          backgroundColor: "#f8fafc",
-          color: "#64748b",
+          backgroundColor:
+            colors.surfaceMuted,
+          color:
+            colors.textSecondary,
           cursor: "pointer",
         }}
       >
@@ -342,8 +396,20 @@ function ModalHeader({ title, subtitle, onClose }) {
 }
 
 export default function CompanyManagement() {
+  const { colors } =
+    useCoordinatorTheme();
+
   const [companies, setCompanies] =
-    useState(initialCompanies);
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
 
   const [searchTerm, setSearchTerm] =
     useState("");
@@ -357,66 +423,118 @@ export default function CompanyManagement() {
   const [currentPage, setCurrentPage] =
     useState(1);
 
-  const [actionCompanyId, setActionCompanyId] =
-    useState(null);
+  const [
+    actionCompanyId,
+    setActionCompanyId,
+  ] = useState(null);
 
-  const [viewCompany, setViewCompany] =
-    useState(null);
+  const [
+    viewCompany,
+    setViewCompany,
+  ] = useState(null);
 
-  const [editingCompany, setEditingCompany] =
-    useState(null);
+  const [
+    editingCompany,
+    setEditingCompany,
+  ] = useState(null);
 
-  const [showAddModal, setShowAddModal] =
-    useState(false);
+  const [
+    showAddModal,
+    setShowAddModal,
+  ] = useState(false);
 
-  const [formData, setFormData] =
-    useState(emptyCompany);
+  const [
+    formData,
+    setFormData,
+  ] = useState(emptyCompany);
 
   const companiesPerPage = 5;
 
-  const filteredCompanies = useMemo(() => {
-    const search =
-      searchTerm.trim().toLowerCase();
+  const loadCompanies = async () => {
+    try {
+      setLoading(true);
+      setError("");
 
-    return companies.filter((company) => {
-      const matchesSearch =
-        !search ||
-        company.name
-          .toLowerCase()
-          .includes(search) ||
-        company.industry
-          .toLowerCase()
-          .includes(search) ||
-        company.location
-          .toLowerCase()
-          .includes(search) ||
-        company.contactPerson
-          .toLowerCase()
-          .includes(search) ||
-        company.email
-          .toLowerCase()
-          .includes(search);
+      const response =
+        await collegeCoordinatorService.getCompanies();
 
-      const matchesIndustry =
-        selectedIndustry === "All Industries" ||
-        company.industry === selectedIndustry;
+      const list =
+        response?.companies || [];
 
-      const matchesStatus =
-        selectedStatus === "All Status" ||
-        company.status === selectedStatus;
-
-      return (
-        matchesSearch &&
-        matchesIndustry &&
-        matchesStatus
+      setCompanies(
+        list.map(normalizeCompany)
       );
-    });
-  }, [
-    companies,
-    searchTerm,
-    selectedIndustry,
-    selectedStatus,
-  ]);
+    } catch (err) {
+      console.error(
+        "Load Companies Error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to load companies from the database."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCompanies();
+  }, []);
+
+  const filteredCompanies =
+    useMemo(() => {
+      const search =
+        searchTerm
+          .trim()
+          .toLowerCase();
+
+      return companies.filter(
+        (company) => {
+          const matchesSearch =
+            !search ||
+            company.name
+              .toLowerCase()
+              .includes(search) ||
+            company.industry
+              .toLowerCase()
+              .includes(search) ||
+            company.location
+              .toLowerCase()
+              .includes(search) ||
+            company.contactPerson
+              .toLowerCase()
+              .includes(search) ||
+            company.email
+              .toLowerCase()
+              .includes(search);
+
+          const matchesIndustry =
+            selectedIndustry ===
+              "All Industries" ||
+            company.industry ===
+              selectedIndustry;
+
+          const matchesStatus =
+            selectedStatus ===
+              "All Status" ||
+            company.status ===
+              selectedStatus;
+
+          return (
+            matchesSearch &&
+            matchesIndustry &&
+            matchesStatus
+          );
+        }
+      );
+    }, [
+      companies,
+      searchTerm,
+      selectedIndustry,
+      selectedStatus,
+    ]);
 
   const totalPages = Math.max(
     1,
@@ -426,10 +544,11 @@ export default function CompanyManagement() {
     )
   );
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages
-  );
+  const safeCurrentPage =
+    Math.min(
+      currentPage,
+      totalPages
+    );
 
   const startIndex =
     (safeCurrentPage - 1) *
@@ -438,174 +557,243 @@ export default function CompanyManagement() {
   const paginatedCompanies =
     filteredCompanies.slice(
       startIndex,
-      startIndex + companiesPerPage
+      startIndex +
+        companiesPerPage
     );
 
   const approvedCompanies =
     companies.filter(
       (company) =>
-        company.status === "Approved"
+        company.status ===
+        "Approved"
     ).length;
 
   const pendingCompanies =
     companies.filter(
       (company) =>
-        company.status === "Pending"
+        company.status ===
+        "Pending"
     ).length;
 
   const totalOpportunities =
     companies.reduce(
       (total, company) =>
-        total + Number(company.opportunities || 0),
+        total +
+        Number(
+          company.opportunities ||
+            0
+        ),
       0
     );
 
-  const statistics = [
-    {
-      id: 1,
-      title: "Total Companies",
-      value: companies.length,
-      subtitle: "Registered companies",
-      icon: Building2,
-      tone: "blue",
-    },
-    {
-      id: 2,
-      title: "Approved",
-      value: approvedCompanies,
-      subtitle: "Approved companies",
-      icon: CheckCircle2,
-      tone: "green",
-    },
-    {
-      id: 3,
-      title: "Pending Approval",
-      value: pendingCompanies,
-      subtitle: "Awaiting review",
-      icon: Clock3,
-      tone: "orange",
-    },
-    {
-      id: 4,
-      title: "OJT Opportunities",
-      value: totalOpportunities,
-      subtitle: "Available opportunities",
-      icon: BriefcaseBusiness,
-      tone: "purple",
-    },
-  ];
-
-  const resetPage = () => {
+  const resetPage = () =>
     setCurrentPage(1);
-  };
 
   const clearFilters = () => {
     setSearchTerm("");
-    setSelectedIndustry("All Industries");
-    setSelectedStatus("All Status");
+    setSelectedIndustry(
+      "All Industries"
+    );
+    setSelectedStatus(
+      "All Status"
+    );
     resetPage();
   };
 
-  const handleApprove = (companyId) => {
-    setCompanies((current) =>
-      current.map((company) =>
-        company.id === companyId
-          ? {
-              ...company,
-              status: "Approved",
-            }
-          : company
-      )
-    );
-
-    setActionCompanyId(null);
-  };
-
-  const handleReject = (companyId) => {
-    setCompanies((current) =>
-      current.map((company) =>
-        company.id === companyId
-          ? {
-              ...company,
-              status: "Rejected",
-            }
-          : company
-      )
-    );
-
-    setActionCompanyId(null);
+  const closeForm = () => {
+    setShowAddModal(false);
+    setEditingCompany(null);
+    setFormData(emptyCompany);
   };
 
   const openAddModal = () => {
     setFormData(emptyCompany);
     setShowAddModal(true);
+    setError("");
   };
 
-  const openEditModal = (company) => {
+  const openEditModal = (
+    company
+  ) => {
     setEditingCompany(company);
+
     setFormData({
-      ...company,
+      companyName:
+        company.name || "",
+      industry:
+        company.industry ||
+        "Other",
+      street:
+        company.street || "",
+      city:
+        company.city || "",
+      state:
+        company.state || "",
+      zipCode:
+        company.zipCode || "",
+      website:
+        company.website || "",
+      description:
+        company.description ||
+        "",
+      contactPerson:
+        company.contactPerson ===
+        "Not provided"
+          ? ""
+          : company.contactPerson,
+      email:
+        company.email ===
+        "Not provided"
+          ? ""
+          : company.email,
+      phone:
+        company.phone ===
+        "Not provided"
+          ? ""
+          : company.phone,
     });
+
     setActionCompanyId(null);
+    setError("");
   };
 
-  const handleFormChange = (field, value) => {
-    setFormData((current) => ({
-      ...current,
-      [field]: value,
-    }));
+  const handleFormChange = (
+    field,
+    value
+  ) => {
+    setFormData(
+      (current) => ({
+        ...current,
+        [field]: value,
+      })
+    );
   };
 
-  const handleAddCompany = (event) => {
-    event.preventDefault();
+  const handleAddCompany =
+    async (event) => {
+      event.preventDefault();
 
-    const newCompany = {
-      ...formData,
-      id: Date.now(),
-      opportunities: Number(
-        formData.opportunities || 0
-      ),
-      students: Number(
-        formData.students || 0
-      ),
+      try {
+        setSaving(true);
+        setError("");
+
+        await collegeCoordinatorService.addCompany(
+          formData
+        );
+
+        closeForm();
+        await loadCompanies();
+      } catch (err) {
+        console.error(
+          "Add Company Error:",
+          err
+        );
+
+        setError(
+          err?.message ||
+            "Failed to add company."
+        );
+      } finally {
+        setSaving(false);
+      }
     };
 
-    setCompanies((current) => [
-      newCompany,
-      ...current,
-    ]);
+  const handleEditCompany =
+    async (event) => {
+      event.preventDefault();
 
-    setShowAddModal(false);
-    setFormData(emptyCompany);
-    resetPage();
+      if (
+        !editingCompany?._id
+      ) {
+        return;
+      }
+
+      try {
+        setSaving(true);
+        setError("");
+
+        await collegeCoordinatorService.updateCompany(
+          editingCompany._id,
+          formData
+        );
+
+        closeForm();
+        await loadCompanies();
+      } catch (err) {
+        console.error(
+          "Update Company Error:",
+          err
+        );
+
+        setError(
+          err?.message ||
+            "Failed to update company."
+        );
+      } finally {
+        setSaving(false);
+      }
+    };
+
+  const handleApprove = async (
+    companyId
+  ) => {
+    try {
+      setSaving(true);
+      setError("");
+
+      await collegeCoordinatorService.approveCompany(
+        companyId
+      );
+
+      setActionCompanyId(null);
+      await loadCompanies();
+    } catch (err) {
+      console.error(
+        "Approve Company Error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to approve company."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const handleEditCompany = (event) => {
-    event.preventDefault();
+  const handleReject = async (
+    companyId
+  ) => {
+    try {
+      setSaving(true);
+      setError("");
 
-    setCompanies((current) =>
-      current.map((company) =>
-        company.id === editingCompany.id
-          ? {
-              ...formData,
-              id: editingCompany.id,
-              opportunities: Number(
-                formData.opportunities || 0
-              ),
-              students: Number(
-                formData.students || 0
-              ),
-            }
-          : company
-      )
-    );
+      await collegeCoordinatorService.rejectCompany(
+        companyId
+      );
 
-    setEditingCompany(null);
-    setFormData(emptyCompany);
+      setActionCompanyId(null);
+      await loadCompanies();
+    } catch (err) {
+      console.error(
+        "Reject Company Error:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Failed to reject company."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
 
   const exportCompanies = () => {
-    if (!filteredCompanies.length) {
+    if (
+      !filteredCompanies.length
+    ) {
       return;
     }
 
@@ -621,54 +809,174 @@ export default function CompanyManagement() {
       "Status",
     ];
 
-    const escapeCsv = (value) => {
-      const text = String(value ?? "");
+    const escapeCsv = (
+      value
+    ) =>
+      `"${String(
+        value ?? ""
+      ).replace(/"/g, '""')}"`;
 
-      return `"${text.replace(/"/g, '""')}"`;
-    };
+    const rows =
+      filteredCompanies.map(
+        (company) =>
+          [
+            company.name,
+            company.industry,
+            company.location,
+            company.contactPerson,
+            company.email,
+            company.phone,
+            company.opportunities,
+            company.students,
+            company.status,
+          ]
+            .map(escapeCsv)
+            .join(",")
+      );
 
-    const rows = filteredCompanies.map(
-      (company) =>
+    const blob = new Blob(
+      [
         [
-          company.name,
-          company.industry,
-          company.location,
-          company.contactPerson,
-          company.email,
-          company.phone,
-          company.opportunities,
-          company.students,
-          company.status,
-        ]
-          .map(escapeCsv)
-          .join(",")
+          headers
+            .map(escapeCsv)
+            .join(","),
+          ...rows,
+        ].join("\n"),
+      ],
+      {
+        type:
+          "text/csv;charset=utf-8;",
+      }
     );
 
-    const csv = [
-      headers.map(escapeCsv).join(","),
-      ...rows,
-    ].join("\n");
-
-    const blob = new Blob([csv], {
-      type: "text/csv;charset=utf-8;",
-    });
-
     const url =
-      URL.createObjectURL(blob);
+      URL.createObjectURL(
+        blob
+      );
 
     const link =
-      document.createElement("a");
+      document.createElement(
+        "a"
+      );
 
     link.href = url;
     link.download = `companies-${new Date()
       .toISOString()
       .slice(0, 10)}.csv`;
 
-    document.body.appendChild(link);
+    document.body.appendChild(
+      link
+    );
+
     link.click();
-    document.body.removeChild(link);
+
+    document.body.removeChild(
+      link
+    );
 
     URL.revokeObjectURL(url);
+  };
+
+  const statistics = [
+    {
+      title: "Total Companies",
+      value: companies.length,
+      subtitle:
+        "Registered companies",
+      icon: Building2,
+      background:
+        colors.primarySoft,
+      color: colors.primary,
+    },
+    {
+      title: "Approved",
+      value: approvedCompanies,
+      subtitle:
+        "Approved companies",
+      icon: CheckCircle2,
+      background:
+        colors.successSoft,
+      color: colors.success,
+    },
+    {
+      title: "Pending Approval",
+      value: pendingCompanies,
+      subtitle:
+        "Awaiting review",
+      icon: Clock3,
+      background:
+        colors.warningSoft,
+      color: colors.warning,
+    },
+    {
+      title: "OJT Opportunities",
+      value: totalOpportunities,
+      subtitle:
+        "Available opportunities",
+      icon: BriefcaseBusiness,
+      background:
+        colors.infoSoft,
+      color: colors.info,
+    },
+  ];
+
+  const cardStyle = {
+    border: `1px solid ${colors.border}`,
+    borderRadius: "14px",
+    backgroundColor:
+      colors.surface,
+    boxShadow:
+      "0 1px 2px rgba(15,23,42,.04)",
+  };
+
+  const inputStyle = {
+    width: "100%",
+    minHeight: "40px",
+    boxSizing: "border-box",
+    padding: "0 11px",
+    border: `1px solid ${colors.border}`,
+    borderRadius: "9px",
+    outline: "none",
+    backgroundColor:
+      colors.surface,
+    color: colors.text,
+    fontFamily: "inherit",
+    fontSize: "14px",
+  };
+
+  const secondaryButtonStyle = {
+    minHeight: "40px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "7px",
+    padding: "0 13px",
+    border: `1px solid ${colors.border}`,
+    borderRadius: "9px",
+    backgroundColor:
+      colors.surface,
+    color:
+      colors.textSecondary,
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: 600,
+  };
+
+  const primaryButtonStyle = {
+    minHeight: "40px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: "7px",
+    padding: "0 14px",
+    border: "none",
+    borderRadius: "9px",
+    backgroundColor:
+      colors.primary,
+    color: "#ffffff",
+    cursor: "pointer",
+    fontSize: "13px",
+    fontWeight: 700,
   };
 
   const renderCompanyForm = (
@@ -682,47 +990,157 @@ export default function CompanyManagement() {
       }}
     >
       <div
-        className="company-form-grid"
         style={{
           display: "grid",
           gridTemplateColumns:
             "1fr 1fr",
-          gap: "13px",
+          gap: "14px",
         }}
+        className="company-form-grid"
       >
-        <div>
-          <label className="company-form-label">
-            Company Name
-          </label>
+        {[
+          [
+            "companyName",
+            "Company Name",
+            "Enter company name",
+            "text",
+          ],
+          [
+            "contactPerson",
+            "Contact Person",
+            "Contact person name",
+            "text",
+          ],
+          [
+            "email",
+            "Email",
+            "company@example.com",
+            "email",
+          ],
+          [
+            "phone",
+            "Phone",
+            "+91 XXXXX XXXXX",
+            "text",
+          ],
+          [
+            "street",
+            "Street",
+            "Street address",
+            "text",
+          ],
+          [
+            "city",
+            "City",
+            "Mumbai / Pune",
+            "text",
+          ],
+          [
+            "state",
+            "State",
+            "Maharashtra",
+            "text",
+          ],
+          [
+            "zipCode",
+            "ZIP Code",
+            "400001",
+            "text",
+          ],
+          [
+            "website",
+            "Website",
+            "https://example.com",
+            "url",
+          ],
+        ].map(
+          ([
+            field,
+            label,
+            placeholder,
+            type,
+          ]) => (
+            <div key={field}>
+              <label
+                style={{
+                  display:
+                    "block",
+                  marginBottom:
+                    "6px",
+                  color:
+                    colors.textSecondary,
+                  fontSize:
+                    "13px",
+                  fontWeight:
+                    600,
+                }}
+              >
+                {label}
+              </label>
 
-          <input
-            required
-            value={formData.name}
-            onChange={(event) =>
-              handleFormChange(
-                "name",
-                event.target.value
-              )
-            }
-            className="company-form-input"
-            placeholder="Enter company name"
-          />
-        </div>
+              <input
+                required={[
+                  "companyName",
+                  "city",
+                ].includes(field)}
+                type={type}
+                value={
+                  formData[field]
+                }
+                onChange={(
+                  event
+                ) =>
+                  handleFormChange(
+                    field,
+                    event.target
+                      .value
+                  )
+                }
+                placeholder={
+                  placeholder
+                }
+                style={
+                  inputStyle
+                }
+              />
+            </div>
+          )
+        )}
 
         <div>
-          <label className="company-form-label">
+          <label
+            style={{
+              display:
+                "block",
+              marginBottom:
+                "6px",
+              color:
+                colors.textSecondary,
+              fontSize:
+                "13px",
+              fontWeight:
+                600,
+            }}
+          >
             Industry
           </label>
 
           <select
-            value={formData.industry}
-            onChange={(event) =>
+            value={
+              formData.industry
+            }
+            onChange={(
+              event
+            ) =>
               handleFormChange(
                 "industry",
-                event.target.value
+                event.target
+                  .value
               )
             }
-            className="company-form-input"
+            style={
+              inputStyle
+            }
           >
             {industryOptions
               .filter(
@@ -730,189 +1148,117 @@ export default function CompanyManagement() {
                   item !==
                   "All Industries"
               )
-              .map((industry) => (
-                <option
-                  key={industry}
-                  value={industry}
-                >
-                  {industry}
-                </option>
-              ))}
+              .map(
+                (industry) => (
+                  <option
+                    key={
+                      industry
+                    }
+                    value={
+                      industry
+                    }
+                  >
+                    {industry}
+                  </option>
+                )
+              )}
           </select>
         </div>
 
-        <div>
-          <label className="company-form-label">
-            Location
-          </label>
-
-          <input
-            required
-            value={formData.location}
-            onChange={(event) =>
-              handleFormChange(
-                "location",
-                event.target.value
-              )
-            }
-            className="company-form-input"
-            placeholder="Mumbai / Pune"
-          />
-        </div>
-
-        <div>
-          <label className="company-form-label">
-            Contact Person
-          </label>
-
-          <input
-            required
-            value={formData.contactPerson}
-            onChange={(event) =>
-              handleFormChange(
-                "contactPerson",
-                event.target.value
-              )
-            }
-            className="company-form-input"
-            placeholder="Contact person name"
-          />
-        </div>
-
-        <div>
-          <label className="company-form-label">
-            Email
-          </label>
-
-          <input
-            required
-            type="email"
-            value={formData.email}
-            onChange={(event) =>
-              handleFormChange(
-                "email",
-                event.target.value
-              )
-            }
-            className="company-form-input"
-            placeholder="company@example.com"
-          />
-        </div>
-
-        <div>
-          <label className="company-form-label">
-            Phone
-          </label>
-
-          <input
-            required
-            value={formData.phone}
-            onChange={(event) =>
-              handleFormChange(
-                "phone",
-                event.target.value
-              )
-            }
-            className="company-form-input"
-            placeholder="+91 XXXXX XXXXX"
-          />
-        </div>
-
-        <div>
-          <label className="company-form-label">
-            OJT Opportunities
-          </label>
-
-          <input
-            type="number"
-            min="0"
-            value={formData.opportunities}
-            onChange={(event) =>
-              handleFormChange(
-                "opportunities",
-                event.target.value
-              )
-            }
-            className="company-form-input"
-          />
-        </div>
-
-        <div>
-          <label className="company-form-label">
-            Students
-          </label>
-
-          <input
-            type="number"
-            min="0"
-            value={formData.students}
-            onChange={(event) =>
-              handleFormChange(
-                "students",
-                event.target.value
-              )
-            }
-            className="company-form-input"
-          />
-        </div>
-
-        <div>
-          <label className="company-form-label">
-            Status
-          </label>
-
-          <select
-            value={formData.status}
-            onChange={(event) =>
-              handleFormChange(
-                "status",
-                event.target.value
-              )
-            }
-            className="company-form-input"
+        <div
+          style={{
+            gridColumn:
+              "1 / -1",
+          }}
+        >
+          <label
+            style={{
+              display:
+                "block",
+              marginBottom:
+                "6px",
+              color:
+                colors.textSecondary,
+              fontSize:
+                "13px",
+              fontWeight:
+                600,
+            }}
           >
-            <option value="Pending">
-              Pending
-            </option>
-            <option value="Approved">
-              Approved
-            </option>
-            <option value="Rejected">
-              Rejected
-            </option>
-          </select>
+            Description
+          </label>
+
+          <textarea
+            value={
+              formData.description
+            }
+            onChange={(
+              event
+            ) =>
+              handleFormChange(
+                "description",
+                event.target
+                  .value
+              )
+            }
+            placeholder="Short company description"
+            style={{
+              ...inputStyle,
+              minHeight:
+                "90px",
+              padding:
+                "10px 11px",
+              resize:
+                "vertical",
+            }}
+          />
         </div>
       </div>
 
+      {error && (
+        <div
+          style={{
+            marginTop: "16px",
+            padding:
+              "10px 12px",
+            borderRadius:
+              "9px",
+            backgroundColor:
+              colors.dangerSoft,
+            color:
+              colors.danger,
+            fontSize:
+              "13px",
+            fontWeight:
+              600,
+          }}
+        >
+          {error}
+        </div>
+      )}
+
       <div
         style={{
-          display: "flex",
-          justifyContent: "flex-end",
+          display:
+            "flex",
+          justifyContent:
+            "flex-end",
           gap: "8px",
-          marginTop: "20px",
-          paddingTop: "15px",
-          borderTop:
-            "1px solid #eef2f7",
+          marginTop:
+            "20px",
+          paddingTop:
+            "15px",
+          borderTop: `1px solid ${colors.border}`,
         }}
       >
         <button
           type="button"
-          onClick={() => {
-            setShowAddModal(false);
-            setEditingCompany(null);
-            setFormData(emptyCompany);
-          }}
+          onClick={closeForm}
+          disabled={saving}
           style={{
-            height: "38px",
-            padding: "0 14px",
-            border:
-              "1px solid #dbe4ee",
-            borderRadius: "8px",
-            backgroundColor: "#ffffff",
-            color: "#64748b",
-            fontSize: "11px",
-            fontWeight: 700,
-            cursor: "pointer",
+            ...secondaryButtonStyle,
+            opacity:
+              saving ? 0.6 : 1,
           }}
         >
           Cancel
@@ -920,19 +1266,26 @@ export default function CompanyManagement() {
 
         <button
           type="submit"
+          disabled={saving}
           style={{
-            height: "38px",
-            padding: "0 15px",
-            border: "none",
-            borderRadius: "8px",
-            backgroundColor: "#2563eb",
-            color: "#ffffff",
-            fontSize: "11px",
-            fontWeight: 700,
-            cursor: "pointer",
+            ...primaryButtonStyle,
+            opacity:
+              saving ? 0.65 : 1,
           }}
         >
-          {submitLabel}
+          {saving && (
+            <Loader2
+              size={14}
+              style={{
+                animation:
+                  "companySpin 1s linear infinite",
+              }}
+            />
+          )}
+
+          {saving
+            ? "Saving..."
+            : submitLabel}
         </button>
       </div>
     </form>
@@ -942,80 +1295,85 @@ export default function CompanyManagement() {
     <div
       style={{
         width: "100%",
+        minHeight: "100%",
         minWidth: 0,
-        color: "#0f172a",
+        backgroundColor:
+          colors.workspace,
+        color: colors.text,
+        fontFamily:
+          '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      {/* =====================================================
-          BREADCRUMB
-      ====================================================== */}
+      {/* Breadcrumb */}
       <div
         style={{
-          display: "flex",
-          alignItems: "center",
+          display:
+            "flex",
+          alignItems:
+            "center",
           gap: "7px",
-          marginBottom: "12px",
-          fontSize: "12px",
+          marginBottom:
+            "12px",
+          fontSize:
+            "13px",
         }}
       >
         <span
           style={{
-            color: "#2563eb",
-            fontWeight: 700,
+            color:
+              colors.primary,
+            fontWeight:
+              600,
           }}
         >
-          Dashboard
+          College Coordinator
         </span>
 
         <ChevronRight
           size={14}
-          color="#cbd5e1"
+          color={
+            colors.textMuted
+          }
         />
 
         <span
           style={{
-            color: "#64748b",
+            color:
+              colors.textSecondary,
           }}
         >
           Company Management
         </span>
       </div>
 
-      {/* =====================================================
-          PAGE HEADER
-      ====================================================== */}
+      {/* Header */}
       <section
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
+          display:
+            "flex",
+          alignItems:
+            "center",
+          justifyContent:
+            "space-between",
           gap: "20px",
-          marginBottom: "20px",
+          marginBottom:
+            "24px",
         }}
       >
         <div>
-          <div
-            style={{
-              marginBottom: "6px",
-              color: "#2563eb",
-              fontSize: "11px",
-              fontWeight: 800,
-              letterSpacing: "1px",
-              textTransform: "uppercase",
-            }}
-          >
-            OJT Management
-          </div>
-
           <h1
             style={{
               margin: 0,
-              color: "#0f172a",
+              color:
+                colors.text,
               fontSize:
-                "clamp(26px, 3vw, 32px)",
-              lineHeight: "1.1",
-              fontWeight: 800,
-              letterSpacing: "-0.8px",
+                "clamp(26px, 3vw, 28px)",
+              lineHeight:
+                "1.2",
+              fontWeight:
+                700,
+              letterSpacing:
+                "-0.02em",
             }}
           >
             Company Management
@@ -1023,177 +1381,223 @@ export default function CompanyManagement() {
 
           <p
             style={{
-              margin: "7px 0 0",
-              color: "#64748b",
-              fontSize: "13px",
-              lineHeight: "1.5",
+              margin:
+                "7px 0 0",
+              color:
+                colors.textSecondary,
+              fontSize:
+                "14px",
             }}
           >
             Manage OJT companies and
-            their internship opportunities.
+            their verification status.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={openAddModal}
-          style={{
-            height: "42px",
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            padding: "0 15px",
-            border: "none",
-            borderRadius: "9px",
-            backgroundColor: "#2563eb",
-            color: "#ffffff",
-            fontSize: "12px",
-            fontWeight: 700,
-            cursor: "pointer",
-            boxShadow:
-              "0 4px 10px rgba(37, 99, 235, 0.18)",
-            whiteSpace: "nowrap",
-          }}
-        >
-          <Plus size={17} />
-          Add Company
-        </button>
-      </section>
-
-      {/* =====================================================
-          STATISTICS
-      ====================================================== */}
-      <section
-        className="company-management-stats"
-        style={{
-          display: "grid",
-          gridTemplateColumns:
-            "repeat(4, minmax(0, 1fr))",
-          gap: "12px",
-          marginBottom: "18px",
-        }}
-      >
-        {statistics.map((stat) => {
-          const toneMap = {
-            blue: {
-              background: "#eff6ff",
-              color: "#2563eb",
-            },
-            green: {
-              background: "#ecfdf5",
-              color: "#059669",
-            },
-            orange: {
-              background: "#fff7ed",
-              color: "#ea580c",
-            },
-            purple: {
-              background: "#f5f3ff",
-              color: "#7c3aed",
-            },
-          };
-
-          const tone =
-            toneMap[stat.tone];
-
-          const Icon = stat.icon;
-
-          return (
-            <div
-              key={stat.id}
-              style={{
-                minWidth: 0,
-                padding: "16px",
-                border:
-                  "1px solid #e2e8f0",
-                borderRadius: "13px",
-                backgroundColor: "#ffffff",
-                boxShadow:
-                  "0 2px 8px rgba(15, 23, 42, 0.035)",
-              }}
-            >
-              <div
-                style={{
-                  width: "39px",
-                  height: "39px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: "10px",
-                  backgroundColor:
-                    tone.background,
-                  color: tone.color,
-                }}
-              >
-                <Icon size={19} />
-              </div>
-
-              <div
-                style={{
-                  marginTop: "10px",
-                  color: "#64748b",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                }}
-              >
-                {stat.title}
-              </div>
-
-              <div
-                style={{
-                  marginTop: "4px",
-                  color: "#0f172a",
-                  fontSize: "25px",
-                  lineHeight: "1",
-                  fontWeight: 800,
-                }}
-              >
-                {stat.value}
-              </div>
-
-              <div
-                style={{
-                  marginTop: "5px",
-                  color: "#94a3b8",
-                  fontSize: "9px",
-                }}
-              >
-                {stat.subtitle}
-              </div>
-            </div>
-          );
-        })}
-      </section>
-
-      {/* =====================================================
-          COMPANY LIST
-      ====================================================== */}
-      <section
-        style={{
-          width: "100%",
-          minWidth: 0,
-          overflow: "hidden",
-          border:
-            "1px solid #e2e8f0",
-          borderRadius: "14px",
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 2px 8px rgba(15, 23, 42, 0.035)",
-        }}
-      >
-        {/* HEADER */}
         <div
           style={{
-            padding: "15px 18px",
-            borderBottom:
-              "1px solid #eef2f7",
+            display:
+              "flex",
+            gap: "8px",
+          }}
+        >
+          <button
+            type="button"
+            onClick={
+              loadCompanies
+            }
+            disabled={
+              loading ||
+              saving
+            }
+            style={{
+              ...secondaryButtonStyle,
+              opacity:
+                loading ||
+                saving
+                  ? 0.6
+                  : 1,
+            }}
+          >
+            <RefreshCw
+              size={15}
+            />
+            Refresh
+          </button>
+
+          <button
+            type="button"
+            onClick={
+              openAddModal
+            }
+            style={
+              primaryButtonStyle
+            }
+          >
+            <Plus
+              size={16}
+            />
+            Add Company
+          </button>
+        </div>
+      </section>
+
+      {error &&
+        !showAddModal &&
+        !editingCompany && (
+          <div
+            style={{
+              marginBottom:
+                "16px",
+              padding:
+                "11px 13px",
+              borderRadius:
+                "9px",
+              backgroundColor:
+                colors.dangerSoft,
+              color:
+                colors.danger,
+              fontSize:
+                "13px",
+              fontWeight:
+                600,
+            }}
+          >
+            {error}
+          </div>
+        )}
+
+      {/* Statistics */}
+      <section
+        style={{
+          display:
+            "grid",
+          gridTemplateColumns:
+            "repeat(4,minmax(0,1fr))",
+          gap: "14px",
+          marginBottom:
+            "18px",
+        }}
+        className="company-management-stats"
+      >
+        {statistics.map(
+          (stat) => {
+            const Icon =
+              stat.icon;
+
+            return (
+              <div
+                key={
+                  stat.title
+                }
+                style={{
+                  ...cardStyle,
+                  padding:
+                    "18px",
+                }}
+              >
+                <div
+                  style={{
+                    width:
+                      "42px",
+                    height:
+                      "42px",
+                    display:
+                      "flex",
+                    alignItems:
+                      "center",
+                    justifyContent:
+                      "center",
+                    borderRadius:
+                      "11px",
+                    backgroundColor:
+                      stat.background,
+                    color:
+                      stat.color,
+                  }}
+                >
+                  <Icon
+                    size={20}
+                  />
+                </div>
+
+                <div
+                  style={{
+                    marginTop:
+                      "11px",
+                    color:
+                      colors.textSecondary,
+                    fontSize:
+                      "13px",
+                    fontWeight:
+                      600,
+                  }}
+                >
+                  {
+                    stat.title
+                  }
+                </div>
+
+                <div
+                  style={{
+                    marginTop:
+                      "3px",
+                    color:
+                      colors.text,
+                    fontSize:
+                      "26px",
+                    lineHeight:
+                      "31px",
+                    fontWeight:
+                      700,
+                  }}
+                >
+                  {
+                    stat.value
+                  }
+                </div>
+
+                <div
+                  style={{
+                    marginTop:
+                      "3px",
+                    color:
+                      colors.textMuted,
+                    fontSize:
+                      "12px",
+                  }}
+                >
+                  {
+                    stat.subtitle
+                  }
+                </div>
+              </div>
+            );
+          }
+        )}
+      </section>
+
+      {/* Company Directory */}
+      <section
+        style={{
+          ...cardStyle,
+          overflow:
+            "hidden",
+        }}
+      >
+        <div
+          style={{
+            padding:
+              "18px",
+            borderBottom: `1px solid ${colors.border}`,
           }}
         >
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
+              display:
+                "flex",
+              alignItems:
+                "center",
               justifyContent:
                 "space-between",
               gap: "15px",
@@ -1203,145 +1607,143 @@ export default function CompanyManagement() {
               <h2
                 style={{
                   margin: 0,
-                  color: "#1e293b",
-                  fontSize: "15px",
-                  fontWeight: 750,
+                  color:
+                    colors.text,
+                  fontSize:
+                    "17px",
+                  fontWeight:
+                    700,
                 }}
               >
-                All Companies
+                Company Directory
               </h2>
 
               <p
                 style={{
-                  margin: "4px 0 0",
-                  color: "#94a3b8",
-                  fontSize: "10px",
+                  margin:
+                    "4px 0 0",
+                  color:
+                    colors.textSecondary,
+                  fontSize:
+                    "13px",
                 }}
               >
-                View and manage registered
-                OJT companies
+                View and manage
+                registered OJT
+                companies.
               </p>
             </div>
 
             <button
               type="button"
-              onClick={exportCompanies}
+              onClick={
+                exportCompanies
+              }
               disabled={
-                filteredCompanies.length === 0
+                !filteredCompanies.length
               }
               style={{
-                height: "34px",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "6px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor:
-                  filteredCompanies.length
-                    ? "#ffffff"
-                    : "#f8fafc",
-                color:
-                  filteredCompanies.length
-                    ? "#475569"
-                    : "#cbd5e1",
-                fontSize: "10px",
-                fontWeight: 700,
-                cursor:
-                  filteredCompanies.length
-                    ? "pointer"
-                    : "not-allowed",
+                ...secondaryButtonStyle,
+                opacity:
+                  !filteredCompanies.length
+                    ? 0.45
+                    : 1,
               }}
             >
-              <Download size={14} />
+              <Download
+                size={15}
+              />
               Export
             </button>
           </div>
 
-          {/* SEARCH + FILTERS */}
           <div
-            className="company-management-filters"
             style={{
-              display: "grid",
+              display:
+                "grid",
               gridTemplateColumns:
-                "minmax(240px, 1fr) auto auto",
-              gap: "9px",
-              marginTop: "14px",
+                "minmax(260px,1fr) 190px 150px",
+              gap: "10px",
+              marginTop:
+                "16px",
             }}
+            className="company-management-filters"
           >
             <div
               style={{
-                height: "38px",
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor:
-                  "#ffffff",
-                boxSizing:
-                  "border-box",
+                position:
+                  "relative",
               }}
             >
               <Search
-                size={16}
-                color="#94a3b8"
+                size={17}
+                color={
+                  colors.textMuted
+                }
+                style={{
+                  position:
+                    "absolute",
+                  left:
+                    "12px",
+                  top:
+                    "50%",
+                  transform:
+                    "translateY(-50%)",
+                  pointerEvents:
+                    "none",
+                }}
               />
 
               <input
-                type="text"
-                placeholder="Search company, industry, location or contact..."
-                value={searchTerm}
-                onChange={(event) => {
+                value={
+                  searchTerm
+                }
+                onChange={(
+                  event
+                ) => {
                   setSearchTerm(
-                    event.target.value
+                    event
+                      .target
+                      .value
                   );
                   resetPage();
                 }}
+                placeholder="Search company, industry, location or contact..."
                 style={{
-                  width: "100%",
-                  minWidth: 0,
-                  border: "none",
-                  outline: "none",
-                  background:
-                    "transparent",
-                  color: "#334155",
-                  fontSize: "11px",
+                  ...inputStyle,
+                  paddingLeft:
+                    "38px",
                 }}
               />
             </div>
 
             <select
-              value={selectedIndustry}
-              onChange={(event) => {
+              value={
+                selectedIndustry
+              }
+              onChange={(
+                event
+              ) => {
                 setSelectedIndustry(
-                  event.target.value
+                  event
+                    .target
+                    .value
                 );
                 resetPage();
               }}
-              style={{
-                height: "38px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor:
-                  "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
-                cursor: "pointer",
-                outline: "none",
-              }}
+              style={
+                inputStyle
+              }
             >
               {industryOptions.map(
                 (industry) => (
                   <option
-                    key={industry}
-                    value={industry}
+                    key={
+                      industry
+                    }
+                    value={
+                      industry
+                    }
                   >
                     {industry}
                   </option>
@@ -1350,33 +1752,32 @@ export default function CompanyManagement() {
             </select>
 
             <select
-              value={selectedStatus}
-              onChange={(event) => {
+              value={
+                selectedStatus
+              }
+              onChange={(
+                event
+              ) => {
                 setSelectedStatus(
-                  event.target.value
+                  event
+                    .target
+                    .value
                 );
                 resetPage();
               }}
-              style={{
-                height: "38px",
-                padding: "0 11px",
-                border:
-                  "1px solid #dbe4ee",
-                borderRadius: "8px",
-                backgroundColor:
-                  "#ffffff",
-                color: "#64748b",
-                fontSize: "10px",
-                fontWeight: 600,
-                cursor: "pointer",
-                outline: "none",
-              }}
+              style={
+                inputStyle
+              }
             >
               {statusOptions.map(
                 (status) => (
                   <option
-                    key={status}
-                    value={status}
+                    key={
+                      status
+                    }
+                    value={
+                      status
+                    }
                   >
                     {status}
                   </option>
@@ -1386,54 +1787,48 @@ export default function CompanyManagement() {
           </div>
         </div>
 
-        {/* RESULT BAR */}
         <div
           style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent:
-              "space-between",
-            gap: "10px",
             padding:
-              "10px 16px",
+              "10px 18px",
             backgroundColor:
-              "#f8fafc",
-            borderBottom:
-              "1px solid #eef2f7",
+              colors.surfaceMuted,
+            borderBottom: `1px solid ${colors.border}`,
+            color:
+              colors.textSecondary,
+            fontSize:
+              "12px",
           }}
         >
-          <span
+          Showing{" "}
+          <strong
             style={{
-              color: "#64748b",
-              fontSize: "10px",
+              color:
+                colors.text,
             }}
           >
-            Showing{" "}
-            <strong
-              style={{
-                color: "#334155",
-              }}
-            >
-              {filteredCompanies.length === 0
-                ? 0
-                : startIndex + 1}
-              -
-              {Math.min(
-                startIndex +
-                  companiesPerPage,
-                filteredCompanies.length
-              )}
-            </strong>{" "}
-            of{" "}
-            <strong
-              style={{
-                color: "#334155",
-              }}
-            >
-              {filteredCompanies.length}
-            </strong>{" "}
-            companies
-          </span>
+            {filteredCompanies.length
+              ? startIndex + 1
+              : 0}
+            -
+            {Math.min(
+              startIndex +
+                companiesPerPage,
+              filteredCompanies.length
+            )}
+          </strong>{" "}
+          of{" "}
+          <strong
+            style={{
+              color:
+                colors.text,
+            }}
+          >
+            {
+              filteredCompanies.length
+            }
+          </strong>{" "}
+          companies
 
           {(searchTerm ||
             selectedIndustry !==
@@ -1442,15 +1837,24 @@ export default function CompanyManagement() {
               "All Status") && (
             <button
               type="button"
-              onClick={clearFilters}
+              onClick={
+                clearFilters
+              }
               style={{
-                border: "none",
+                marginLeft:
+                  "12px",
+                border:
+                  "none",
                 background:
                   "transparent",
-                color: "#2563eb",
-                fontSize: "10px",
-                fontWeight: 700,
-                cursor: "pointer",
+                color:
+                  colors.primary,
+                fontSize:
+                  "12px",
+                fontWeight:
+                  700,
+                cursor:
+                  "pointer",
               }}
             >
               Clear filters
@@ -1458,23 +1862,31 @@ export default function CompanyManagement() {
           )}
         </div>
 
-        {/* TABLE */}
         <div
           style={{
-            width: "100%",
-            overflowX: "auto",
+            width:
+              "100%",
+            overflowX:
+              "auto",
           }}
         >
           <table
             style={{
-              width: "100%",
-              minWidth: "950px",
+              width:
+                "100%",
+              minWidth:
+                "950px",
               borderCollapse:
                 "collapse",
             }}
           >
             <thead>
-              <tr>
+              <tr
+                style={{
+                  backgroundColor:
+                    colors.surfaceMuted,
+                }}
+              >
                 {[
                   "Company",
                   "Industry",
@@ -1483,52 +1895,94 @@ export default function CompanyManagement() {
                   "Opportunities",
                   "Status",
                   "Action",
-                ].map((heading) => (
-                  <th
-                    key={heading}
-                    style={{
-                      padding:
-                        "10px 13px",
-                      backgroundColor:
-                        "#f8fafc",
-                      borderBottom:
-                        "1px solid #e2e8f0",
-                      color: "#94a3b8",
-                      fontSize: "9px",
-                      fontWeight: 750,
-                      textAlign: "left",
-                      textTransform:
-                        "uppercase",
-                      letterSpacing:
-                        "0.45px",
-                      whiteSpace:
-                        "nowrap",
-                    }}
-                  >
-                    {heading}
-                  </th>
-                ))}
+                ].map(
+                  (heading) => (
+                    <th
+                      key={
+                        heading
+                      }
+                      style={{
+                        padding:
+                          "12px 14px",
+                        backgroundColor:
+                          colors.surfaceMuted,
+                        borderBottom: `1px solid ${colors.border}`,
+                        color:
+                          colors.textSecondary,
+                        fontSize:
+                          "12px",
+                        fontWeight:
+                          700,
+                        textAlign:
+                          "left",
+                        textTransform:
+                          "uppercase",
+                        letterSpacing:
+                          ".03em",
+                        whiteSpace:
+                          "nowrap",
+                      }}
+                    >
+                      {
+                        heading
+                      }
+                    </th>
+                  )
+                )}
               </tr>
             </thead>
 
             <tbody>
-              {paginatedCompanies.length >
-              0 ? (
+              {loading ? (
+                <tr>
+                  <td
+                    colSpan="7"
+                    style={{
+                      padding:
+                        "60px",
+                      textAlign:
+                        "center",
+                      color:
+                        colors.textSecondary,
+                      fontSize:
+                        "14px",
+                    }}
+                  >
+                    <Loader2
+                      size={24}
+                      style={{
+                        animation:
+                          "companySpin 1s linear infinite",
+                      }}
+                    />
+
+                    <div
+                      style={{
+                        marginTop:
+                          "8px",
+                      }}
+                    >
+                      Loading companies...
+                    </div>
+                  </td>
+                </tr>
+              ) : paginatedCompanies.length ? (
                 paginatedCompanies.map(
                   (company) => (
                     <tr
-                      key={company.id}
+                      key={
+                        company._id
+                      }
                       style={{
                         backgroundColor:
-                          "#ffffff",
+                          colors.surface,
                       }}
                     >
                       <td
                         style={{
                           padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
                         }}
                       >
                         <div
@@ -1537,39 +1991,17 @@ export default function CompanyManagement() {
                               "flex",
                             alignItems:
                               "center",
-                            gap: "9px",
+                            gap: "11px",
                           }}
                         >
-                          <div
-                            style={{
-                              width:
-                                "34px",
-                              height:
-                                "34px",
-                              minWidth:
-                                "34px",
-                              display:
-                                "flex",
-                              alignItems:
-                                "center",
-                              justifyContent:
-                                "center",
-                              borderRadius:
-                                "9px",
-                              backgroundColor:
-                                "#eff6ff",
-                              color:
-                                "#2563eb",
-                              fontSize:
-                                "9px",
-                              fontWeight:
-                                800,
-                            }}
-                          >
-                            {getInitials(
-                              company.name
-                            )}
-                          </div>
+                          <CompanyIcon
+                            company={
+                              company
+                            }
+                            colors={
+                              colors
+                            }
+                          />
 
                           <div>
                             <strong
@@ -1577,13 +2009,11 @@ export default function CompanyManagement() {
                                 display:
                                   "block",
                                 color:
-                                  "#334155",
+                                  colors.text,
                                 fontSize:
-                                  "11px",
+                                  "14px",
                                 fontWeight:
                                   700,
-                                whiteSpace:
-                                  "nowrap",
                               }}
                             >
                               {
@@ -1596,11 +2026,11 @@ export default function CompanyManagement() {
                                 display:
                                   "block",
                                 marginTop:
-                                  "2px",
+                                  "3px",
                                 color:
-                                  "#94a3b8",
+                                  colors.textMuted,
                                 fontSize:
-                                  "9px",
+                                  "12px",
                               }}
                             >
                               OJT Partner
@@ -1612,15 +2042,12 @@ export default function CompanyManagement() {
                       <td
                         style={{
                           padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
                           color:
-                            "#64748b",
+                            colors.textSecondary,
                           fontSize:
-                            "10px",
-                          whiteSpace:
-                            "nowrap",
+                            "14px",
                         }}
                       >
                         {
@@ -1631,65 +2058,66 @@ export default function CompanyManagement() {
                       <td
                         style={{
                           padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
                           color:
-                            "#64748b",
+                            colors.textSecondary,
                           fontSize:
-                            "10px",
-                          whiteSpace:
-                            "nowrap",
+                            "14px",
                         }}
                       >
-                        {company.location}
+                        {
+                          company.location
+                        }
                       </td>
 
                       <td
                         style={{
                           padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
                           color:
-                            "#64748b",
+                            colors.textSecondary,
                           fontSize:
-                            "10px",
-                          whiteSpace:
-                            "nowrap",
+                            "14px",
                         }}
                       >
-                        {company.contactPerson}
+                        {
+                          company.contactPerson
+                        }
                       </td>
 
                       <td
                         style={{
                           padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
                           color:
-                            "#334155",
+                            colors.text,
                           fontSize:
-                            "11px",
+                            "14px",
                           fontWeight:
                             700,
                         }}
                       >
-                        {company.opportunities}
+                        {
+                          company.opportunities
+                        }
                       </td>
 
                       <td
                         style={{
                           padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
                         }}
                       >
                         <StatusBadge
                           status={
                             company.status
+                          }
+                          colors={
+                            colors
                           }
                         />
                       </td>
@@ -1699,9 +2127,8 @@ export default function CompanyManagement() {
                           position:
                             "relative",
                           padding:
-                            "11px 13px",
-                          borderBottom:
-                            "1px solid #f1f5f9",
+                            "14px",
+                          borderBottom: `1px solid ${colors.borderLight}`,
                         }}
                       >
                         <button
@@ -1709,41 +2136,42 @@ export default function CompanyManagement() {
                           onClick={() =>
                             setActionCompanyId(
                               actionCompanyId ===
-                                company.id
+                                company._id
                                 ? null
-                                : company.id
+                                : company._id
                             )
                           }
                           style={{
                             width:
-                              "30px",
+                              "34px",
                             height:
-                              "30px",
+                              "34px",
                             display:
                               "flex",
                             alignItems:
                               "center",
                             justifyContent:
                               "center",
-                            border:
-                              "none",
+                            border: `1px solid ${colors.border}`,
                             borderRadius:
-                              "7px",
+                              "8px",
                             backgroundColor:
-                              "#f8fafc",
+                              colors.surface,
                             color:
-                              "#64748b",
+                              colors.textSecondary,
                             cursor:
                               "pointer",
                           }}
                         >
                           <MoreHorizontal
-                            size={16}
+                            size={
+                              17
+                            }
                           />
                         </button>
 
                         {actionCompanyId ===
-                          company.id && (
+                          company._id && (
                           <div
                             style={{
                               position:
@@ -1751,21 +2179,20 @@ export default function CompanyManagement() {
                               right:
                                 "13px",
                               top:
-                                "45px",
+                                "53px",
                               zIndex:
-                                20,
+                                30,
                               width:
-                                "155px",
+                                "180px",
                               padding:
-                                "5px",
-                              border:
-                                "1px solid #e2e8f0",
+                                "6px",
+                              border: `1px solid ${colors.border}`,
                               borderRadius:
-                                "9px",
+                                "10px",
                               backgroundColor:
-                                "#ffffff",
+                                colors.surface,
                               boxShadow:
-                                "0 10px 25px rgba(15, 23, 42, 0.12)",
+                                "0 14px 30px rgba(0,0,0,.25)",
                             }}
                           >
                             <button
@@ -1778,9 +2205,40 @@ export default function CompanyManagement() {
                                   null
                                 );
                               }}
-                              className="company-action-button"
+                              style={{
+                                width:
+                                  "100%",
+                                height:
+                                  "36px",
+                                display:
+                                  "flex",
+                                alignItems:
+                                  "center",
+                                gap:
+                                  "8px",
+                                padding:
+                                  "0 9px",
+                                border:
+                                  "none",
+                                borderRadius:
+                                  "7px",
+                                background:
+                                  "transparent",
+                                color:
+                                  colors.textSecondary,
+                                cursor:
+                                  "pointer",
+                                fontSize:
+                                  "13px",
+                                textAlign:
+                                  "left",
+                              }}
                             >
-                              <Eye size={14} />
+                              <Eye
+                                size={
+                                  14
+                                }
+                              />
                               View Company
                             </button>
 
@@ -1791,10 +2249,39 @@ export default function CompanyManagement() {
                                   company
                                 )
                               }
-                              className="company-action-button"
+                              style={{
+                                width:
+                                  "100%",
+                                height:
+                                  "36px",
+                                display:
+                                  "flex",
+                                alignItems:
+                                  "center",
+                                gap:
+                                  "8px",
+                                padding:
+                                  "0 9px",
+                                border:
+                                  "none",
+                                borderRadius:
+                                  "7px",
+                                background:
+                                  "transparent",
+                                color:
+                                  colors.textSecondary,
+                                cursor:
+                                  "pointer",
+                                fontSize:
+                                  "13px",
+                                textAlign:
+                                  "left",
+                              }}
                             >
                               <Pencil
-                                size={14}
+                                size={
+                                  14
+                                }
                               />
                               Edit Company
                             </button>
@@ -1805,13 +2292,42 @@ export default function CompanyManagement() {
                                 type="button"
                                 onClick={() =>
                                   handleApprove(
-                                    company.id
+                                    company._id
                                   )
                                 }
-                                className="company-action-button company-action-success"
+                                style={{
+                                  width:
+                                    "100%",
+                                  height:
+                                    "36px",
+                                  display:
+                                    "flex",
+                                  alignItems:
+                                    "center",
+                                  gap:
+                                    "8px",
+                                  padding:
+                                    "0 9px",
+                                  border:
+                                    "none",
+                                  borderRadius:
+                                    "7px",
+                                  background:
+                                    "transparent",
+                                  color:
+                                    colors.success,
+                                  cursor:
+                                    "pointer",
+                                  fontSize:
+                                    "13px",
+                                  textAlign:
+                                    "left",
+                                }}
                               >
                                 <Check
-                                  size={14}
+                                  size={
+                                    14
+                                  }
                                 />
                                 Approve Company
                               </button>
@@ -1823,12 +2339,43 @@ export default function CompanyManagement() {
                                 type="button"
                                 onClick={() =>
                                   handleReject(
-                                    company.id
+                                    company._id
                                   )
                                 }
-                                className="company-action-button company-action-danger"
+                                style={{
+                                  width:
+                                    "100%",
+                                  height:
+                                    "36px",
+                                  display:
+                                    "flex",
+                                  alignItems:
+                                    "center",
+                                  gap:
+                                    "8px",
+                                  padding:
+                                    "0 9px",
+                                  border:
+                                    "none",
+                                  borderRadius:
+                                    "7px",
+                                  background:
+                                    "transparent",
+                                  color:
+                                    colors.danger,
+                                  cursor:
+                                    "pointer",
+                                  fontSize:
+                                    "13px",
+                                  textAlign:
+                                    "left",
+                                }}
                               >
-                                <X size={14} />
+                                <X
+                                  size={
+                                    14
+                                  }
+                                />
                                 Reject Company
                               </button>
                             )}
@@ -1844,38 +2391,29 @@ export default function CompanyManagement() {
                     colSpan="7"
                     style={{
                       padding:
-                        "50px 20px",
+                        "60px 20px",
                       textAlign:
                         "center",
                       color:
-                        "#94a3b8",
+                        colors.textSecondary,
                       fontSize:
-                        "11px",
+                        "14px",
                     }}
                   >
                     <Search
-                      size={28}
-                      color="#cbd5e1"
-                      style={{
-                        marginBottom:
-                          "8px",
-                      }}
+                      size={30}
+                      color={
+                        colors.textMuted
+                      }
                     />
-
-                    <div>
-                      No companies found
-                    </div>
 
                     <div
                       style={{
                         marginTop:
-                          "4px",
-                        fontSize:
-                          "10px",
+                          "8px",
                       }}
                     >
-                      Try changing your
-                      search or filters.
+                      No companies found.
                     </div>
                   </td>
                 </tr>
@@ -1884,45 +2422,48 @@ export default function CompanyManagement() {
           </table>
         </div>
 
-        {/* PAGINATION */}
         <div
           style={{
-            minHeight: "58px",
-            display: "flex",
-            alignItems: "center",
+            minHeight:
+              "58px",
+            display:
+              "flex",
+            alignItems:
+              "center",
             justifyContent:
               "space-between",
             gap: "12px",
             padding:
-              "10px 16px",
-            borderTop:
-              "1px solid #eef2f7",
+              "10px 18px",
+            borderTop: `1px solid ${colors.border}`,
           }}
         >
           <span
             style={{
               color:
-                "#94a3b8",
+                colors.textSecondary,
               fontSize:
-                "10px",
+                "13px",
             }}
           >
-            Page {safeCurrentPage} of{" "}
+            Page{" "}
+            {safeCurrentPage}{" "}
+            of{" "}
             {totalPages}
           </span>
 
           <div
             style={{
-              display: "flex",
-              alignItems:
-                "center",
+              display:
+                "flex",
               gap: "5px",
             }}
           >
             <button
               type="button"
               disabled={
-                safeCurrentPage === 1
+                safeCurrentPage ===
+                1
               }
               onClick={() =>
                 setCurrentPage(
@@ -1933,36 +2474,77 @@ export default function CompanyManagement() {
                     )
                 )
               }
-              className="company-page-button"
+              style={{
+                ...secondaryButtonStyle,
+                minHeight:
+                  "34px",
+                width:
+                  "34px",
+                padding: 0,
+                fontSize:
+                  "18px",
+                opacity:
+                  safeCurrentPage ===
+                  1
+                    ? 0.45
+                    : 1,
+              }}
             >
               ‹
             </button>
 
             {Array.from(
               {
-                length: totalPages,
+                length:
+                  totalPages,
               },
               (_, index) =>
                 index + 1
-            ).map((page) => (
-              <button
-                key={page}
-                type="button"
-                onClick={() =>
-                  setCurrentPage(
-                    page
-                  )
-                }
-                className={`company-page-button ${
-                  safeCurrentPage ===
-                  page
-                    ? "company-page-active"
-                    : ""
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+            ).map(
+              (page) => (
+                <button
+                  key={page}
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage(
+                      page
+                    )
+                  }
+                  style={{
+                    width:
+                      "34px",
+                    height:
+                      "34px",
+                    border: `1px solid ${
+                      safeCurrentPage ===
+                      page
+                        ? colors.primary
+                        : colors.border
+                    }`,
+                    borderRadius:
+                      "8px",
+                    backgroundColor:
+                      safeCurrentPage ===
+                      page
+                        ? colors.primary
+                        : colors.surface,
+                    color:
+                      safeCurrentPage ===
+                      page
+                        ? "#ffffff"
+                        : colors.textSecondary,
+                    cursor:
+                      "pointer",
+                    fontSize:
+                      "13px",
+                    fontWeight:
+                      600,
+                  }}
+                >
+                  {page}
+                </button>
+              )
+            )}
 
             <button
               type="button"
@@ -1979,7 +2561,21 @@ export default function CompanyManagement() {
                     )
                 )
               }
-              className="company-page-button"
+              style={{
+                ...secondaryButtonStyle,
+                minHeight:
+                  "34px",
+                width:
+                  "34px",
+                padding: 0,
+                fontSize:
+                  "18px",
+                opacity:
+                  safeCurrentPage ===
+                  totalPages
+                    ? 0.45
+                    : 1,
+              }}
             >
               ›
             </button>
@@ -1987,62 +2583,59 @@ export default function CompanyManagement() {
         </div>
       </section>
 
-      {/* =====================================================
-          VIEW COMPANY MODAL
-      ====================================================== */}
+      {/* Company Details */}
       {viewCompany && (
         <Modal
           onClose={() =>
-            setViewCompany(null)
+            setViewCompany(
+              null
+            )
           }
-          width="540px"
+          width="620px"
+          colors={colors}
         >
           <ModalHeader
             title="Company Details"
             subtitle="Complete company information"
             onClose={() =>
-              setViewCompany(null)
+              setViewCompany(
+                null
+              )
             }
+            colors={colors}
           />
 
           <div
             style={{
-              padding: "20px",
+              padding:
+                "20px",
             }}
           >
             <div
               style={{
-                display: "flex",
-                alignItems: "center",
+                display:
+                  "flex",
+                alignItems:
+                  "center",
                 gap: "13px",
                 padding:
                   "14px",
                 borderRadius:
                   "11px",
                 backgroundColor:
-                  "#f8fafc",
+                  colors.surfaceMuted,
+                border: `1px solid ${colors.border}`,
               }}
             >
-              <div
-                style={{
-                  width: "50px",
-                  height: "50px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent:
-                    "center",
-                  borderRadius: "12px",
-                  backgroundColor:
-                    "#eff6ff",
-                  color: "#2563eb",
-                  fontSize: "13px",
-                  fontWeight: 800,
-                }}
-              >
-                {getInitials(
-                  viewCompany.name
-                )}
-              </div>
+              <CompanyIcon
+                company={
+                  viewCompany
+                }
+                colors={
+                  colors
+                }
+                large
+              />
 
               <div
                 style={{
@@ -2053,14 +2646,16 @@ export default function CompanyManagement() {
                   style={{
                     margin: 0,
                     color:
-                      "#1e293b",
+                      colors.text,
                     fontSize:
-                      "16px",
+                      "17px",
                     fontWeight:
-                      750,
+                      700,
                   }}
                 >
-                  {viewCompany.name}
+                  {
+                    viewCompany.name
+                  }
                 </h3>
 
                 <div
@@ -2068,12 +2663,14 @@ export default function CompanyManagement() {
                     marginTop:
                       "5px",
                     color:
-                      "#64748b",
+                      colors.textSecondary,
                     fontSize:
-                      "10px",
+                      "13px",
                   }}
                 >
-                  {viewCompany.industry}
+                  {
+                    viewCompany.industry
+                  }
                 </div>
               </div>
 
@@ -2081,74 +2678,73 @@ export default function CompanyManagement() {
                 status={
                   viewCompany.status
                 }
+                colors={
+                  colors
+                }
               />
             </div>
 
             <div
-              className="company-details-grid"
               style={{
-                display: "grid",
+                display:
+                  "grid",
                 gridTemplateColumns:
                   "1fr 1fr",
                 gap: "10px",
                 marginTop:
                   "15px",
               }}
+              className="company-details-grid"
             >
               {[
-                {
-                  icon: MapPin,
-                  label: "Location",
-                  value:
-                    viewCompany.location,
-                },
-                {
-                  icon: UserRound,
-                  label: "Contact Person",
-                  value:
-                    viewCompany.contactPerson,
-                },
-                {
-                  icon: Mail,
-                  label: "Email",
-                  value:
-                    viewCompany.email,
-                },
-                {
-                  icon: Phone,
-                  label: "Phone",
-                  value:
-                    viewCompany.phone,
-                },
-                {
-                  icon: BriefcaseBusiness,
-                  label:
-                    "OJT Opportunities",
-                  value:
-                    viewCompany.opportunities,
-                },
-                {
-                  icon: Users,
-                  label:
-                    "Students",
-                  value:
-                    viewCompany.students,
-                },
+                [
+                  MapPin,
+                  "Location",
+                  viewCompany.location,
+                ],
+                [
+                  UserRound,
+                  "Contact Person",
+                  viewCompany.contactPerson,
+                ],
+                [
+                  Mail,
+                  "Email",
+                  viewCompany.email,
+                ],
+                [
+                  Phone,
+                  "Phone",
+                  viewCompany.phone,
+                ],
+                [
+                  BriefcaseBusiness,
+                  "OJT Opportunities",
+                  viewCompany.opportunities,
+                ],
+                [
+                  Users,
+                  "Students",
+                  viewCompany.students,
+                ],
               ].map(
-                ({
-                  icon: Icon,
+                ([
+                  Icon,
                   label,
                   value,
-                }) => (
+                ]) => (
                   <div
-                    key={label}
+                    key={
+                      label
+                    }
                     style={{
                       padding:
                         "12px",
-                      border:
-                        "1px solid #edf2f7",
+                      border: `1px solid ${colors.border}`,
                       borderRadius:
                         "10px",
+                      backgroundColor:
+                        colors.surface,
                     }}
                   >
                     <div
@@ -2157,21 +2753,25 @@ export default function CompanyManagement() {
                           "flex",
                         alignItems:
                           "center",
-                        gap: "7px",
+                        gap:
+                          "7px",
                         color:
-                          "#94a3b8",
+                          colors.textMuted,
                         fontSize:
-                          "9px",
+                          "12px",
                         fontWeight:
-                          700,
-                        textTransform:
-                          "uppercase",
+                          600,
                       }}
                     >
                       <Icon
-                        size={13}
+                        size={
+                          14
+                        }
                       />
-                      {label}
+
+                      {
+                        label
+                      }
                     </div>
 
                     <div
@@ -2179,25 +2779,70 @@ export default function CompanyManagement() {
                         marginTop:
                           "6px",
                         color:
-                          "#334155",
+                          colors.text,
                         fontSize:
-                          "11px",
-                        fontWeight:
-                          650,
+                          "14px",
                         wordBreak:
                           "break-word",
                       }}
                     >
-                      {value}
+                      {
+                        value
+                      }
                     </div>
                   </div>
                 )
               )}
             </div>
 
+            {viewCompany.description && (
+              <div
+                style={{
+                  marginTop:
+                    "10px",
+                  padding:
+                    "13px",
+                  border: `1px solid ${colors.border}`,
+                  borderRadius:
+                    "10px",
+                }}
+              >
+                <div
+                  style={{
+                    color:
+                      colors.textMuted,
+                    fontSize:
+                      "12px",
+                    fontWeight:
+                      700,
+                  }}
+                >
+                  DESCRIPTION
+                </div>
+
+                <div
+                  style={{
+                    marginTop:
+                      "6px",
+                    color:
+                      colors.textSecondary,
+                    fontSize:
+                      "13px",
+                    lineHeight:
+                      1.6,
+                  }}
+                >
+                  {
+                    viewCompany.description
+                  }
+                </div>
+              </div>
+            )}
+
             <div
               style={{
-                display: "flex",
+                display:
+                  "flex",
                 justifyContent:
                   "flex-end",
                 gap: "8px",
@@ -2208,38 +2853,21 @@ export default function CompanyManagement() {
               <button
                 type="button"
                 onClick={() => {
-                  setViewCompany(null);
+                  setViewCompany(
+                    null
+                  );
                   openEditModal(
                     viewCompany
                   );
                 }}
                 style={{
-                  height: "36px",
-                  display:
-                    "inline-flex",
-                  alignItems:
-                    "center",
-                  gap: "6px",
-                  padding:
-                    "0 13px",
-                  border:
-                    "1px solid #dbe4ee",
-                  borderRadius:
-                    "8px",
-                  backgroundColor:
-                    "#ffffff",
+                  ...secondaryButtonStyle,
                   color:
-                    "#475569",
-                  fontSize:
-                    "10px",
-                  fontWeight:
-                    700,
-                  cursor:
-                    "pointer",
+                    colors.primary,
                 }}
               >
                 <Pencil
-                  size={13}
+                  size={14}
                 />
                 Edit
               </button>
@@ -2251,24 +2879,9 @@ export default function CompanyManagement() {
                     null
                   )
                 }
-                style={{
-                  height: "36px",
-                  padding:
-                    "0 15px",
-                  border: "none",
-                  borderRadius:
-                    "8px",
-                  backgroundColor:
-                    "#2563eb",
-                  color:
-                    "#ffffff",
-                  fontSize:
-                    "10px",
-                  fontWeight:
-                    700,
-                  cursor:
-                    "pointer",
-                }}
+                style={
+                  primaryButtonStyle
+                }
               >
                 Close
               </button>
@@ -2277,28 +2890,22 @@ export default function CompanyManagement() {
         </Modal>
       )}
 
-      {/* =====================================================
-          ADD COMPANY MODAL
-      ====================================================== */}
+      {/* Add Company */}
       {showAddModal && (
         <Modal
-          onClose={() => {
-            setShowAddModal(false);
-            setFormData(
-              emptyCompany
-            );
-          }}
-          width="620px"
+          onClose={
+            closeForm
+          }
+          width="680px"
+          colors={colors}
         >
           <ModalHeader
             title="Add Company"
             subtitle="Register a new OJT company"
-            onClose={() => {
-              setShowAddModal(false);
-              setFormData(
-                emptyCompany
-              );
-            }}
+            onClose={
+              closeForm
+            }
+            colors={colors}
           />
 
           {renderCompanyForm(
@@ -2308,28 +2915,22 @@ export default function CompanyManagement() {
         </Modal>
       )}
 
-      {/* =====================================================
-          EDIT COMPANY MODAL
-      ====================================================== */}
+      {/* Edit Company */}
       {editingCompany && (
         <Modal
-          onClose={() => {
-            setEditingCompany(null);
-            setFormData(
-              emptyCompany
-            );
-          }}
-          width="620px"
+          onClose={
+            closeForm
+          }
+          width="680px"
+          colors={colors}
         >
           <ModalHeader
             title="Edit Company"
             subtitle="Update company information"
-            onClose={() => {
-              setEditingCompany(null);
-              setFormData(
-                emptyCompany
-              );
-            }}
+            onClose={
+              closeForm
+            }
+            colors={colors}
           />
 
           {renderCompanyForm(
@@ -2339,138 +2940,32 @@ export default function CompanyManagement() {
         </Modal>
       )}
 
-      {/* =====================================================
-          STYLES
-      ====================================================== */}
-      <style>
-        {`
-          .company-action-button {
-            width: 100%;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 0 9px;
-            border: none;
-            border-radius: 6px;
-            background: transparent;
-            color: #475569;
-            font-size: 10px;
-            font-weight: 600;
-            text-align: left;
-            cursor: pointer;
+      <style>{`
+        @keyframes companySpin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+
+        @media (max-width: 1050px) {
+          .company-management-stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
           }
 
-          .company-action-button:hover {
-            background: #f8fafc;
+          .company-management-filters {
+            grid-template-columns: 1fr 1fr !important;
           }
+        }
 
-          .company-action-success {
-            color: #059669;
+        @media (max-width: 700px) {
+          .company-management-stats,
+          .company-management-filters,
+          .company-form-grid,
+          .company-details-grid {
+            grid-template-columns: 1fr !important;
           }
-
-          .company-action-success:hover {
-            background: #ecfdf5;
-          }
-
-          .company-action-danger {
-            color: #dc2626;
-          }
-
-          .company-action-danger:hover {
-            background: #fef2f2;
-          }
-
-          .company-page-button {
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #e2e8f0;
-            border-radius: 7px;
-            background: #ffffff;
-            color: #64748b;
-            font-size: 10px;
-            font-weight: 600;
-            cursor: pointer;
-          }
-
-          .company-page-button:hover:not(:disabled) {
-            border-color: #bfdbfe;
-            background: #eff6ff;
-            color: #2563eb;
-          }
-
-          .company-page-button:disabled {
-            color: #cbd5e1;
-            cursor: not-allowed;
-            background: #f8fafc;
-          }
-
-          .company-page-active {
-            border-color: #2563eb;
-            background: #2563eb;
-            color: #ffffff;
-          }
-
-          .company-page-active:hover:not(:disabled) {
-            border-color: #2563eb;
-            background: #2563eb;
-            color: #ffffff;
-          }
-
-          .company-form-label {
-            display: block;
-            margin-bottom: 6px;
-            color: #475569;
-            font-size: 10px;
-            font-weight: 700;
-          }
-
-          .company-form-input {
-            width: 100%;
-            height: 38px;
-            padding: 0 10px;
-            box-sizing: border-box;
-            border: 1px solid #dbe4ee;
-            border-radius: 8px;
-            outline: none;
-            background: #ffffff;
-            color: #334155;
-            font-size: 11px;
-          }
-
-          .company-form-input:focus {
-            border-color: #93c5fd;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08);
-          }
-
-          @media (max-width: 1000px) {
-            .company-management-stats {
-              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-            }
-          }
-
-          @media (max-width: 700px) {
-            .company-management-stats {
-              grid-template-columns: 1fr !important;
-            }
-
-            .company-management-filters {
-              grid-template-columns: 1fr !important;
-            }
-
-            .company-form-grid {
-              grid-template-columns: 1fr !important;
-            }
-
-            .company-details-grid {
-              grid-template-columns: 1fr !important;
-            }
-          }
-        `}
-      </style>
+        }
+      `}</style>
     </div>
   );
 }

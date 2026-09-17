@@ -7,29 +7,160 @@ const {
   addCollegeCoordinator,
   updateCollegeCoordinator,
   deleteCollegeCoordinator,
+
+  getStudents,
+  addStudent,
+  updateStudent,
+  deleteStudent,
+
+  getCompanies,
+  addCompany,
+  updateCompany,
+  approveCompany,
+  rejectCompany,
+  deleteCompany,
 } = require("../controllers/collegeCoordinatorController");
 
-const router = express.Router();
+const {
+  getTrackingStudents,
+  updateTrackingProgress,
+} = require("../controllers/ojtTrackingController");
 
-// Get all
-router.get("/", getAllCollegeCoordinators);
+const {
+  getReports,
+} = require("../controllers/ojtReportsController");
 
-// Get by department
+const router =
+  express.Router();
+
+const {
+  getDashboard,
+} = require("../controllers/coordinatorDashboardController");
+
+// =========================================================
+// COLLEGE COORDINATOR ROUTES
+// =========================================================
+
+router.get(
+  "/",
+  getAllCollegeCoordinators
+);
+
 router.get(
   "/department/:department",
   getCoordinatorsByDepartment
 );
 
-// Get by ID
-router.get("/:id", getCollegeCoordinatorById);
+// =========================================================
+// STUDENT MANAGEMENT
+// These must stay before /:id
+// =========================================================
 
-// Add
-router.post("/", addCollegeCoordinator);
+router.get(
+  "/students",
+  getStudents
+);
 
-// Update
-router.put("/:id", updateCollegeCoordinator);
+router.post(
+  "/students",
+  addStudent
+);
 
-// Delete
-router.delete("/:id", deleteCollegeCoordinator);
+router.put(
+  "/students/:id",
+  updateStudent
+);
+
+router.delete(
+  "/students/:id",
+  deleteStudent
+);
+
+// =========================================================
+// COMPANY MANAGEMENT
+// =========================================================
+
+router.get(
+  "/companies",
+  getCompanies
+);
+
+router.post(
+  "/companies",
+  addCompany
+);
+
+router.put(
+  "/companies/:id/approve",
+  approveCompany
+);
+
+router.put(
+  "/companies/:id/reject",
+  rejectCompany
+);
+
+router.put(
+  "/companies/:id",
+  updateCompany
+);
+
+router.delete(
+  "/companies/:id",
+  deleteCompany
+);
+
+// =========================================================
+// OJT TRACKING
+// =========================================================
+
+router.get(
+  "/tracking",
+  getTrackingStudents
+);
+
+router.put(
+  "/tracking/:id/progress",
+  updateTrackingProgress
+);
+
+// =========================================================
+// OJT REPORTS
+// =========================================================
+
+router.get(
+  "/reports",
+  getReports
+);
+
+// DASHBOARD
+router.get(
+  "/dashboard",
+  getDashboard
+);
+// =========================================================
+// SINGLE COLLEGE COORDINATOR
+// These must remain LAST
+// =========================================================
+
+router.get(
+  "/:id",
+  getCollegeCoordinatorById
+);
+
+router.post(
+  "/",
+  addCollegeCoordinator
+);
+
+router.put(
+  "/:id",
+  updateCollegeCoordinator
+);
+
+router.delete(
+  "/:id",
+  deleteCollegeCoordinator
+);
 
 module.exports = router;
