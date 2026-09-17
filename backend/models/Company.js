@@ -24,37 +24,19 @@ const companySchema = new mongoose.Schema(
       trim: true,
     },
 
-    contactPerson: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-
     email: {
       type: String,
       default: "",
       trim: true,
     },
 
-    phone: {
+    companyPhone: {
       type: String,
       default: "",
       trim: true,
     },
 
     street: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-
-    city: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-
-    state: {
       type: String,
       default: "",
       trim: true,
