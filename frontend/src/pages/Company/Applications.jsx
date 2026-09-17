@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 
 import CompanySidebar from "../../components/common/CompanySidebar";
 import CompanyHeader from "../../components/common/CompanyHeader";
@@ -10,19 +11,16 @@ import ApplicationsFiltersBar from "../../components/company/ApplicationsFilters
 import ApplicationsTable from "../../components/company/ApplicationsTable";
 import StudentApplicationPanel from "../../components/company/StudentApplicationPanel";
 
-import {
-  applicationsStats,
-  applications,
-  opportunityOptions,
-  departmentOptions,
-  statusOptions,
-} from "../../components/company/applicationsData";
-
 const PER_PAGE = 7;
 
-const STATUS_STORAGE_KEY = "company_application_statuses";
+const getToken = () => localStorage.getItem("token");
+
+const API_BASE = "http://localhost:5000/api/companies/applications";
 
 const Applications = () => {
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [filters, setFilters] = useState({
     search: "",
     opportunity: "All Opportunities",
@@ -32,57 +30,65 @@ const Applications = () => {
   });
 
   const [page, setPage] = useState(1);
+  const [selectedId, setSelectedId] = useState(null);
 
-  const [selectedId, setSelectedId] = useState(
-    applications[0] ? applications[0].id : null
-  );
+  const fetchApplications = async () => {
+    const token = getToken();
 
-  const [appStatuses, setAppStatuses] = useState(() => {
-    const defaultStatuses = Object.fromEntries(
-      applications.map((a) => [a.id, a.status])
-    );
+    if (!token) {
+      console.error(
+        "No login token found in localStorage. Checked keys: ojtUser, user, authUser, currentUser, token. " +
+        "Make sure you are actually logged in, and check Console > Object.keys(localStorage) to find the real key name."
+      );
+      setLoading(false);
+      return;
+    }
 
     try {
-      const savedStatuses = localStorage.getItem(
-        STATUS_STORAGE_KEY
-      );
-
-      if (savedStatuses) {
-        return {
-          ...defaultStatuses,
-          ...JSON.parse(savedStatuses),
-        };
+      const response = await axios.get(API_BASE, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setApplications(response.data.applications || []);
+      if (response.data.applications && response.data.applications[0]) {
+        setSelectedId(response.data.applications[0].id);
       }
     } catch (error) {
+      // Log the ACTUAL server message, not just the generic Axios error
       console.error(
-        "Error loading application statuses:",
-        error
+        "Failed to load applications:",
+        error.response?.status,
+        error.response?.data || error.message
       );
+    } finally {
+      setLoading(false);
     }
-
-    return defaultStatuses;
-  });
+  };
 
   useEffect(() => {
-    try {
-      localStorage.setItem(
-        STATUS_STORAGE_KEY,
-        JSON.stringify(appStatuses)
-      );
-    } catch (error) {
-      console.error(
-        "Error saving application statuses:",
-        error
-      );
-    }
-  }, [appStatuses]);
+    fetchApplications();
+  }, []);
+
+  const opportunityOptions = useMemo(
+    () => ["All Opportunities", ...new Set(applications.map((a) => a.opportunity).filter(Boolean))],
+    [applications]
+  );
+  const departmentOptions = useMemo(
+    () => ["All Departments", ...new Set(applications.map((a) => a.department).filter(Boolean))],
+    [applications]
+  );
+  const statusOptions = ["All Status", "Pending", "In Review", "Shortlisted", "Accepted", "Rejected"];
+
+  const applicationsStats = useMemo(() => {
+    return {
+      total: applications.length,
+      shortlisted: applications.filter((a) => a.status === "Shortlisted").length,
+      accepted: applications.filter((a) => a.status === "Accepted").length,
+      rejected: applications.filter((a) => a.status === "Rejected").length,
+    };
+  }, [applications]);
 
   const handleFilterChange = (key, value) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-
+    setFilters((prev) => ({ ...prev, [key]: value }));
     setPage(1);
   };
 
@@ -94,72 +100,46 @@ const Applications = () => {
       status: "All Status",
       appliedOn: "",
     });
-
     setPage(1);
   };
 
-  const mergedApplications = useMemo(() => {
-    return applications.map((a) => ({
-      ...a,
-      status: appStatuses[a.id] || a.status,
-    }));
-  }, [appStatuses]);
-
   const filteredApplications = useMemo(() => {
-    return mergedApplications.filter((a) => {
+    return applications.filter((a) => {
       const searchText = filters.search.toLowerCase();
 
       const matchesSearch =
-        a.name.toLowerCase().includes(searchText) ||
-        a.college.toLowerCase().includes(searchText) ||
-        a.skills.some((s) =>
-          s.toLowerCase().includes(searchText)
-        );
+        a.name?.toLowerCase().includes(searchText) ||
+        a.college?.toLowerCase().includes(searchText) ||
+        a.skills?.some((s) => s.toLowerCase().includes(searchText));
 
-      const matchesOpportunity =
-        filters.opportunity === "All Opportunities" ||
-        a.opportunity === filters.opportunity;
-
-      const matchesDepartment =
-        filters.department === "All Departments" ||
-        a.department === filters.department;
-
-      const matchesStatus =
-        filters.status === "All Status" ||
-        a.status === filters.status;
-
+      const matchesOpportunity = filters.opportunity === "All Opportunities" || a.opportunity === filters.opportunity;
+      const matchesDepartment = filters.department === "All Departments" || a.department === filters.department;
+      const matchesStatus = filters.status === "All Status" || a.status === filters.status;
       const matchesDate = !filters.appliedOn;
 
-      return (
-        matchesSearch &&
-        matchesOpportunity &&
-        matchesDepartment &&
-        matchesStatus &&
-        matchesDate
-      );
+      return matchesSearch && matchesOpportunity && matchesDepartment && matchesStatus && matchesDate;
     });
-  }, [mergedApplications, filters]);
+  }, [applications, filters]);
 
-  const totalPages = Math.max(
-    1,
-    Math.ceil(filteredApplications.length / PER_PAGE)
-  );
+  const totalPages = Math.max(1, Math.ceil(filteredApplications.length / PER_PAGE));
+  const paginated = filteredApplications.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const selectedApplication = applications.find((a) => a.id === selectedId) || null;
 
-  const paginated = filteredApplications.slice(
-    (page - 1) * PER_PAGE,
-    page * PER_PAGE
-  );
-
-  const selectedApplication =
-    mergedApplications.find(
-      (a) => a.id === selectedId
-    ) || null;
-
-  const updateStatus = (id, status) => {
-    setAppStatuses((prev) => ({
-      ...prev,
-      [id]: status,
-    }));
+  const updateStatus = async (id, status) => {
+    try {
+      await axios.put(
+        `${API_BASE}/${id}`,
+        { status },
+        { headers: { Authorization: `Bearer ${getToken()}` } }
+      );
+      fetchApplications();
+    } catch (error) {
+      console.error(
+        "Failed to update status:",
+        error.response?.status,
+        error.response?.data || error.message
+      );
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -167,6 +147,8 @@ const Applications = () => {
       setPage(newPage);
     }
   };
+
+  if (loading) return <p className="p-6 text-gray-500">Loading applications...</p>;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
