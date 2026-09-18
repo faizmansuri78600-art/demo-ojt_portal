@@ -9,7 +9,7 @@ const getHeaders = () => {
   };
 };
 
- export const api = {
+export const api = {
   baseURL: API_BASE_URL,
 
   async get(endpoint) {
@@ -86,23 +86,5 @@ const getHeaders = () => {
     return {
       data: responseData,
     };
-  },
-
-  async put(endpoint, data) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
-
-      throw new Error(error.message || "Something went wrong");
-    }
-
-    return response.json();
   },
 };

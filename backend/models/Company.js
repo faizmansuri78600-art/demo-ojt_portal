@@ -9,6 +9,7 @@ const companySchema = new mongoose.Schema(
 
     verifiedByCoordinatorId: {
       type: String,
+      default: "",
     },
 
     companyName: {
@@ -19,74 +20,97 @@ const companySchema = new mongoose.Schema(
 
     yearOfEstablishment: {
       type: String,
+      default: "",
     },
 
     registrationNumber: {
       type: String,
+      default: "",
     },
 
     companySize: {
       type: String,
+      default: "",
+    },
+
+    industry: {
+      type: String,
+      default: "",
+    },
+
+    headOffice: {
+      type: String,
+      default: "",
     },
 
     companyPhone: {
       type: String,
+      default: "",
     },
-    logoUrl: {
-  type: String,
-  default: "",
-},
 
     street: {
       type: String,
+      default: "",
     },
 
     city: {
       type: String,
+      default: "",
     },
 
     state: {
       type: String,
+      default: "",
     },
 
     zipCode: {
       type: String,
+      default: "",
     },
 
     country: {
       type: String,
+      default: "",
     },
 
     website: {
       type: String,
+      default: "",
     },
 
     contactPerson: {
       type: String,
+      default: "",
     },
 
     alternateEmail: {
       type: String,
+      default: "",
     },
 
     email: {
       type: String,
+      default: "",
     },
 
     mobileNumber: {
       type: String,
+      default: "",
     },
 
     phoneNumber: {
       type: String,
+      default: "",
     },
 
     description: {
       type: String,
+      default: "",
     },
 
     logoUrl: {
       type: String,
+      default: "",
     },
 
     isVerified: {
@@ -96,6 +120,7 @@ const companySchema = new mongoose.Schema(
   },
   {
     collection: "companies",
+    timestamps: true,
   }
 );
 

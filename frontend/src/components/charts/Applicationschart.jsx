@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -6,10 +6,10 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer
-} from 'recharts';
+  ResponsiveContainer,
+} from "recharts";
 
-const companyId = 'C001';
+import { api } from "../../services/api";
 
 export default function ApplicationsChart() {
   const [data, setData] = useState([]);
@@ -17,25 +17,53 @@ export default function ApplicationsChart() {
   useEffect(() => {
     const fetchApplicationTrend = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/companies/${companyId}/dashboard/application-trend`
+        // ==========================================
+        // Get logged-in company
+        // ==========================================
+
+        const companyResponse = await api.get(
+          "/companies/me"
         );
 
-        const result = await response.json();
+        if (
+          !companyResponse.data?.success ||
+          !companyResponse.data.company
+        ) {
+          throw new Error(
+            companyResponse.data?.message ||
+              "Company profile not found."
+          );
+        }
 
-        if (result.success) {
-          const formattedData = result.trend.map((item) => ({
-            date: item.date,
-            applications: item.applications
-          }));
+        const company =
+          companyResponse.data.company;
+
+        // ==========================================
+        // Get application trend
+        // ==========================================
+
+        const response = await api.get(
+          `/companies/${company._id}/dashboard/application-trend`
+        );
+
+        const result = response.data;
+
+        if (result?.success) {
+          const formattedData =
+            result.trend.map((item) => ({
+              date: item.date,
+              applications: item.applications,
+            }));
 
           setData(formattedData);
         }
       } catch (error) {
         console.error(
-          'Failed to fetch application trend:',
+          "Failed to fetch application trend:",
           error
         );
+
+        setData([]);
       }
     };
 
@@ -56,14 +84,17 @@ export default function ApplicationsChart() {
       </div>
 
       <div className="flex-1 min-h-0">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer
+          width="100%"
+          height="100%"
+        >
           <LineChart
             data={data}
             margin={{
               top: 5,
               right: 10,
               left: -10,
-              bottom: 0
+              bottom: 0,
             }}
           >
             <CartesianGrid
@@ -96,11 +127,11 @@ export default function ApplicationsChart() {
               strokeWidth={2.5}
               dot={{
                 r: 3.5,
-                fill: '#1E5EFF'
+                fill: "#1E5EFF",
               }}
               activeDot={{
                 r: 5,
-                fill: '#1E5EFF'
+                fill: "#1E5EFF",
               }}
             />
           </LineChart>

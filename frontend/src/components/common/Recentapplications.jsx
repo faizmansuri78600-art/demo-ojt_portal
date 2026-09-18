@@ -7,27 +7,50 @@ export default function RecentApplications() {
   const [applications, setApplications] = useState([]);
   const [showAll, setShowAll] = useState(false);
 
-  useEffect(() => {
-    const fetchApplications = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/companies/${companyId}/dashboard/applications`
-        );
-
-        const data = await response.json();
-
-        if (data.success) {
-          setApplications(data.applications);
+useEffect(() => {
+  const fetchApplications = async () => {
+    try {
+      // Get the logged-in company
+      const companyResponse = await fetch(
+        "http://localhost:5000/api/companies/me",
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
         }
-      } catch (error) {
-        console.error("Failed to fetch applications:", error);
+      );
+
+      const companyData = await companyResponse.json();
+
+      if (!companyData.success || !companyData.company) {
+        console.error("Company details not found");
+        return;
       }
-    };
 
-    fetchApplications();
-  }, []);
+      const companyId = companyData.company._id;
 
-  const getInitials = (name) => {
+      // Get applications for this company
+      const response = await fetch(
+        `http://localhost:5000/api/companies/${companyId}/dashboard/applications`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        setApplications(data.applications);
+      }
+    } catch (error) {
+      console.error("Failed to fetch applications:", error);
+    }
+  };
+
+  fetchApplications();
+}, []);  const getInitials = (name) => {
     if (!name) return "US";
 
     const words = name.trim().split(" ");
