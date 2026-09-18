@@ -8,17 +8,6 @@ import OpportunityFilters from "../../components/company/OpportunityFilters";
 import OpportunityTable from "../../components/company/OpportunityTable";
 import OpportunityForm from "../../components/company/OpportunityForm";
 
-/*
-  TEMPORARY COMPANY ID
-
-  We are using C001 for now because your current logged-in user
-  does not yet have a matching CompanyCoordinator record.
-
-  Later this can be replaced with the actual logged-in company ID.
-*/
-const COMPANY_ID = "C001";
-
-
 // =====================================================
 // Convert MongoDB opportunity → UI opportunity
 // =====================================================
@@ -57,21 +46,23 @@ const convertToUI = (item) => {
           .split(",")
           .map((skill) => skill.trim())
           .filter(Boolean)
-      : ["HTML", "CSS"],
+      : [],
 
     eligibility: item.eligibility || "",
 
-    status: item.status || "Draft",
+    // Backend uses "Open"
+    // UI displays "Active"
+    status:
+      item.status === "Open"
+        ? "Active"
+        : item.status || "Draft",
 
     posted: item.postedOn || "",
-
-    companyId: item.companyId || COMPANY_ID,
 
     createdByCoordinatorId:
       item.createdByCoordinatorId || "",
   };
 };
-
 
 // =====================================================
 // Convert UI opportunity → MongoDB opportunity
@@ -93,10 +84,9 @@ const convertToMongo = (formData) => {
     : formData.skills || "";
 
   return {
-    companyId: COMPANY_ID,
-
-    createdByCoordinatorId:
-      formData.createdByCoordinatorId || "",
+    // IMPORTANT:
+    // companyId is NOT sent from frontend.
+    // Backend gets the company from the logged-in user.
 
     title: formData.title || "",
 
@@ -123,13 +113,15 @@ const convertToMongo = (formData) => {
 
     eligibility: formData.eligibility || "",
 
-    /*
-      The form does not currently have an isPaid field.
-      We derive it from whether a stipend is entered.
-    */
+    // If stipend is greater than 0,
+    // consider it a paid opportunity.
     isPaid: stipendValue > 0,
 
-    status: formData.status || "Draft",
+    // UI "Active" = Backend "Open"
+    status:
+      formData.status === "Active"
+        ? "Open"
+        : formData.status || "Draft",
 
     postedOn:
       formData.postedOn ||
@@ -137,9 +129,7 @@ const convertToMongo = (formData) => {
   };
 };
 
-
 export default function ManageOjtOpportunities() {
-
   // =====================================================
   // STATES
   // =====================================================
@@ -166,57 +156,60 @@ export default function ManageOjtOpportunities() {
   const [viewOpportunity, setViewOpportunity] =
     useState(null);
 
-
   // =====================================================
-  // LOAD OPPORTUNITIES FROM MONGODB
+  // LOAD LOGGED-IN COMPANY OPPORTUNITIES
   // =====================================================
 
   useEffect(() => {
-
     const fetchOpportunities = async () => {
-
       try {
+        const token = localStorage.getItem("token");
 
-        const response = await fetch(
-          `http://localhost:5000/api/opportunities/company/${COMPANY_ID}`
-        );
-
-        if (!response.ok) {
+        if (!token) {
           throw new Error(
-            "Failed to fetch opportunities"
+            "Login token not found. Please login again."
           );
         }
 
+        const response = await fetch(
+          "http://localhost:5000/api/opportunities/my",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
         const data = await response.json();
 
-        if (data.success) {
-
-          const uiOpportunities =
-            data.opportunities.map(convertToUI);
-
-          setOpportunities(uiOpportunities);
-
+        if (!response.ok || !data.success) {
+          throw new Error(
+            data.message ||
+              "Failed to fetch opportunities"
+          );
         }
 
-      } catch (error) {
+        const uiOpportunities =
+          data.opportunities.map(convertToUI);
 
+        setOpportunities(uiOpportunities);
+
+      } catch (error) {
         console.error(
           "Failed to load opportunities:",
           error
         );
 
         window.alert(
-          "Failed to load opportunities from database."
+          error.message ||
+            "Failed to load opportunities from database."
         );
-
       }
-
     };
 
     fetchOpportunities();
-
   }, []);
-
 
   // =====================================================
   // FILTER
@@ -224,14 +217,20 @@ export default function ManageOjtOpportunities() {
 
   const filteredOpportunities =
     opportunities.filter((item) => {
-
       const searchText =
         search.toLowerCase();
 
       const matchesSearch =
-        item.title.toLowerCase().includes(searchText) ||
-        item.description.toLowerCase().includes(searchText) ||
-        item.skills.join(" ").toLowerCase().includes(searchText);
+        item.title
+          .toLowerCase()
+          .includes(searchText) ||
+        item.description
+          .toLowerCase()
+          .includes(searchText) ||
+        item.skills
+          .join(" ")
+          .toLowerCase()
+          .includes(searchText);
 
       const matchesDepartment =
         department === "All Departments" ||
@@ -251,18 +250,14 @@ export default function ManageOjtOpportunities() {
         matchesStatus &&
         matchesDuration
       );
-
     });
-
 
   // =====================================================
   // ADD
   // =====================================================
 
   const handleAdd = () => {
-
     setSelectedOpportunity({
-
       id: null,
 
       title: "",
@@ -287,45 +282,36 @@ export default function ManageOjtOpportunities() {
 
       status: "Draft",
 
-      posted: new Date()
-        .toISOString()
-        .split("T")[0],
-
+      posted:
+        new Date()
+          .toISOString()
+          .split("T")[0],
     });
-
   };
-
 
   // =====================================================
   // EDIT
   // =====================================================
 
   const handleEdit = (opportunity) => {
-
     setSelectedOpportunity({
       ...opportunity,
     });
-
   };
-
 
   // =====================================================
   // VIEW
   // =====================================================
 
   const handleView = (opportunity) => {
-
     setViewOpportunity(opportunity);
-
   };
-
 
   // =====================================================
   // DELETE
   // =====================================================
 
   const handleDelete = async (opportunity) => {
-
     const confirmed = window.confirm(
       `Are you sure you want to delete "${opportunity.title}"?`
     );
@@ -335,11 +321,23 @@ export default function ManageOjtOpportunities() {
     }
 
     try {
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        throw new Error(
+          "Login token not found. Please login again."
+        );
+      }
 
       const response = await fetch(
         `http://localhost:5000/api/opportunities/${opportunity.id}`,
         {
           method: "DELETE",
+
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
 
@@ -348,7 +346,7 @@ export default function ManageOjtOpportunities() {
       if (!response.ok || !data.success) {
         throw new Error(
           data.message ||
-          "Failed to delete opportunity"
+            "Failed to delete opportunity"
         );
       }
 
@@ -365,35 +363,31 @@ export default function ManageOjtOpportunities() {
 
       if (
         selectedOpportunity &&
-        selectedOpportunity.id === opportunity.id
+        selectedOpportunity.id ===
+          opportunity.id
       ) {
         setSelectedOpportunity(null);
       }
 
     } catch (error) {
-
       console.error(
         "Delete Opportunity Error:",
         error
       );
 
       window.alert(
-        "Failed to delete opportunity."
+        error.message ||
+          "Failed to delete opportunity."
       );
-
     }
-
   };
-
 
   // =====================================================
   // SAVE
   // =====================================================
 
   const handleSave = async (formData) => {
-
     if (!formData.title.trim()) {
-
       window.alert(
         "Please enter opportunity title."
       );
@@ -402,14 +396,12 @@ export default function ManageOjtOpportunities() {
     }
 
     if (!formData.description.trim()) {
-
       window.alert(
         "Please enter description."
       );
 
       return;
     }
-
 
     // ---------------------------------------------------
     // Convert UI data to MongoDB format
@@ -418,15 +410,21 @@ export default function ManageOjtOpportunities() {
     const mongoData =
       convertToMongo(formData);
 
-
     try {
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        throw new Error(
+          "Login token not found. Please login again."
+        );
+      }
 
       // =================================================
       // EDIT EXISTING
       // =================================================
 
       if (formData.id) {
-
         const response = await fetch(
           `http://localhost:5000/api/opportunities/${formData.id}`,
           {
@@ -435,6 +433,9 @@ export default function ManageOjtOpportunities() {
             headers: {
               "Content-Type":
                 "application/json",
+
+              Authorization:
+                `Bearer ${token}`,
             },
 
             body: JSON.stringify(
@@ -452,10 +453,9 @@ export default function ManageOjtOpportunities() {
         ) {
           throw new Error(
             data.message ||
-            "Failed to update opportunity"
+              "Failed to update opportunity"
           );
         }
-
 
         // Convert saved MongoDB data
         // back to UI format
@@ -464,7 +464,6 @@ export default function ManageOjtOpportunities() {
           convertToUI(
             data.opportunity
           );
-
 
         setOpportunities(
           (previous) =>
@@ -475,20 +474,16 @@ export default function ManageOjtOpportunities() {
             )
         );
 
-
         window.alert(
           "Opportunity updated successfully."
         );
-
       }
-
 
       // =================================================
       // ADD NEW
       // =================================================
 
       else {
-
         const response = await fetch(
           "http://localhost:5000/api/opportunities/",
           {
@@ -497,6 +492,9 @@ export default function ManageOjtOpportunities() {
             headers: {
               "Content-Type":
                 "application/json",
+
+              Authorization:
+                `Bearer ${token}`,
             },
 
             body: JSON.stringify(
@@ -505,10 +503,8 @@ export default function ManageOjtOpportunities() {
           }
         );
 
-
         const data =
           await response.json();
-
 
         if (
           !response.ok ||
@@ -516,10 +512,9 @@ export default function ManageOjtOpportunities() {
         ) {
           throw new Error(
             data.message ||
-            "Failed to add opportunity"
+              "Failed to add opportunity"
           );
         }
-
 
         // Convert saved MongoDB data
         // back to UI format
@@ -529,7 +524,6 @@ export default function ManageOjtOpportunities() {
             data.opportunity
           );
 
-
         setOpportunities(
           (previous) => [
             newOpportunity,
@@ -537,18 +531,14 @@ export default function ManageOjtOpportunities() {
           ]
         );
 
-
         window.alert(
           "Opportunity added successfully."
         );
-
       }
-
 
       setSelectedOpportunity(null);
 
     } catch (error) {
-
       console.error(
         "Save Opportunity Error:",
         error
@@ -556,31 +546,24 @@ export default function ManageOjtOpportunities() {
 
       window.alert(
         error.message ||
-        "Failed to save opportunity."
+          "Failed to save opportunity."
       );
-
     }
-
   };
-
 
   // =====================================================
   // CANCEL
   // =====================================================
 
   const handleCancel = () => {
-
     setSelectedOpportunity(null);
-
   };
-
 
   // =====================================================
   // RESET FILTERS
   // =====================================================
 
   const handleReset = () => {
-
     setSearch("");
 
     setDepartment(
@@ -594,29 +577,24 @@ export default function ManageOjtOpportunities() {
     setDuration(
       "All Duration"
     );
-
   };
-
 
   // =====================================================
   // UI
   // =====================================================
 
   return (
-
     <div className="flex min-h-screen w-full bg-[#F8FAFC]">
 
       {/* SIDEBAR */}
 
       <CompanySidebar />
 
-
       {/* RIGHT SIDE */}
 
       <div className="flex-1 min-w-0 flex flex-col">
 
         <CompanyHeader />
-
 
         {/* MAIN */}
 
@@ -650,7 +628,6 @@ export default function ManageOjtOpportunities() {
 
             </div>
 
-
             {/* ADD BUTTON */}
 
             <button
@@ -673,11 +650,9 @@ export default function ManageOjtOpportunities() {
 
           </div>
 
-
           {/* MAIN AREA */}
 
           <div className="flex gap-4 items-stretch">
-
 
             {/* LEFT */}
 
@@ -705,7 +680,6 @@ export default function ManageOjtOpportunities() {
 
               </div>
 
-
               {/* FILTERS */}
 
               <div className="mb-4">
@@ -713,17 +687,20 @@ export default function ManageOjtOpportunities() {
                 <OpportunityFilters
                   search={search}
                   setSearch={setSearch}
+
                   department={department}
                   setDepartment={setDepartment}
+
                   status={status}
                   setStatus={setStatus}
+
                   duration={duration}
                   setDuration={setDuration}
+
                   onReset={handleReset}
                 />
 
               </div>
-
 
               {/* TABLE */}
 
@@ -731,13 +708,15 @@ export default function ManageOjtOpportunities() {
                 opportunities={
                   filteredOpportunities
                 }
+
                 onEdit={handleEdit}
+
                 onView={handleView}
+
                 onDelete={handleDelete}
               />
 
             </div>
-
 
             {/* RIGHT FORM */}
 
@@ -745,7 +724,9 @@ export default function ManageOjtOpportunities() {
               opportunity={
                 selectedOpportunity
               }
+
               onSave={handleSave}
+
               onCancel={handleCancel}
             />
 
@@ -753,13 +734,13 @@ export default function ManageOjtOpportunities() {
 
         </main>
 
-
         <CompanyFooter />
 
       </div>
 
-
-      {/* VIEW POPUP */}
+      {/* =================================================
+          VIEW POPUP
+          ================================================= */}
 
       {viewOpportunity && (
 
@@ -805,7 +786,6 @@ export default function ManageOjtOpportunities() {
               </button>
 
             </div>
-
 
             <div className="space-y-3 text-[12px]">
 
@@ -890,7 +870,6 @@ export default function ManageOjtOpportunities() {
 
             </div>
 
-
             <button
               type="button"
               onClick={() =>
@@ -920,15 +899,12 @@ export default function ManageOjtOpportunities() {
   );
 }
 
-
 // =====================================================
 // DETAIL
 // =====================================================
 
 function Detail({ label, value }) {
-
   return (
-
     <div>
 
       <p className="font-semibold text-[#111827]">
@@ -940,6 +916,5 @@ function Detail({ label, value }) {
       </p>
 
     </div>
-
   );
 }

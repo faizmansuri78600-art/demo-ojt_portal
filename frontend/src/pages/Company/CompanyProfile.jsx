@@ -18,7 +18,7 @@ import {
   FaTwitter
 } from "react-icons/fa";
 
-import abcLogo from "../../assets/abc.jpeg";
+
 
 import CompanySidebar from "../../components/common/CompanySidebar";
 import CompanyHeader from "../../components/common/CompanyHeader";
@@ -29,93 +29,49 @@ import { api } from "../../services/api";
 
 export default function CompanyProfile() {
   const [isEditing, setIsEditing] = useState(false);
-  const [companyId, setCompanyId] = useState("company_001");
+
+  const getLogoUrl = (logoUrl) => {
+    if (!logoUrl) return null;
+    if (logoUrl.startsWith("http://") || logoUrl.startsWith("https://")) {
+      return logoUrl;
+    }
+    return `http://localhost:5000${logoUrl}`;
+  };
   const [isCreating, setIsCreating] = useState(false);
 
   /* ================= BASIC INFORMATION ================= */
 
-  const [companyName, setCompanyName] = useState(
-    "ABC Technologies Pvt. Ltd."
-  );
-
-  const [yearOfEstablishment, setYearOfEstablishment] = useState(
-    "2018"
-  );
-
-  const [registrationNumber, setRegistrationNumber] = useState(
-    "ABC/Tech/2018/558"
-  );
-
-  const [companySize, setCompanySize] = useState(
-    "51 - 200 Employees"
-  );
-
-  const [industry, setIndustry] = useState(
-    "Information Technology"
-  );
-
-  const [headOffice, setHeadOffice] = useState(
-    "Pune, Maharashtra, India"
-  );
-
-  const [website, setWebsite] = useState(
-    "www.abctechnologies.com"
-  );
+  const [companyName, setCompanyName] = useState("");
+  const [yearOfEstablishment, setYearOfEstablishment] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [companySize, setCompanySize] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [headOffice, setHeadOffice] = useState("");
+  const [website, setWebsite] = useState("");
 
   /* ================= CONTACT INFORMATION ================= */
 
-  const [contactPerson, setContactPerson] = useState(
-    "Rahul Sharma"
-  );
-
-  const [alternateEmail, setAlternateEmail] = useState(
-    "recruitment@abctechnologies.com"
-  );
-
-  const [email, setEmail] = useState(
-    "hr@abctechnologies.com"
-  );
-
-  const [mobileNumber, setMobileNumber] = useState(
-    "+91 87654 32109"
-  );
-
-  const [phoneNumber, setPhoneNumber] = useState(
-    "+91 98765 43210"
-  );
+  const [contactPerson, setContactPerson] = useState("");
+  const [alternateEmail, setAlternateEmail] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   /* ================= ADDRESS INFORMATION ================= */
 
-  const [streetAddress, setStreetAddress] = useState(
-    "ABC Tower, 2nd Floor, Baner Road"
-  );
-
-  const [city, setCity] = useState(
-    "Pune"
-  );
-
-  const [state, setState] = useState(
-    "Maharashtra"
-  );
-
-  const [pincode, setPincode] = useState(
-    "411045"
-  );
-
-  const [country, setCountry] = useState(
-    "India"
-  );
+  const [streetAddress, setStreetAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [country, setCountry] = useState("");
 
   /* ================= DESCRIPTION ================= */
 
-  const [description, setDescription] = useState(
-    "ABC Technologies Pvt. Ltd. is a leading IT solutions and services company delivering innovative digital solutions to clients worldwide. We specialize in web development, mobile applications, cloud solutions, and IT consulting. Our mission is to empower businesses through technology and innovation. We believe in building strong relationships with communities through internship and training opportunities."
-  );
+  const [description, setDescription] = useState("");
 
   /* ================= LOGO ================= */
 
-  const [companyLogo, setCompanyLogo] = useState(abcLogo);
-
+  const [companyLogo, setCompanyLogo] = useState(null);
   const fileInputRef = useRef(null);
 
   /* ================= POPUP ================= */
@@ -149,64 +105,38 @@ export default function CompanyProfile() {
   useEffect(() => {
     const loadCompanyProfile = async () => {
       try {
-        const response = await api.get(
-          `/companies/${companyId}`
-        );
+        const response = await api.get("/companies/me");
+        console.log("COMPANY DATA FROM DATABASE:", response);
 
-        console.log(
-          "COMPANY DATA FROM DATABASE:",
-          response
-        );
-
-        if (response.success && response.company) {
-          const company = response.company;
-
+        if (response.data?.success && response.data.company) {
+          const company = response.data.company;
           setCompanyName(company.companyName || "");
-          setYearOfEstablishment(
-            company.yearOfEstablishment || ""
-          );
-          setRegistrationNumber(
-            company.registrationNumber || ""
-          );
+          setYearOfEstablishment(company.yearOfEstablishment || "");
+          setRegistrationNumber(company.registrationNumber || "");
           setCompanySize(company.companySize || "");
           setIndustry(company.industry || "");
           setHeadOffice(company.headOffice || "");
           setWebsite(company.website || "");
-
-          setContactPerson(
-            company.contactPerson || ""
-          );
-          setAlternateEmail(
-            company.alternateEmail || ""
-          );
+          setContactPerson(company.contactPerson || "");
+          setAlternateEmail(company.alternateEmail || "");
           setEmail(company.email || "");
-          setMobileNumber(
-            company.mobileNumber || ""
-          );
-          setPhoneNumber(
-            company.phoneNumber || ""
-          );
-
+          setMobileNumber(company.mobileNumber || "");
+          setPhoneNumber(company.phoneNumber || "");
           setStreetAddress(company.street || "");
           setCity(company.city || "");
           setState(company.state || "");
           setPincode(company.zipCode || "");
           setCountry(company.country || "");
-
           setDescription(company.description || "");
-
-          setCompanyLogo(company.logoUrl || null);
+          setCompanyLogo(getLogoUrl(company.logoUrl));
         }
       } catch (error) {
-        console.error(
-          "Error loading company profile:",
-          error
-        );
+        console.error("Error loading company profile:", error);
+        showPopup(error.message || "Failed to load company profile.", "error");
       }
     };
-
     loadCompanyProfile();
-  }, [companyId]);
+  }, []);
 
   /* ================= CHANGE LOGO ================= */
 
@@ -218,7 +148,7 @@ export default function CompanyProfile() {
 
   /* ================= SELECT NEW LOGO ================= */
 
-  const handleLogoChange = (event) => {
+  const handleLogoChange = async (event) => {
     if (!isEditing) return;
 
     const file = event.target.files[0];
@@ -227,35 +157,105 @@ export default function CompanyProfile() {
       return;
     }
 
-    if (!file.type.startsWith("image/")) {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "image/webp",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
       showPopup(
-        "Please select a valid image file.",
+        "Only JPG, JPEG, PNG and WEBP images are allowed.",
         "error"
       );
 
+      event.target.value = "";
       return;
     }
 
-    const imageURL = URL.createObjectURL(file);
+    if (file.size > 2 * 1024 * 1024) {
+      showPopup(
+        "Logo size must be less than 2 MB.",
+        "error"
+      );
 
-    setCompanyLogo(imageURL);
+      event.target.value = "";
+      return;
+    }
 
-    showPopup(
-      "Logo changed successfully!"
-    );
+    try {
+      const token = localStorage.getItem("token");
+
+      const formData = new FormData();
+      formData.append("logo", file);
+
+      const response = await fetch(
+        "http://localhost:5000/api/companies/me/logo",
+        {
+          method: "POST",
+          headers: {
+            ...(token
+              ? { Authorization: `Bearer ${token}` }
+              : {}),
+          },
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || "Failed to upload company logo."
+        );
+      }
+
+      setCompanyLogo(data.logoUrl || null);
+
+      showPopup("Logo uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading company logo:", error);
+
+      showPopup(
+        error.message || "Failed to upload company logo.",
+        "error"
+      );
+    } finally {
+      event.target.value = "";
+    }
   };
 
   /* ================= REMOVE LOGO ================= */
 
-  const handleRemoveLogo = () => {
+  const handleRemoveLogo = async () => {
     if (!isEditing) return;
 
-    setCompanyLogo(null);
+    try {
+      const response = await api.put("/companies/me", {
+        logoUrl: "",
+      });
 
-    showPopup(
-      "Company logo removed.",
-      "success"
-    );
+      if (!response.data?.success) {
+        throw new Error(
+          response.data?.message || "Failed to remove company logo."
+        );
+      }
+
+      setCompanyLogo(null);
+
+      showPopup(
+        "Company logo removed.",
+        "success"
+      );
+    } catch (error) {
+      console.error("Error removing company logo:", error);
+
+      showPopup(
+        error.message || "Failed to remove company logo.",
+        "error"
+      );
+    }
   };
 
   /* ================= EDIT PROFILE ================= */
@@ -277,40 +277,10 @@ export default function CompanyProfile() {
   /* ================= ADD NEW PROFILE ================= */
 
   const handleAddNewProfile = () => {
-    setIsCreating(true);
+    setIsCreating(false);
     setIsEditing(true);
-
-    setCompanyName("");
-    setYearOfEstablishment("");
-    setRegistrationNumber("");
-    setCompanySize("");
-    setIndustry("");
-    setHeadOffice("");
-    setWebsite("");
-
-    setContactPerson("");
-    setAlternateEmail("");
-    setEmail("");
-    setMobileNumber("");
-    setPhoneNumber("");
-
-    setStreetAddress("");
-    setCity("");
-    setState("");
-    setPincode("");
-    setCountry("");
-
-    setDescription("");
-    setCompanyLogo(null);
-
-    showPopup(
-      "Enter the details for the new company profile."
-    );
-
-    window.scrollTo({
-      top: 0,
-      behavior: "smooth"
-    });
+    showPopup("You already have a company profile. You can edit the existing profile.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   /* ================= SAVE CHANGES ================= */
@@ -320,180 +290,50 @@ export default function CompanyProfile() {
 
     try {
       const companyData = {
-        companyName,
-        yearOfEstablishment,
-        registrationNumber,
-        companySize,
-        industry,
-        headOffice,
-        website,
-        contactPerson,
-        alternateEmail,
-        email,
-        mobileNumber,
-        phoneNumber,
-        street: streetAddress,
-        city,
-        state,
-        zipCode: pincode,
-        country,
-        description
+        companyName, yearOfEstablishment, registrationNumber, companySize,
+        industry, headOffice, website, contactPerson, alternateEmail, email,
+        mobileNumber, phoneNumber, street: streetAddress, city, state,
+        zipCode: pincode, country, description
       };
 
-      console.log(
-        "DATA BEING SENT TO MONGODB:",
-        companyData
-      );
+      console.log("DATA BEING SENT TO MONGODB:", companyData);
 
-      let response;
+      const response = await api.put("/companies/me", companyData);
+      console.log("DATABASE RESPONSE:", response);
 
-      /* ================= CREATE NEW COMPANY ================= */
-
-      if (isCreating) {
-        response = await api.post(
-          "/companies",
-          companyData
-        );
-
-        console.log(
-          "NEW COMPANY CREATED:",
-          response
-        );
-
-        if (!response.success || !response.company) {
-          throw new Error(
-            response.message ||
-            "Failed to create company profile."
-          );
-        }
-
-        setCompanyId(response.company._id);
-        setIsCreating(false);
-        setIsEditing(false);
-
-        showPopup(
-          `New company profile created successfully! ID: ${response.company._id}`
-        );
-
-        return;
+      if (!response.data?.success) {
+        throw new Error(response.data?.message || "Failed to save company profile.");
       }
 
-      /* ================= UPDATE EXISTING COMPANY ================= */
-
-      response = await api.put(
-        `/companies/${companyId}`,
-        companyData
-      );
-
-      console.log(
-        "DATABASE RESPONSE:",
-        response
-      );
-
-      if (!response.success) {
-        throw new Error(
-          response.message ||
-          "Failed to save company profile."
-        );
+      const company = response.data.company;
+      if (company) {
+        setCompanyName(company.companyName || "");
+        setYearOfEstablishment(company.yearOfEstablishment || "");
+        setRegistrationNumber(company.registrationNumber || "");
+        setCompanySize(company.companySize || "");
+        setIndustry(company.industry || "");
+        setHeadOffice(company.headOffice || "");
+        setWebsite(company.website || "");
+        setContactPerson(company.contactPerson || "");
+        setAlternateEmail(company.alternateEmail || "");
+        setEmail(company.email || "");
+        setMobileNumber(company.mobileNumber || "");
+        setPhoneNumber(company.phoneNumber || "");
+        setStreetAddress(company.street || "");
+        setCity(company.city || "");
+        setState(company.state || "");
+        setPincode(company.zipCode || "");
+        setCountry(company.country || "");
+        setDescription(company.description || "");
+        setCompanyLogo(getLogoUrl(company.logoUrl));
       }
 
-      if (response.company) {
-        const company = response.company;
-
-        setCompanyName(
-          company.companyName || ""
-        );
-
-        setYearOfEstablishment(
-          company.yearOfEstablishment || ""
-        );
-
-        setRegistrationNumber(
-          company.registrationNumber || ""
-        );
-
-        setCompanySize(
-          company.companySize || ""
-        );
-
-        setIndustry(
-          company.industry || ""
-        );
-
-        setHeadOffice(
-          company.headOffice || ""
-        );
-
-        setWebsite(
-          company.website || ""
-        );
-
-        setContactPerson(
-          company.contactPerson || ""
-        );
-
-        setAlternateEmail(
-          company.alternateEmail || ""
-        );
-
-        setEmail(
-          company.email || ""
-        );
-
-        setMobileNumber(
-          company.mobileNumber || ""
-        );
-
-        setPhoneNumber(
-          company.phoneNumber || ""
-        );
-
-        setStreetAddress(
-          company.street || ""
-        );
-
-        setCity(
-          company.city || ""
-        );
-
-        setState(
-          company.state || ""
-        );
-
-        setPincode(
-          company.zipCode || ""
-        );
-
-        setCountry(
-          company.country || ""
-        );
-
-        setDescription(
-          company.description || ""
-        );
-
-        setCompanyLogo(
-          company.logoUrl || null
-        );
-      }
-
+      setIsCreating(false);
       setIsEditing(false);
-
-      showPopup(
-        "Company profile updated successfully!"
-      );
-
+      showPopup("Company profile updated successfully!");
     } catch (error) {
-      console.error(
-        "Error saving company profile:",
-        error
-      );
-
-      showPopup(
-        error.message ||
-        "Failed to save company profile.",
-        "error"
-      );
+      console.error("Error saving company profile:", error);
+      showPopup(error.message || "Failed to save company profile.", "error");
     }
   };
 
@@ -501,110 +341,39 @@ export default function CompanyProfile() {
 
   const handleCancelChanges = async () => {
     try {
-      const response = await api.get(
-        `/companies/${companyId}`
-      );
+      const response = await api.get("/companies/me");
 
-      if (response.success && response.company) {
-        const company = response.company;
-
-        setCompanyName(
-          company.companyName || ""
-        );
-
-        setYearOfEstablishment(
-          company.yearOfEstablishment || ""
-        );
-
-        setRegistrationNumber(
-          company.registrationNumber || ""
-        );
-
-        setCompanySize(
-          company.companySize || ""
-        );
-
-        setIndustry(
-          company.industry || ""
-        );
-
-        setHeadOffice(
-          company.headOffice || ""
-        );
-
-        setWebsite(
-          company.website || ""
-        );
-
-        setContactPerson(
-          company.contactPerson || ""
-        );
-
-        setAlternateEmail(
-          company.alternateEmail || ""
-        );
-
-        setEmail(
-          company.email || ""
-        );
-
-        setMobileNumber(
-          company.mobileNumber || ""
-        );
-
-        setPhoneNumber(
-          company.phoneNumber || ""
-        );
-
-        setStreetAddress(
-          company.street || ""
-        );
-
-        setCity(
-          company.city || ""
-        );
-
-        setState(
-          company.state || ""
-        );
-
-        setPincode(
-          company.zipCode || ""
-        );
-
-        setCountry(
-          company.country || ""
-        );
-
-        setDescription(
-          company.description || ""
-        );
-
-        setCompanyLogo(
-          company.logoUrl || null
-        );
+      if (response.data?.success && response.data.company) {
+        const company = response.data.company;
+        setCompanyName(company.companyName || "");
+        setYearOfEstablishment(company.yearOfEstablishment || "");
+        setRegistrationNumber(company.registrationNumber || "");
+        setCompanySize(company.companySize || "");
+        setIndustry(company.industry || "");
+        setHeadOffice(company.headOffice || "");
+        setWebsite(company.website || "");
+        setContactPerson(company.contactPerson || "");
+        setAlternateEmail(company.alternateEmail || "");
+        setEmail(company.email || "");
+        setMobileNumber(company.mobileNumber || "");
+        setPhoneNumber(company.phoneNumber || "");
+        setStreetAddress(company.street || "");
+        setCity(company.city || "");
+        setState(company.state || "");
+        setPincode(company.zipCode || "");
+        setCountry(company.country || "");
+        setDescription(company.description || "");
+        setCompanyLogo(getLogoUrl(company.logoUrl));
       }
 
       setIsCreating(false);
       setIsEditing(false);
-
-      showPopup(
-        "Changes cancelled."
-      );
-
+      showPopup("Changes cancelled.");
     } catch (error) {
-      console.error(
-        "Error cancelling changes:",
-        error
-      );
-
+      console.error("Error cancelling changes:", error);
       setIsCreating(false);
       setIsEditing(false);
-
-      showPopup(
-        "Failed to restore company profile.",
-        "error"
-      );
+      showPopup(error.message || "Failed to restore company profile.", "error");
     }
   };
 
@@ -1124,8 +893,8 @@ export default function CompanyProfile() {
                     {companyLogo ? (
 
                       <img
-                        src={companyLogo}
-                        alt="ABC Technologies Logo"
+                        src={getLogoUrl(companyLogo)}
+                        alt="Company Logo"
                         className="
                           w-[105px]
                           h-[105px]

@@ -5,26 +5,39 @@ const {
   getOpenOpportunities,
   getTopCompanies,
   getOpportunitiesByCompany,
+  getMyOpportunities,
   addOpportunity,
   updateOpportunity,
   deleteOpportunity,
 } = require("../controllers/opportunityController");
 
+const protect = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
 // ======================================
-// Existing Routes
+// Public Routes
 // ======================================
 
+// Get all opportunities
 router.get("/", getAllOpportunities);
 
+// Get only open opportunities
 router.get("/open", getOpenOpportunities);
 
+// Get top companies
 router.get("/top-companies", getTopCompanies);
 
 // ======================================
 // Company Opportunity Routes
 // ======================================
+
+// Get opportunities of the logged-in company
+router.get(
+  "/my",
+  protect,
+  getMyOpportunities
+);
 
 // Get opportunities of a specific company
 router.get(
@@ -32,21 +45,28 @@ router.get(
   getOpportunitiesByCompany
 );
 
+// ======================================
+// Company CRUD Routes
+// ======================================
+
 // Add new opportunity
 router.post(
   "/",
+  protect,
   addOpportunity
 );
 
-// Update opportunity
+// Update an opportunity
 router.put(
   "/:id",
+  protect,
   updateOpportunity
 );
 
-// Delete opportunity
+// Delete an opportunity
 router.delete(
   "/:id",
+  protect,
   deleteOpportunity
 );
 

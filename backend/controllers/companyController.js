@@ -109,7 +109,7 @@ const createCompany = async (req, res) => {
       }
     });
 
-    // Find the latest company ID
+    // Find the latest old-style company ID
     const companies = await Company.find(
       {
         _id: /^company_\d+$/,
@@ -158,7 +158,7 @@ const createCompany = async (req, res) => {
 };
 
 // =====================================================
-// Update existing company profile
+// Update existing company profile by ID
 // =====================================================
 
 const updateCompany = async (req, res) => {
@@ -195,7 +195,9 @@ const updateCompany = async (req, res) => {
 
     const company = await Company.findByIdAndUpdate(
       req.params.id,
-      { $set: updates },
+      {
+        $set: updates,
+      },
       {
         new: true,
         runValidators: true,
@@ -220,6 +222,192 @@ const updateCompany = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to update company profile",
+      error: error.message,
+    });
+  }
+};
+
+// =====================================================
+// GET LOGGED-IN COMPANY PROFILE
+// =====================================================
+
+const getMyCompanyProfile = async (req, res) => {
+  try {
+    // Get email of currently logged-in Company user
+    const userEmail = req.user.email;
+
+    if (!userEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Logged-in user email not found",
+      });
+    }
+
+    // Find company using logged-in user's email
+    const company = await Company.findOne({
+      email: userEmail,
+    });
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company profile not found for this user",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      company,
+    });
+  } catch (error) {
+    console.error("Get My Company Profile Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch company profile",
+      error: error.message,
+    });
+  }
+};
+
+// =====================================================
+// UPDATE LOGGED-IN COMPANY PROFILE
+// =====================================================
+
+const updateMyCompanyProfile = async (req, res) => {
+  try {
+    // Get email of currently logged-in Company user
+    const userEmail = req.user.email;
+
+    if (!userEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Logged-in user email not found",
+      });
+    }
+
+    const allowedFields = [
+      "companyName",
+      "yearOfEstablishment",
+      "registrationNumber",
+      "companySize",
+      "industry",
+      "headOffice",
+      "street",
+      "city",
+      "state",
+      "zipCode",
+      "country",
+      "website",
+      "contactPerson",
+      "alternateEmail",
+      "email",
+      "mobileNumber",
+      "phoneNumber",
+      "description",
+      "logoUrl",
+    ];
+
+    const updates = {};
+
+    allowedFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    // Update only the company belonging to logged-in user
+    const company = await Company.findOneAndUpdate(
+      {
+        email: userEmail,
+      },
+      {
+        $set: updates,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company profile not found for this user",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Company profile updated successfully",
+      company,
+    });
+  } catch (error) {
+    console.error("Update My Company Profile Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update company profile",
+      error: error.message,
+    });
+  }
+};
+
+// =====================================================
+// UPLOAD COMPANY LOGO
+// =====================================================
+
+const uploadCompanyLogo = async (req, res) => {
+  try {
+    const userEmail = req.user.email;
+
+    if (!userEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Logged-in user email not found",
+      });
+    }
+
+    // Check if a logo was uploaded
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "Please select a company logo",
+      });
+    }
+
+    // Find company using logged-in user's email
+    const company = await Company.findOne({
+      email: userEmail,
+    });
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company profile not found for this user",
+      });
+    }
+
+    // Path that will be stored in MongoDB
+    const logoUrl = `/uploads/company-logos/${req.file.filename}`;
+
+    // Save logo path in company document
+    company.logoUrl = logoUrl;
+
+    await company.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Company logo uploaded successfully",
+      logoUrl: company.logoUrl,
+      company,
+    });
+  } catch (error) {
+    console.error("Upload Company Logo Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to upload company logo",
       error: error.message,
     });
   }
@@ -307,10 +495,13 @@ const getCompanyDashboardStats = async (req, res) => {
     const { id } = req.params;
 
     // Find all opportunities belonging to this company
-    const opportunities = await Opportunity.find({
-      companyId: id,
-    });
+    console.log("COMPANY ID:", id);
 
+const allOpportunities = await Opportunity.find({});
+console.log("ALL OPPORTUNITIES:", allOpportunities);
+
+const opportunities = await Opportunity.find({ companyId: id });
+console.log("MATCHING OPPORTUNITIES:", opportunities);
     const opportunityIds = opportunities.map(
       (opportunity) => opportunity._id
     );
@@ -470,7 +661,7 @@ const getCompanyDashboardDepartmentStats = async (
 
     const departmentCounts = {};
 
-    // Find the department of every applicant
+    // Find department of every applicant
     for (const application of applications) {
       const student = await Student.findById(
         application.studentId
@@ -521,6 +712,11 @@ module.exports = {
   getCompanyById,
   createCompany,
   updateCompany,
+
+  getMyCompanyProfile,
+  updateMyCompanyProfile,
+  uploadCompanyLogo,
+
   getCompanyDashboardApplications,
   getCompanyDashboardStats,
   getCompanyDashboardApplicationTrend,

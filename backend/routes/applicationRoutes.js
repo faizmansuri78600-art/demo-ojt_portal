@@ -1,22 +1,30 @@
 const express = require("express");
 
 const {
+  createApplication,
   getRecentApplications,
   getApplicationStats,
 } = require("../controllers/applicationController");
 
+const protect = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-// ======================================
-// Recent Applications
-// ======================================
+
+// =====================================================
+// STUDENT APPLY
+// =====================================================
+
+router.post("/", protect, createApplication);
+
+
+// =====================================================
+// APPLICATION DATA
+// =====================================================
 
 router.get("/recent", getRecentApplications);
 
-// ======================================
-// Application Statistics
-// ======================================
-
 router.get("/stats", getApplicationStats);
+
 
 module.exports = router;
