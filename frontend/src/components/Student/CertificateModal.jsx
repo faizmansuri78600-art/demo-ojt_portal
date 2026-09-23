@@ -55,7 +55,7 @@ export default function CertificateModal({ certificate, onClose }) {
             <p className="mt-5 text-sm text-slate-500">This is to certify that</p>
 
             <h2 className="mt-2 border-b-2 border-amber-300 px-6 pb-1 text-2xl font-bold text-blue-900">
-              {certificate.studentName || "Mohammad Zaid"}
+              {certificate.studentName || "—"}
             </h2>
 
             <p className="mt-5 max-w-lg text-sm leading-relaxed text-slate-600">

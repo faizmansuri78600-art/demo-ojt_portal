@@ -1,9 +1,7 @@
-// const User = require("../models/User");
-// const Student = require("../models/Student");
 const User = require("../models/User");
-const Faculty = require("../models/Faculty");
 const Student = require("../models/Student");
 const Company = require("../models/Company");
+const CompanyCoordinator = require("../models/CompanyCoordinator");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
 
@@ -24,45 +22,28 @@ const loginUser = async (req, res) => {
       });
     }
 
-  const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-if (!user) {
-  return res.status(401).json({
-    success: false,
-    message: "Invalid email or password",
-  });
-}
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
 
-let facultyId = null;
-let facultyName = null;
+    const isPasswordCorrect = await bcrypt.compare(
+      password,
+      user.passwordHash
+    );
 
-if (user.role === "Faculty") {
-  const faculty = await Faculty.findOne({ userId: user._id });
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+      });
+    }
 
-  if (!faculty) {
-    return res.status(404).json({
-      success: false,
-      message: "Faculty profile not found",
-    });
-  }
-
-  facultyId = faculty._id;
-  facultyName = faculty.name;
-}
-
-const isPasswordCorrect = await bcrypt.compare(
-  password,
-  user.passwordHash
-);
-
-if (!isPasswordCorrect) {
-  return res.status(401).json({
-    success: false,
-    message: "Invalid email or password",
-  });
-}
-
-const token = generateToken(user._id, user.role);
+    const token = generateToken(user._id, user.role);
 
     return res.status(200).json({
       success: true,
@@ -71,12 +52,10 @@ const token = generateToken(user._id, user.role);
       token: token,
 
       user: {
-  id: user._id,
-  email: user.email,
-  role: user.role,
-  facultyId: facultyId,
-  facultyName: facultyName,
-},
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     console.error("Login Error:", error);
@@ -267,13 +246,15 @@ const token = generateToken(user._id, user.role);
       rollNumber,
       department,
       cgpa,
-
-      // Company fields
+      // Company Coordinator specific fields
       companyName,
-      industry,
-      contactPerson,
+      street,
+      city,
+      state,
+      zipCode,
       website,
-      address,
+      description,
+      designation,
     } = req.body;
 
     // ---------------------------------------------
@@ -316,6 +297,17 @@ const token = generateToken(user._id, user.role);
       return res.status(400).json({
         success: false,
         message: "User with this email already exists",
+      });
+    }
+
+    // ---------------------------------------------
+    // Company Coordinator requires a company name
+    // ---------------------------------------------
+
+    if (role === "Company Coordinator" && !companyName) {
+      return res.status(400).json({
+        success: false,
+        message: "Company name is required for Company Coordinator registration",
       });
     }
 
@@ -397,45 +389,36 @@ const token = generateToken(user._id, user.role);
     }
 
     // ---------------------------------------------
-    // Create Company Profile
+    // Create Company + CompanyCoordinator link
+    // Only for Company Coordinator registration
     // ---------------------------------------------
 
     let company = null;
+    let companyCoordinator = null;
 
-    if (role === "Company") {
+    if (role === "Company Coordinator") {
       const companyId = "C" + Date.now();
 
       company = await Company.create({
         _id: companyId,
-
-        companyName:
-          companyName || name,
-
-        industry:
-          industry || "Other",
-
-        contactPerson:
-          contactPerson || name,
-
-        email:
-          email,
-
-        phone:
-          phone || "",
-
-        street:
-          address || "",
-
-        website:
-          website || "",
-
-        description: "",
-
-        verifiedByCoordinatorId: "",
-
+        companyName: companyName,
+        street: street || "",
+        city: city || "",
+        state: state || "",
+        zipCode: zipCode || "",
+        website: website || "",
+        description: description || "",
         isVerified: false,
+      });
 
-        status: "Pending",
+      const companyCoordinatorId = "CC" + Date.now();
+
+      companyCoordinator = await CompanyCoordinator.create({
+        _id: companyCoordinatorId,
+        userId: userId,
+        companyId: companyId,
+        name: name,
+        designation: designation || "",
       });
     }
 
@@ -472,20 +455,16 @@ const token = generateToken(user._id, user.role);
       company: company
         ? {
             id: company._id,
-            companyName:
-              company.companyName,
-            industry:
-              company.industry,
-            contactPerson:
-              company.contactPerson,
-            email:
-              company.email,
-            phone:
-              company.phone,
-            website:
-              company.website,
-            status:
-              company.status,
+            companyName: company.companyName,
+            isVerified: company.isVerified,
+          }
+        : null,
+
+      companyCoordinator: companyCoordinator
+        ? {
+            id: companyCoordinator._id,
+            userId: companyCoordinator.userId,
+            companyId: companyCoordinator.companyId,
           }
         : null,
     });
