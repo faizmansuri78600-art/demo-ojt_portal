@@ -4,6 +4,7 @@ const {
   getAllWeeklyReports,
   getWeeklyReportById,
   getReportsByOjtId,
+  getReportsByFacultyId,
   addWeeklyReport,
   updateWeeklyReport,
   deleteWeeklyReport,
@@ -22,6 +23,12 @@ router.get(
   getReportsByOjtId
 );
 
+//Get reports by Faculty ID
+// Get reports by Faculty ID
+router.get(
+  "/faculty/:facultyId",
+  getReportsByFacultyId
+);
 
 // Get report by ID
 router.get(

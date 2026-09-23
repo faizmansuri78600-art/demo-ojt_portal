@@ -1,4 +1,8 @@
 const Evaluation = require("../models/Evaluation");
+const AssignedOjt = require("../models/AssignedOjt");
+const Application = require("../models/Application");
+const Student = require("../models/Student");
+const Opportunity = require("../models/Opportunity");
 
 // Get All Evaluations
 const getAllEvaluations = async (req, res) => {
@@ -257,6 +261,78 @@ const deleteEvaluation = async (req, res) => {
   }
 };
 
+// Get Evaluation Students By Faculty ID
+const getEvaluationStudentsByFacultyId = async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+
+    const assignedOjtList = await AssignedOjt.find({
+      facultyId,
+    });
+
+    const students = [];
+
+    for (const assignment of assignedOjtList) {
+      const application = await Application.findById(
+        assignment.applicationId
+      );
+
+      if (!application) continue;
+
+      const student = await Student.findById(application.studentId);
+
+      if (!student) continue;
+
+      const opportunity = await Opportunity.findById(
+        application.opportunityId
+      );
+
+      const evaluation = await Evaluation.findOne({
+        assignedOjtId: assignment._id,
+      });
+
+      students.push({
+        id: assignment._id,
+        studentId: student._id,
+        initials: student.name
+          ? student.name
+              .split(" ")
+              .map((word) => word[0])
+              .join("")
+              .substring(0, 2)
+              .toUpperCase()
+          : "NA",
+        name: student.name || "N/A",
+        email: "",
+        company: opportunity?.companyId || "N/A",
+        location: opportunity?.location || "N/A",
+        role: opportunity?.title || "N/A",
+        progress: evaluation ? 100 : 0,
+        progressColor: evaluation ? "bg-green-500" : "bg-blue-500",
+        status: evaluation ? "Evaluated" : "Pending",
+        assignedOjtId: assignment._id,
+        evaluationId: evaluation?._id || null,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      count: students.length,
+      students,
+    });
+  } catch (error) {
+    console.error(
+      "Get Evaluation Students By Faculty Error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch evaluation students",
+    });
+  }
+};
+
 module.exports = {
   getAllEvaluations,
   getEvaluationById,
@@ -264,4 +340,5 @@ module.exports = {
   addEvaluation,
   updateEvaluation,
   deleteEvaluation,
+  getEvaluationStudentsByFacultyId,
 };

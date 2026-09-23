@@ -5,9 +5,12 @@ const FeedbackModal = ({ report, onClose, onSubmit }) => {
   const [text, setText] = useState("");
   const [rating, setRating] = useState(0);
 
-  const handleSubmit = () => {
-    onSubmit({ text, rating }); // static/dummy submission — no backend yet
-  };
+ const handleSubmit = () => {
+  onSubmit({
+    facultyRemarks: text,
+    status: "Approved",
+  });
+};
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">

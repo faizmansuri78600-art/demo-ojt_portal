@@ -32,6 +32,11 @@ const weeklyReportSchema = new mongoose.Schema(
     facultyRemarks: {
       type: String,
     },
+    status: {
+     type: String,
+    enum: ["Pending Review", "Approved", "Revision Requested"],
+  default: "Pending Review",
+},
   },
   {
     collection: "weeklyreport",

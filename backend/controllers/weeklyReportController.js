@@ -1,4 +1,9 @@
 const WeeklyReport = require("../models/WeeklyReport");
+const AssignedOjt = require("../models/AssignedOjt");
+const Application = require("../models/Application");
+const Student = require("../models/Student");
+const Opportunity = require("../models/Opportunity");
+const Company = require("../models/Company");
 
 // ======================================
 // Get All Weekly Reports
@@ -93,6 +98,106 @@ const getReportsByOjtId = async (req, res) => {
   }
 };
 
+// ======================================
+// Get Weekly Reports By Faculty ID
+// ======================================
+
+const getReportsByFacultyId = async (req, res) => {
+  try {
+    const { facultyId } = req.params;
+
+    const assignedOjts = await AssignedOjt.find({ facultyId });
+
+    const reports = [];
+
+    for (const assignment of assignedOjts) {
+
+      const weeklyReports = await WeeklyReport.find({
+        assignedOjtId: assignment._id,
+      }).sort({ weekNumber: 1 });
+
+      for (const report of weeklyReports) {
+
+        const application = await Application.findById(
+          assignment.applicationId
+        );
+
+        if (!application) continue;
+
+        const student = await Student.findById(
+          application.studentId
+        );
+
+        const opportunity = await Opportunity.findById(
+          application.opportunityId
+        );
+
+        let company = null;
+
+        if (opportunity) {
+          company = await Company.findById(
+            opportunity.companyId
+          );
+        }
+
+        reports.push({
+          id: report._id,
+           studentId: student ? student._id : null,
+  assignedOjtId: assignment._id,
+ taskAssigned: report.taskAssigned || "",
+workCompleted: report.workCompleted || "",
+facultyRemarks: report.facultyRemarks || "",
+name: student ? student.name : "N/A",
+
+          initials: student
+            ? student.name
+                .split(" ")
+                .map((word) => word[0])
+                .join("")
+                .substring(0, 2)
+                .toUpperCase()
+            : "NA",
+
+          company: company
+            ? company.companyName
+            : "N/A",
+
+          reportType: "Weekly Diary",
+
+          week: `Week ${report.weekNumber}`,
+
+          dateRange: `${assignment.startDate || ""} - ${
+            assignment.endDate || ""
+          }`,
+
+          submittedDate: report.submittedOn || "N/A",
+
+          submittedTime: "",
+
+          status: report.status || "Pending Review",
+        });
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      count: reports.length,
+      reports: reports,
+    });
+
+  } catch (error) {
+
+    console.error(
+      "Get Reports By Faculty ID Error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch faculty weekly reports",
+    });
+  }
+};
 
 // ======================================
 // Add Weekly Report
@@ -186,6 +291,7 @@ const updateWeeklyReport = async (req, res) => {
       workCompleted,
       submittedOn,
       facultyRemarks,
+      status,
     } = req.body;
 
     if (assignedOjtId !== undefined) {
@@ -216,6 +322,9 @@ const updateWeeklyReport = async (req, res) => {
     if (facultyRemarks !== undefined) {
       report.facultyRemarks =
         facultyRemarks;
+    }
+    if (status !== undefined) {
+    report.status = status;
     }
 
     const updatedReport =
@@ -290,6 +399,7 @@ module.exports = {
   getAllWeeklyReports,
   getWeeklyReportById,
   getReportsByOjtId,
+  getReportsByFacultyId,
   addWeeklyReport,
   updateWeeklyReport,
   deleteWeeklyReport,

@@ -7,7 +7,9 @@ const Company = require("../models/Company");
 
 const getAllOpportunities = async (req, res) => {
   try {
-    const opportunities = await Opportunity.find();
+    const opportunities = await Opportunity.find().sort({
+      postedOn: -1,
+    });
 
     res.status(200).json({
       success: true,
@@ -32,6 +34,8 @@ const getOpenOpportunities = async (req, res) => {
   try {
     const opportunities = await Opportunity.find({
       status: "Open",
+    }).sort({
+      postedOn: -1,
     });
 
     res.status(200).json({
@@ -111,9 +115,18 @@ const getOpportunitiesByCompany = async (req, res) => {
   try {
     const { companyId } = req.params;
 
+    if (!companyId) {
+      return res.status(400).json({
+        success: false,
+        message: "Company ID is required",
+      });
+    }
+
     const opportunities = await Opportunity.find({
       companyId: companyId,
-    }).sort({ postedOn: -1 });
+    }).sort({
+      postedOn: -1,
+    });
 
     res.status(200).json({
       success: true,
@@ -131,13 +144,87 @@ const getOpportunitiesByCompany = async (req, res) => {
 };
 
 // ======================================
+// Get My Opportunities
+// ======================================
+// Gets opportunities belonging to the
+// currently logged-in company.
+// ======================================
+
+const getMyOpportunities = async (req, res) => {
+  try {
+    const userEmail = req.user?.email;
+
+    if (!userEmail) {
+      return res.status(401).json({
+        success: false,
+        message: "User email not found",
+      });
+    }
+
+    // Find the company using logged-in user's email
+    const company = await Company.findOne({
+      email: userEmail,
+    });
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company profile not found",
+      });
+    }
+
+    // Get only this company's opportunities
+    const opportunities = await Opportunity.find({
+      companyId: company._id,
+    }).sort({
+      postedOn: -1,
+    });
+
+    res.status(200).json({
+      success: true,
+      companyId: company._id,
+      companyName: company.companyName,
+      count: opportunities.length,
+      opportunities: opportunities,
+    });
+  } catch (error) {
+    console.error("Get My Opportunities Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch your opportunities",
+    });
+  }
+};
+
+// ======================================
 // Add Opportunity
 // ======================================
 
 const addOpportunity = async (req, res) => {
   try {
+    const userEmail = req.user?.email;
+
+    if (!userEmail) {
+      return res.status(401).json({
+        success: false,
+        message: "User email not found",
+      });
+    }
+
+    // Find logged-in company
+    const company = await Company.findOne({
+      email: userEmail,
+    });
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company profile not found",
+      });
+    }
+
     const {
-      companyId,
       createdByCoordinatorId,
       title,
       description,
@@ -154,36 +241,59 @@ const addOpportunity = async (req, res) => {
       postedOn,
     } = req.body;
 
-    if (!companyId || !title) {
+    // Title is required
+    if (!title || !title.trim()) {
       return res.status(400).json({
         success: false,
-        message: "Company ID and title are required",
+        message: "Opportunity title is required",
       });
     }
 
     const opportunity = await Opportunity.create({
       _id: "O" + Date.now(),
-      companyId,
+
+      // Automatically use logged-in company
+      companyId: company._id,
+
       createdByCoordinatorId: createdByCoordinatorId || "",
-      title,
+
+      title: title.trim(),
+
       description: description || "",
+
       department: department || "",
+
       duration: duration || "",
+
       location: location || "",
+
       stipend:
-        stipend === "" || stipend === null || stipend === undefined
+        stipend === "" ||
+        stipend === null ||
+        stipend === undefined
           ? 0
           : Number(stipend),
+
       vacancies:
-        vacancies === "" || vacancies === null || vacancies === undefined
+        vacancies === "" ||
+        vacancies === null ||
+        vacancies === undefined
           ? 0
           : Number(vacancies),
+
       lastDate: lastDate || "",
+
       skillsRequired: skillsRequired || "",
+
       eligibility: eligibility || "",
+
       isPaid: Boolean(isPaid),
+
       status: status || "Open",
-      postedOn: postedOn || new Date().toISOString().split("T")[0],
+
+      postedOn:
+        postedOn ||
+        new Date().toISOString().split("T")[0],
     });
 
     res.status(201).json({
@@ -197,6 +307,7 @@ const addOpportunity = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to add opportunity",
+      error: error.message,
     });
   }
 };
@@ -208,6 +319,45 @@ const addOpportunity = async (req, res) => {
 const updateOpportunity = async (req, res) => {
   try {
     const { id } = req.params;
+
+    const userEmail = req.user?.email;
+
+    if (!userEmail) {
+      return res.status(401).json({
+        success: false,
+        message: "User email not found",
+      });
+    }
+
+    // Find logged-in company
+    const company = await Company.findOne({
+      email: userEmail,
+    });
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company profile not found",
+      });
+    }
+
+    // Find opportunity
+    const opportunity = await Opportunity.findById(id);
+
+    if (!opportunity) {
+      return res.status(404).json({
+        success: false,
+        message: "Opportunity not found",
+      });
+    }
+
+    // Check ownership
+    if (opportunity.companyId !== company._id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to update this opportunity",
+      });
+    }
 
     const {
       title,
@@ -225,42 +375,53 @@ const updateOpportunity = async (req, res) => {
       postedOn,
     } = req.body;
 
-    const opportunity = await Opportunity.findById(id);
+    opportunity.title =
+      title ?? opportunity.title;
 
-    if (!opportunity) {
-      return res.status(404).json({
-        success: false,
-        message: "Opportunity not found",
-      });
-    }
+    opportunity.description =
+      description ?? opportunity.description;
 
-    opportunity.title = title ?? opportunity.title;
-    opportunity.description = description ?? opportunity.description;
-    opportunity.department = department ?? opportunity.department;
-    opportunity.duration = duration ?? opportunity.duration;
-    opportunity.location = location ?? opportunity.location;
+    opportunity.department =
+      department ?? opportunity.department;
+
+    opportunity.duration =
+      duration ?? opportunity.duration;
+
+    opportunity.location =
+      location ?? opportunity.location;
 
     if (stipend !== undefined) {
       opportunity.stipend =
-        stipend === "" || stipend === null ? 0 : Number(stipend);
+        stipend === "" || stipend === null
+          ? 0
+          : Number(stipend);
     }
 
     if (vacancies !== undefined) {
       opportunity.vacancies =
-        vacancies === "" || vacancies === null ? 0 : Number(vacancies);
+        vacancies === "" || vacancies === null
+          ? 0
+          : Number(vacancies);
     }
 
-    opportunity.lastDate = lastDate ?? opportunity.lastDate;
+    opportunity.lastDate =
+      lastDate ?? opportunity.lastDate;
+
     opportunity.skillsRequired =
       skillsRequired ?? opportunity.skillsRequired;
-    opportunity.eligibility = eligibility ?? opportunity.eligibility;
+
+    opportunity.eligibility =
+      eligibility ?? opportunity.eligibility;
 
     if (isPaid !== undefined) {
       opportunity.isPaid = Boolean(isPaid);
     }
 
-    opportunity.status = status ?? opportunity.status;
-    opportunity.postedOn = postedOn ?? opportunity.postedOn;
+    opportunity.status =
+      status ?? opportunity.status;
+
+    opportunity.postedOn =
+      postedOn ?? opportunity.postedOn;
 
     await opportunity.save();
 
@@ -275,6 +436,7 @@ const updateOpportunity = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to update opportunity",
+      error: error.message,
     });
   }
 };
@@ -287,12 +449,42 @@ const deleteOpportunity = async (req, res) => {
   try {
     const { id } = req.params;
 
+    const userEmail = req.user?.email;
+
+    if (!userEmail) {
+      return res.status(401).json({
+        success: false,
+        message: "User email not found",
+      });
+    }
+
+    // Find logged-in company
+    const company = await Company.findOne({
+      email: userEmail,
+    });
+
+    if (!company) {
+      return res.status(404).json({
+        success: false,
+        message: "Company profile not found",
+      });
+    }
+
+    // Find opportunity
     const opportunity = await Opportunity.findById(id);
 
     if (!opportunity) {
       return res.status(404).json({
         success: false,
         message: "Opportunity not found",
+      });
+    }
+
+    // Check ownership
+    if (opportunity.companyId !== company._id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to delete this opportunity",
       });
     }
 
@@ -308,6 +500,7 @@ const deleteOpportunity = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to delete opportunity",
+      error: error.message,
     });
   }
 };
@@ -321,6 +514,7 @@ module.exports = {
   getOpenOpportunities,
   getTopCompanies,
   getOpportunitiesByCompany,
+  getMyOpportunities,
   addOpportunity,
   updateOpportunity,
   deleteOpportunity,

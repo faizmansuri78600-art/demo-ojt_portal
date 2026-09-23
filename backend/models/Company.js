@@ -20,101 +20,102 @@ const companySchema = new mongoose.Schema(
 
     yearOfEstablishment: {
       type: String,
+      default: "",
     },
 
     registrationNumber: {
       type: String,
+      default: "",
     },
 
     companySize: {
       type: String,
+      default: "",
     },
 
     industry: {
       type: String,
+      default: "",
     },
 
     headOffice: {
       type: String,
+      default: "",
     },
-    logoUrl: {
-  type: String,
-  default: "",
-},
+
+    companyPhone: {
+      type: String,
+      default: "",
+    },
 
     street: {
       type: String,
       default: "",
-      trim: true,
     },
 
     city: {
       type: String,
       default: "",
-      trim: true,
     },
 
     state: {
       type: String,
       default: "",
-      trim: true,
     },
 
     zipCode: {
       type: String,
       default: "",
-      trim: true,
     },
 
     country: {
       type: String,
+      default: "",
     },
 
     website: {
       type: String,
       default: "",
-      trim: true,
     },
 
     contactPerson: {
       type: String,
+      default: "",
     },
 
     alternateEmail: {
       type: String,
+      default: "",
     },
 
     email: {
       type: String,
+      default: "",
     },
 
     mobileNumber: {
       type: String,
+      default: "",
     },
 
     phoneNumber: {
       type: String,
+      default: "",
     },
 
     description: {
       type: String,
       default: "",
-      trim: true,
     },
 
     logoUrl: {
       type: String,
+      default: "",
     },
 
     isVerified: {
       type: Boolean,
       default: false,
-    },
-
-    status: {
-      type: String,
-      enum: ["Pending", "Approved", "Rejected"],
-      default: "Pending",
     },
   },
   {
