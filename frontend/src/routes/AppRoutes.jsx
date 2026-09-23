@@ -437,14 +437,10 @@ function AppRoutes() {
           Individual pages render through <Outlet />.
       ======================================================= */}
 
-      <Route
-        path="/coordinator"
-        element={<CoordinatorLayout />}
-      >
-
-        {/* /coordinator → /coordinator/dashboard */}
-          Protected: Student only
-      ====================================================== */}
+     <Route
+  path="/coordinator"
+  element={<CoordinatorLayout />}
+/>
 
       <Route
         element={
