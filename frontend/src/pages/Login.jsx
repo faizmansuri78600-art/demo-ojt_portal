@@ -966,35 +966,77 @@ function Login() {
   // No role is selected on the public login page.
   // ============================================================
 
-  function redirectUser(role) {
-    const userRole = role.toLowerCase().trim();
+  // function redirectUser(role) {
+  //   const userRole = role.toLowerCase().trim();
 
-    switch (userRole) {
-      case "student":
-        navigate("/student/dashboard");
-        break;
+  //   switch (userRole) {
+  //     case "student":
+  //       navigate("/student/dashboard");
+  //       break;
 
-      case "faculty":
-        navigate("/faculty/dashboard");
-        break;
+  //     case "faculty":
+  //       navigate("/faculty/dashboard");
+  //       break;
 
-      case "collegecoordinator":
-        navigate("/college-coordinator/dashboard");
-        navigate("/coordinator/dashboard");
-        break;
+  //     case "collegecoordinator":
+  //       navigate("/coordinator/dashboard");
+  //       break;
 
-      case "companycoordinator":
-        navigate("/company-coordinator/dashboard");
-        break;
+  //     case "companycoordinator":
+  //       navigate("/company-coordinator/dashboard");
+  //       break;
 
-      case "administrator":
-        navigate("/admin/dashboard");
-        break;
+  //     case "administrator":
+  //       navigate("/admin/dashboard");
+  //       break;
 
-      default:
-        setError("Invalid user role. Please contact administrator.");
-    }
+  //     default:
+  //       setError("Invalid user role. Please contact administrator.");
+  //   }
+  // }
+
+    function redirectUser(role) {
+  const userRole = role
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "");
+
+  switch (userRole) {
+
+    case "student":
+      navigate("/student/dashboard");
+      break;
+
+    case "faculty":
+      navigate("/faculty/dashboard");
+      break;
+
+    case "collegecoordinator":
+      navigate("/coordinator/dashboard");
+      break;
+
+    case "company":
+      navigate("/company/dashboard");
+      break;
+
+    case "companycoordinator":
+      setError(
+        "Company Coordinator module is not available yet."
+      );
+      break;
+
+    case "administrator":
+      setError(
+        "Administrators must use the Admin Login page."
+      );
+      break;
+
+    default:
+      setError(
+        "Invalid user role. Please contact administrator."
+      );
   }
+}
 
   // ============================================================
   // LOGIN

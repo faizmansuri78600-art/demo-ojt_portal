@@ -252,9 +252,6 @@ export default function BrowseOjt() {
     }
   };
 
-  // ===============================
-  // FILTER OJT
-  // ===============================
 
   const companyOptions = [
     "All Companies",
@@ -300,11 +297,13 @@ export default function BrowseOjt() {
     });
 
   const resetFilters = () => {
+
     setSearch("");
     setCompany("All Companies");
     setLocation("All Locations");
     setDuration("All Durations");
     setSort("Newest");
+
   };
 
   if (loading) {
@@ -316,26 +315,36 @@ export default function BrowseOjt() {
   }
 
   return (
+
     <div className="min-h-screen bg-gray-50">
+
       <Header />
+
 
       <div className="flex pt-16">
         <Sidebar activePage="Browse OJT Opportunities" />
 
         <main className="ml-64 flex-1 p-6">
-          {/* ================= BREADCRUMB ================= */}
+
+          {/* HEADER */}
 
           <div className="text-sm text-gray-500 mb-3">
+
             Dashboard
-            <span className="mx-2">›</span>
+
+            <span className="mx-2">
+              ›
+            </span>
+
             <span className="text-gray-700">
               Browse OJT Opportunities
             </span>
+
           </div>
 
-          {/* ================= PAGE HEADING ================= */}
 
           <div className="mb-6">
+
             <h1 className="text-2xl font-bold text-gray-800">
               Browse OJT Opportunities
             </h1>
@@ -344,11 +353,14 @@ export default function BrowseOjt() {
               Explore and apply for the best OJT opportunities that
               match your skills and interests.
             </p>
+
           </div>
 
-          {/* ================= SEARCH BAR ================= */}
+
+          {/* SEARCH */}
 
           <div className="bg-white border border-gray-200 rounded-lg p-4 mb-5">
+
             <div className="flex flex-wrap gap-3">
               <div className="flex-1 min-w-[220px] border border-gray-200 rounded-md flex items-center px-3">
                 <Search size={17} className="text-gray-400 mr-2" />
@@ -356,10 +368,15 @@ export default function BrowseOjt() {
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) =>
+                    setSearch(
+                      e.target.value
+                    )
+                  }
                   placeholder="Search by role, company, skills..."
                   className="w-full py-2 outline-none text-sm"
                 />
+
               </div>
 
               <select
@@ -374,20 +391,47 @@ export default function BrowseOjt() {
 
               <select
                 value={location}
-                onChange={(e) => setLocation(e.target.value)}
+                onChange={(e) =>
+                  setLocation(
+                    e.target.value
+                  )
+                }
                 className="border border-gray-200 rounded-md px-4 py-2 text-sm text-gray-600"
               >
-                <option>All Locations</option>
-                <option>Pune</option>
-                <option>Mumbai</option>
-                <option>Bangalore</option>
-                <option>Hyderabad</option>
-                <option>Chennai</option>
+
+                <option>
+                  All Locations
+                </option>
+
+                <option>
+                  Pune
+                </option>
+
+                <option>
+                  Mumbai
+                </option>
+
+                <option>
+                  Bangalore
+                </option>
+
+                <option>
+                  Hyderabad
+                </option>
+
+                <option>
+                  Chennai
+                </option>
+
               </select>
 
               <select
                 value={duration}
-                onChange={(e) => setDuration(e.target.value)}
+                onChange={(e) =>
+                  setDuration(
+                    e.target.value
+                  )
+                }
                 className="border border-gray-200 rounded-md px-4 py-2 text-sm text-gray-600"
               >
                 <option>All Durations</option>
@@ -398,29 +442,50 @@ export default function BrowseOjt() {
 
               <select
                 value={sort}
-                onChange={(e) => setSort(e.target.value)}
+                onChange={(e) =>
+                  setSort(
+                    e.target.value
+                  )
+                }
                 className="border border-gray-200 rounded-md px-4 py-2 text-sm text-gray-600"
               >
-                <option value="Newest">Sort By: Newest</option>
-                <option value="Oldest">Oldest</option>
+
+                <option value="Newest">
+                  Sort By: Newest
+                </option>
+
+                <option value="Oldest">
+                  Oldest
+                </option>
+
               </select>
+
             </div>
 
             <div className="mt-4 text-sm text-gray-500">
+
               Total{" "}
+
               <span className="font-semibold text-gray-700">
                 {filteredOpportunities.length}
               </span>{" "}
+
               Opportunities Found
+
             </div>
+
           </div>
 
-          {/* ================= PAGE GRID ================= */}
+
+          {/* GRID */}
 
           <div className="grid grid-cols-1 gap-5">
             <div className="space-y-4">
+
               {filteredOpportunities.length === 0 ? (
+
                 <div className="bg-white border border-gray-200 rounded-lg p-10 text-center">
+
                   <Search
                     size={35}
                     className="mx-auto text-gray-300 mb-3"
@@ -433,7 +498,9 @@ export default function BrowseOjt() {
                   <p className="text-xs text-gray-400 mt-1">
                     Try changing your search or filters.
                   </p>
+
                 </div>
+
               ) : (
                 filteredOpportunities.map((opportunity) => {
                   const opportunityId = opportunity._id || opportunity.id;
@@ -461,13 +528,9 @@ export default function BrowseOjt() {
                                 Applied
                               </span>
                             )}
+
                           </div>
 
-                          <p className="text-sm text-gray-600 mt-1">
-                            {opportunity.company}
-                          </p>
-                        </div>
-                      </div>
 
                       <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-xs text-gray-500">
                         <span className="flex items-center gap-1.5">
@@ -532,9 +595,13 @@ export default function BrowseOjt() {
                           ) : isApplying ? (
                             "Submitting..."
                           ) : (
-                            "Apply Now"
+
+                            <Bookmark size={20} />
+
                           )}
+
                         </button>
+
                       </div>
                     </div>
                   );
@@ -563,13 +630,6 @@ export default function BrowseOjt() {
                 </p>
               </div>
 
-              <button
-                onClick={() => setSelectedOJT(null)}
-                className="text-gray-400 hover:text-gray-700"
-              >
-                <X size={20} />
-              </button>
-            </div>
 
             <div className="p-5">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
@@ -579,39 +639,28 @@ export default function BrowseOjt() {
                     className="text-blue-600 mb-2"
                   />
 
-                  <p className="text-[10px] text-gray-400">
-                    Location
-                  </p>
+                      <MapPin
+                        size={16}
+                        className="text-blue-600 mb-2"
+                      />
 
-                  <p className="text-xs font-medium text-gray-700 mt-1">
-                    {selectedOJT.location}
-                  </p>
-                </div>
+                      <p className="text-[10px] text-gray-400">
+                        Location
+                      </p>
 
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <Clock
-                    size={16}
-                    className="text-blue-600 mb-2"
-                  />
+                      <p className="text-xs font-medium text-gray-700 mt-1">
+                        {selectedOJT.location}
+                      </p>
 
-                  <p className="text-[10px] text-gray-400">
-                    Duration
-                  </p>
+                    </div>
 
-                  <p className="text-xs font-medium text-gray-700 mt-1">
-                    {selectedOJT.duration}
-                  </p>
-                </div>
 
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <IndianRupee
-                    size={16}
-                    className="text-blue-600 mb-2"
-                  />
+                    <div className="bg-gray-50 rounded-lg p-3">
 
-                  <p className="text-[10px] text-gray-400">
-                    Stipend
-                  </p>
+                      <Clock
+                        size={16}
+                        className="text-blue-600 mb-2"
+                      />
 
                   <p className="text-xs font-medium text-gray-700 mt-1">
                     {selectedOJT.isPaid ? "Paid" : "Unpaid"}
@@ -624,10 +673,9 @@ export default function BrowseOjt() {
                   About the Opportunity
                 </h3>
 
-                <p className="text-sm text-gray-500 leading-relaxed">
-                  {selectedOJT.description}
-                </p>
-              </div>
+                      <p className="text-[10px] text-gray-400">
+                        Stipend
+                      </p>
 
               <div>
                 <h3 className="text-sm font-semibold text-gray-800 mb-2">
@@ -659,6 +707,7 @@ export default function BrowseOjt() {
                   })()}
                 </div>
               </div>
+
             </div>
 
             <div className="flex justify-end gap-3 p-5 border-t border-gray-100">
@@ -692,5 +741,6 @@ export default function BrowseOjt() {
         </div>
       )}
     </div>
+
   );
 }

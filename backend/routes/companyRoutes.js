@@ -9,6 +9,10 @@ const {
   updateApplicationStatus,
 } = require("../controllers/companyController");
 
+const protect = require("../middleware/authMiddleware");
+
+const { logoUpload } = require("../config/multer");
+
 const router = express.Router();
 
 // Public company directory

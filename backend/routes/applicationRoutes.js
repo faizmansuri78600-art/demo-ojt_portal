@@ -1,6 +1,7 @@
 const express = require("express");
 
 const {
+  createApplication,
   getRecentApplications,
   getApplicationStats,
   applyToOpportunity,

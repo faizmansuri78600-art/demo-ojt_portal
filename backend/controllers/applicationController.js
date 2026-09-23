@@ -1,7 +1,7 @@
 const Application = require("../models/Application");
 const Student = require("../models/Student");
 
-const getRecentApplications = async (req, res) => {
+const createApplication = async (req, res) => {
   try {
     const applications = await Application.find({})
       .sort({ appliedOn: -1 })
@@ -89,6 +89,7 @@ const getMyApplications = async (req, res) => {
 };
 
 module.exports = {
+  createApplication,
   getRecentApplications,
   getApplicationStats,
   applyToOpportunity,

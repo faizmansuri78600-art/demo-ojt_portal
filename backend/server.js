@@ -30,7 +30,7 @@ app.use(cors());
 
 app.use(express.json());
 
-// resume uploads
+// Resume uploads
 app.use("/uploads", express.static("uploads"));
 
 app.use(
@@ -121,14 +121,13 @@ app.use(
 );
 
 // ======================================
-// Task routes
+// Task Routes
 // ======================================
 
 app.use(
   "/api/tasks",
   taskRoutes
 );
-
 
 // ======================================
 // Attendance Routes
