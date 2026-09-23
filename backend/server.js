@@ -203,10 +203,10 @@ app.use(
   assignedOjtRoutes
 );
 
-app.use(
-  "/api/evaluations",
-  evaluationRoutes
-);
+// app.use(
+//   "/api/evaluations",
+//   evaluationRoutes
+// );
 
 // ======================================
 // Evaluation Routes
@@ -282,13 +282,13 @@ app.use(
 // routes such as /mentor-assignment.
 // ======================================
 
-const collegeCoordinatorRoutes =
-  require("./routes/collegeCoordinatorRoutes");
+// const collegeCoordinatorRoutes =
+//   require("./routes/collegeCoordinatorRoutes");
 
-app.use(
-  "/api/college-coordinators",
-  collegeCoordinatorRoutes
-);
+// app.use(
+//   "/api/college-coordinators",
+//   collegeCoordinatorRoutes
+// );
 const settingsRoutes = require("./routes/settingsRoutes");
 
 app.use(
