@@ -1,90 +1,60 @@
 const Student = require("../models/Student");
 
-// ======================================
-// Get All Students
-// ======================================
+const getMyProfile = async (req, res) => {
+  try {
+    const student = await Student.findOne({ userId: req.user._id });
+
+    if (!student) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Student profile not found" });
+    }
+
+    res.status(200).json({ success: true, student });
+  } catch (error) {
+    console.error("Get My Profile Error:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch student profile" });
+  }
+};
 
 const getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find();
-
-    res.status(200).json({
-      success: true,
-      count: students.length,
-      students: students,
-    });
+    const students = await Student.find({});
+    res.status(200).json({ success: true, count: students.length, students });
   } catch (error) {
     console.error("Get All Students Error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch students",
-    });
+    res.status(500).json({ success: false, message: "Failed to fetch students" });
   }
 };
-
-
-// ======================================
-// Get Student By ID
-// ======================================
-
-const getStudentById = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const student = await Student.findById(id);
-
-    if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: "Student not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      student: student,
-    });
-  } catch (error) {
-    console.error("Get Student Error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch student",
-    });
-  }
-};
-
-
-// ======================================
-// Get Verified Students
-// ======================================
 
 const getVerifiedStudents = async (req, res) => {
   try {
-    const students = await Student.find({
-      isVerified: true,
-    });
-
-    res.status(200).json({
-      success: true,
-      count: students.length,
-      students: students,
-    });
+    const students = await Student.find({ isVerified: true });
+    res.status(200).json({ success: true, count: students.length, students });
   } catch (error) {
     console.error("Get Verified Students Error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch verified students",
-    });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to fetch verified students" });
   }
 };
 
+const getStudentById = async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.id);
 
-// ======================================
-// Add Student
-// ======================================
+    if (!student) {
+      return res.status(404).json({ success: false, message: "Student not found" });
+    }
+
+    res.status(200).json({ success: true, student });
+  } catch (error) {
+    console.error("Get Student By Id Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch student" });
+  }
+};
 
 const addStudent = async (req, res) => {
   try {
@@ -102,19 +72,7 @@ const addStudent = async (req, res) => {
     } = req.body;
 
     if (!_id) {
-      return res.status(400).json({
-        success: false,
-        message: "Student ID is required",
-      });
-    }
-
-    const existingStudent = await Student.findById(_id);
-
-    if (existingStudent) {
-      return res.status(400).json({
-        success: false,
-        message: "Student already exists",
-      });
+      return res.status(400).json({ success: false, message: "_id is required" });
     }
 
     const student = await Student.create({
@@ -127,150 +85,54 @@ const addStudent = async (req, res) => {
       cgpa,
       profilePhotoUrl,
       resumeUrl,
-      isVerified: isVerified || false,
+      isVerified,
     });
 
-    res.status(201).json({
-      success: true,
-      message: "Student added successfully",
-      student: student,
-    });
+    res.status(201).json({ success: true, student });
   } catch (error) {
     console.error("Add Student Error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to add student",
-    });
+    res.status(500).json({ success: false, message: "Failed to add student" });
   }
 };
-
-
-// ======================================
-// Update Student
-// ======================================
 
 const updateStudent = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const student = await Student.findById(id);
+    const student = await Student.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      runValidators: true,
+    });
 
     if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: "Student not found",
-      });
+      return res.status(404).json({ success: false, message: "Student not found" });
     }
 
-    const {
-      userId,
-      verifiedByCoordinatorId,
-      rollNumber,
-      name,
-      department,
-      cgpa,
-      profilePhotoUrl,
-      resumeUrl,
-      isVerified,
-    } = req.body;
-
-    if (userId !== undefined) {
-      student.userId = userId;
-    }
-
-    if (verifiedByCoordinatorId !== undefined) {
-      student.verifiedByCoordinatorId = verifiedByCoordinatorId;
-    }
-
-    if (rollNumber !== undefined) {
-      student.rollNumber = rollNumber;
-    }
-
-    if (name !== undefined) {
-      student.name = name;
-    }
-
-    if (department !== undefined) {
-      student.department = department;
-    }
-
-    if (cgpa !== undefined) {
-      student.cgpa = cgpa;
-    }
-
-    if (profilePhotoUrl !== undefined) {
-      student.profilePhotoUrl = profilePhotoUrl;
-    }
-
-    if (resumeUrl !== undefined) {
-      student.resumeUrl = resumeUrl;
-    }
-
-    if (isVerified !== undefined) {
-      student.isVerified = isVerified;
-    }
-
-    const updatedStudent = await student.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Student updated successfully",
-      student: updatedStudent,
-    });
+    res.status(200).json({ success: true, student });
   } catch (error) {
     console.error("Update Student Error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to update student",
-    });
+    res.status(500).json({ success: false, message: "Failed to update student" });
   }
 };
-
-
-// ======================================
-// Delete Student
-// ======================================
 
 const deleteStudent = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const student = await Student.findById(id);
+    const student = await Student.findByIdAndDelete(req.params.id);
 
     if (!student) {
-      return res.status(404).json({
-        success: false,
-        message: "Student not found",
-      });
+      return res.status(404).json({ success: false, message: "Student not found" });
     }
 
-    await Student.findByIdAndDelete(id);
-
-    res.status(200).json({
-      success: true,
-      message: "Student deleted successfully",
-    });
+    res.status(200).json({ success: true, message: "Student deleted successfully" });
   } catch (error) {
     console.error("Delete Student Error:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to delete student",
-    });
+    res.status(500).json({ success: false, message: "Failed to delete student" });
   }
 };
 
-
-// ======================================
-// Export
-// ======================================
-
 module.exports = {
+  getMyProfile,
   getAllStudents,
-  getStudentById,
   getVerifiedStudents,
+  getStudentById,
   addStudent,
   updateStudent,
   deleteStudent,

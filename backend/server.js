@@ -1,11 +1,7 @@
-const dns = require("dns");
-
-dns.setServers([
-  "8.8.8.8",
-  "1.1.1.1",
-]);
-
+const dns=require("dns");
+dns.setServers(["8.8.8.8","1.1.1.1"]);
 const express = require("express");
+const taskRoutes = require("./routes/taskRoutes");
 const cors = require("cors");
 const dotenv = require("dotenv");
 
@@ -34,6 +30,9 @@ app.use(cors());
 
 app.use(express.json());
 
+// Resume uploads
+app.use("/uploads", express.static("uploads"));
+
 app.use(
   express.urlencoded({
     extended: true,
@@ -44,10 +43,7 @@ app.use(
 // Routes
 // ======================================
 
-// ======================================
-// Authentication Routes
-// ======================================
-
+// Authentication routes
 const authRoutes =
   require("./routes/authRoutes");
 
@@ -56,10 +52,8 @@ app.use(
   authRoutes
 );
 
-// ======================================
-// Admin Routes
-// ======================================
 
+// Admin routes
 const adminRoutes =
   require("./routes/adminRoutes");
 
@@ -68,10 +62,8 @@ app.use(
   adminRoutes
 );
 
-// ======================================
-// Application Routes
-// ======================================
 
+// Application routes
 const applicationRoutes =
   require("./routes/applicationRoutes");
 
@@ -129,6 +121,15 @@ app.use(
 );
 
 // ======================================
+// Task Routes
+// ======================================
+
+app.use(
+  "/api/tasks",
+  taskRoutes
+);
+
+// ======================================
 // Attendance Routes
 // ======================================
 
@@ -152,125 +153,41 @@ app.use(
   weeklyReportRoutes
 );
 
-// ======================================
-// Certificate Routes
-// ======================================
 
-const certificateRoutes =
-  require("./routes/certificateRoutes");
 
-app.use(
-  "/api/certificates",
-  certificateRoutes
-);
 
-// ======================================
-// Notification Routes
-// ======================================
-
-const notificationRoutes =
-  require("./routes/notificationRoutes");
+const certificateRoutes = 
+require("./routes/certificateRoutes");
 
 app.use(
-  "/api/notifications",
-  notificationRoutes
+  "/api/certificates", certificateRoutes
 );
 
-// ======================================
-// Assigned OJT Routes
-// ======================================
 
-const assignedOjtRoutes =
-  require("./routes/assignedOjtRoutes");
+const notificationRoutes = require("./routes/notificationRoutes");
+app.use("/api/notifications", notificationRoutes);
 
-app.use(
-  "/api/assigned-ojt",
-  assignedOjtRoutes
-);
 
-// ======================================
-// Evaluation Routes
-// ======================================
+const assignedOjtRoutes = require("./routes/assignedOjtRoutes");
+app.use("/api/assigned-ojt", assignedOjtRoutes);
 
-const evaluationRoutes =
-  require("./routes/evaluationRoutes");
 
-app.use(
-  "/api/evaluations",
-  evaluationRoutes
-);
+const evaluationRoutes = require("./routes/evaluationRoutes");
+app.use("/api/evaluations", evaluationRoutes);
 
-// ======================================
-// Faculty Routes
-// ======================================
 
-const facultyRoutes =
-  require("./routes/facultyRoutes");
+const facultyRoutes = require("./routes/facultyRoutes");
+app.use("/api/faculty", facultyRoutes);
 
-app.use(
-  "/api/faculty",
-  facultyRoutes
-);
 
-// ======================================
-// Company Coordinator Routes
-// ======================================
+const companyCoordinatorRoutes = require("./routes/companyCoordinatorRoutes");
+app.use("/api/company-coordinators", companyCoordinatorRoutes);
 
-const companyCoordinatorRoutes =
-  require("./routes/companyCoordinatorRoutes");
 
-app.use(
-  "/api/company-coordinators",
-  companyCoordinatorRoutes
-);
+const collegeCoordinatorRoutes = require("./routes/collegeCoordinatorRoutes");
+app.use("/api/college-coordinators", collegeCoordinatorRoutes);
 
-// ======================================
-// MENTOR ASSIGNMENT ROUTES
-// ======================================
-// IMPORTANT:
-// This route MUST come before the general
-// College Coordinator route.
-//
-// Otherwise:
-// /mentor-assignment
-// gets treated as:
-// /:id
-// by collegeCoordinatorRoutes.
-// ======================================
 
-const mentorAssignmentRoutes =
-  require("./routes/mentorAssignmentRoutes");
-
-app.use(
-  "/api/college-coordinators/mentor-assignment",
-  mentorAssignmentRoutes
-);
-
-// ======================================
-// COLLEGE COORDINATOR ROUTES
-// ======================================
-// Keep this AFTER mentor assignment routes.
-// collegeCoordinatorRoutes contains:
-//
-// router.get("/:id", getCollegeCoordinatorById);
-//
-// Therefore this must come after more specific
-// routes such as /mentor-assignment.
-// ======================================
-
-const collegeCoordinatorRoutes =
-  require("./routes/collegeCoordinatorRoutes");
-
-app.use(
-  "/api/college-coordinators",
-  collegeCoordinatorRoutes
-);
-const settingsRoutes = require("./routes/settingsRoutes");
-
-app.use(
-  "/api/settings",
-  settingsRoutes
-);
 // ======================================
 // Test Route
 // ======================================
@@ -283,6 +200,7 @@ app.get("/", (req, res) => {
   });
 });
 
+
 // ======================================
 // 404 Route
 // ======================================
@@ -294,6 +212,7 @@ app.use((req, res) => {
       "API route not found",
   });
 });
+
 
 // ======================================
 // Error Handler
@@ -313,6 +232,7 @@ app.use(
     });
   }
 );
+
 
 // ======================================
 // Start Server

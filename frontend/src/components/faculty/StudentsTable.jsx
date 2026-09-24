@@ -4,7 +4,10 @@ const StudentsTable = ({ students, onViewAll = () => {} }) => {
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="font-bold text-gray-900 text-lg">Assigned Students Overview</h2>
+        <h2 className="font-bold text-gray-900 text-lg">
+          Assigned Students Overview
+        </h2>
+
         <button
           onClick={onViewAll}
           className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 hover:bg-gray-50"
@@ -25,38 +28,101 @@ const StudentsTable = ({ students, onViewAll = () => {} }) => {
               <th className="py-2 pr-4 font-medium">Status</th>
             </tr>
           </thead>
+
           <tbody>
-            {students.map((student) => (
-              <tr key={student.id} className="border-b border-gray-50 last:border-0">
-                <td className="py-3 pr-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold flex items-center justify-center">
-                      {student.initials}
+            {students.map((student, index) => {
+              // API data + dummy data both supported
+              const studentName =
+                student.studentName || student.name || "N/A";
+
+              const companyName =
+                student.companyName || student.company || "N/A";
+
+              const role = student.role || "N/A";
+
+              const startDate = student.startDate || "N/A";
+
+              const progress = Number(student.progress) || 0;
+
+              const status = student.status || "N/A";
+
+              // Create initials from student name
+              const initials =
+                student.initials ||
+                studentName
+                  .split(" ")
+                  .map((word) => word.charAt(0))
+                  .join("")
+                  .slice(0, 2)
+                  .toUpperCase();
+
+              // API does not have id, so use assignmentId/studentId
+              const studentKey =
+                student.assignmentId ||
+                student.studentId ||
+                student.id ||
+                index;
+
+              return (
+                <tr
+                  key={studentKey}
+                  className="border-b border-gray-50 last:border-0"
+                >
+                  {/* Student Name */}
+                  <td className="py-3 pr-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold flex items-center justify-center">
+                        {initials}
+                      </div>
+
+                      <span className="font-medium text-gray-800">
+                        {studentName}
+                      </span>
                     </div>
-                    <span className="font-medium text-gray-800">{student.name}</span>
-                  </div>
-                </td>
-                <td className="py-3 pr-4 text-gray-600">{student.company}</td>
-                <td className="py-3 pr-4 text-gray-600">{student.role}</td>
-                <td className="py-3 pr-4 text-gray-600">{student.startDate}</td>
-                <td className="py-3 pr-4">
-                  <div className="flex items-center gap-2 w-40">
-                    <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${student.progressColor}`}
-                        style={{ width: `${student.progress}%` }}
-                      />
+                  </td>
+
+                  {/* Company */}
+                  <td className="py-3 pr-4 text-gray-600">
+                    {companyName}
+                  </td>
+
+                  {/* Role */}
+                  <td className="py-3 pr-4 text-gray-600">
+                    {role}
+                  </td>
+
+                  {/* Start Date */}
+                  <td className="py-3 pr-4 text-gray-600">
+                    {startDate}
+                  </td>
+
+                  {/* Progress */}
+                  <td className="py-3 pr-4">
+                    <div className="flex items-center gap-2 w-40">
+                      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${
+                            student.progressColor || "bg-blue-500"
+                          }`}
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+
+                      <span className="text-xs text-gray-500 w-8">
+                        {progress}%
+                      </span>
                     </div>
-                    <span className="text-xs text-gray-500 w-8">{student.progress}%</span>
-                  </div>
-                </td>
-                <td className="py-3 pr-4">
-                  <span className="bg-green-50 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">
-                    {student.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
+                  </td>
+
+                  {/* Status */}
+                  <td className="py-3 pr-4">
+                    <span className="bg-green-50 text-green-700 text-xs font-medium px-2.5 py-1 rounded-full">
+                      {status}
+                    </span>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

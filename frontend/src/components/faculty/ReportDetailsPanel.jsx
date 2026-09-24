@@ -35,7 +35,6 @@ const ReportDetailsPanel = ({ report, onClose, onAddFeedback }) => {
         <div>
           <p className="font-bold text-gray-900">{report.name}</p>
           <p className="text-sm text-gray-500">{report.company}</p>
-          <p className="text-sm text-blue-600">{report.role}</p>
         </div>
       </div>
 
@@ -64,19 +63,34 @@ const ReportDetailsPanel = ({ report, onClose, onAddFeedback }) => {
           </span>
         </div>
       </div>
+{/* Weekly Diary Details */}
+<div className="flex flex-col gap-3">
+  <div>
+    <p className="text-sm text-gray-500">Task Assigned</p>
+    <p className="text-sm text-gray-800 font-medium">
+      {report.taskAssigned || "N/A"}
+    </p>
+  </div>
 
-      {/* Mentor feedback */}
-      {report.feedback && (
-        <div>
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-gray-800 text-sm">Mentor Feedback</h3>
-            <span className="text-xs text-gray-400">{report.feedback.date}</span>
-          </div>
-          <div className="bg-green-50 border border-green-100 rounded-lg p-3 text-sm text-gray-700 leading-relaxed">
-            {report.feedback.text}
-          </div>
-        </div>
-      )}
+  <div>
+    <p className="text-sm text-gray-500">Work Completed</p>
+    <p className="text-sm text-gray-800 font-medium">
+      {report.workCompleted || "N/A"}
+    </p>
+  </div>
+</div>
+  {/* Mentor Feedback */}
+{report.facultyRemarks && (
+  <div>
+    <h3 className="font-semibold text-gray-800 text-sm mb-2">
+      Mentor Feedback
+    </h3>
+
+    <div className="bg-green-50 border border-green-100 rounded-lg p-3 text-sm text-gray-700 leading-relaxed">
+      {report.facultyRemarks}
+    </div>
+  </div>
+)}
 
       {/* Rating */}
       {report.rating && (

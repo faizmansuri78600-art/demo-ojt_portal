@@ -1,8 +1,7 @@
-// const User = require("../models/User");
-// const Student = require("../models/Student");
 const User = require("../models/User");
 const Student = require("../models/Student");
 const Company = require("../models/Company");
+const CompanyCoordinator = require("../models/CompanyCoordinator");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/generateToken");
 
@@ -247,13 +246,15 @@ const loginUser = async (req, res) => {
       rollNumber,
       department,
       cgpa,
-
-      // Company fields
+      // Company Coordinator specific fields
       companyName,
-      industry,
-      contactPerson,
+      street,
+      city,
+      state,
+      zipCode,
       website,
-      address,
+      description,
+      designation,
     } = req.body;
 
     // ---------------------------------------------
@@ -296,6 +297,17 @@ const loginUser = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "User with this email already exists",
+      });
+    }
+
+    // ---------------------------------------------
+    // Company Coordinator requires a company name
+    // ---------------------------------------------
+
+    if (role === "Company Coordinator" && !companyName) {
+      return res.status(400).json({
+        success: false,
+        message: "Company name is required for Company Coordinator registration",
       });
     }
 
@@ -377,45 +389,36 @@ const loginUser = async (req, res) => {
     }
 
     // ---------------------------------------------
-    // Create Company Profile
+    // Create Company + CompanyCoordinator link
+    // Only for Company Coordinator registration
     // ---------------------------------------------
 
     let company = null;
+    let companyCoordinator = null;
 
-    if (role === "Company") {
+    if (role === "Company Coordinator") {
       const companyId = "C" + Date.now();
 
       company = await Company.create({
         _id: companyId,
-
-        companyName:
-          companyName || name,
-
-        industry:
-          industry || "Other",
-
-        contactPerson:
-          contactPerson || name,
-
-        email:
-          email,
-
-        phone:
-          phone || "",
-
-        street:
-          address || "",
-
-        website:
-          website || "",
-
-        description: "",
-
-        verifiedByCoordinatorId: "",
-
+        companyName: companyName,
+        street: street || "",
+        city: city || "",
+        state: state || "",
+        zipCode: zipCode || "",
+        website: website || "",
+        description: description || "",
         isVerified: false,
+      });
 
-        status: "Pending",
+      const companyCoordinatorId = "CC" + Date.now();
+
+      companyCoordinator = await CompanyCoordinator.create({
+        _id: companyCoordinatorId,
+        userId: userId,
+        companyId: companyId,
+        name: name,
+        designation: designation || "",
       });
     }
 
@@ -452,20 +455,16 @@ const loginUser = async (req, res) => {
       company: company
         ? {
             id: company._id,
-            companyName:
-              company.companyName,
-            industry:
-              company.industry,
-            contactPerson:
-              company.contactPerson,
-            email:
-              company.email,
-            phone:
-              company.phone,
-            website:
-              company.website,
-            status:
-              company.status,
+            companyName: company.companyName,
+            isVerified: company.isVerified,
+          }
+        : null,
+
+      companyCoordinator: companyCoordinator
+        ? {
+            id: companyCoordinator._id,
+            userId: companyCoordinator.userId,
+            companyId: companyCoordinator.companyId,
           }
         : null,
     });

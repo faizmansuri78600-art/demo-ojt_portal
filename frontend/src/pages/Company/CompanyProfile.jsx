@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 
 import {
   Pencil,
@@ -18,107 +18,61 @@ import {
   FaTwitter
 } from "react-icons/fa";
 
-import abcLogo from "../../assets/abc.jpeg";
+
 
 import CompanySidebar from "../../components/common/CompanySidebar";
 import CompanyHeader from "../../components/common/CompanyHeader";
 import CompanyFooter from "../../components/common/CompanyFooter";
 import ProfileActions from "../../components/common/ProfileActions";
 import FormField from "../../components/common/FormField";
-
+import { api } from "../../services/api";
 
 export default function CompanyProfile() {
+  const [isEditing, setIsEditing] = useState(false);
+
+  const getLogoUrl = (logoUrl) => {
+    if (!logoUrl) return null;
+    if (logoUrl.startsWith("http://") || logoUrl.startsWith("https://")) {
+      return logoUrl;
+    }
+    return `http://localhost:5000${logoUrl}`;
+  };
+  const [isCreating, setIsCreating] = useState(false);
 
   /* ================= BASIC INFORMATION ================= */
 
-  const [companyName, setCompanyName] = useState(
-    "ABC Technologies Pvt. Ltd."
-  );
-
-  const [yearOfEstablishment, setYearOfEstablishment] = useState(
-    "2018"
-  );
-
-  const [registrationNumber, setRegistrationNumber] = useState(
-    "ABC/Tech/2018/558"
-  );
-
-  const [companySize, setCompanySize] = useState(
-    "51 - 200 Employees"
-  );
-
-  const [industry, setIndustry] = useState(
-    "Information Technology"
-  );
-
-  const [headOffice, setHeadOffice] = useState(
-    "Pune, Maharashtra, India"
-  );
-
-  const [website, setWebsite] = useState(
-    "www.abctechnologies.com"
-  );
-
+  const [companyName, setCompanyName] = useState("");
+  const [yearOfEstablishment, setYearOfEstablishment] = useState("");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [companySize, setCompanySize] = useState("");
+  const [industry, setIndustry] = useState("");
+  const [headOffice, setHeadOffice] = useState("");
+  const [website, setWebsite] = useState("");
 
   /* ================= CONTACT INFORMATION ================= */
 
-  const [contactPerson, setContactPerson] = useState(
-    "Rahul Sharma"
-  );
-
-  const [alternateEmail, setAlternateEmail] = useState(
-    "recruitment@abctechnologies.com"
-  );
-
-  const [email, setEmail] = useState(
-    "hr@abctechnologies.com"
-  );
-
-  const [mobileNumber, setMobileNumber] = useState(
-    "+91 87654 32109"
-  );
-
-  const [phoneNumber, setPhoneNumber] = useState(
-    "+91 98765 43210"
-  );
-
+  const [contactPerson, setContactPerson] = useState("");
+  const [alternateEmail, setAlternateEmail] = useState("");
+  const [email, setEmail] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   /* ================= ADDRESS INFORMATION ================= */
 
-  const [streetAddress, setStreetAddress] = useState(
-    "ABC Tower, 2nd Floor, Baner Road"
-  );
-
-  const [city, setCity] = useState(
-    "Pune"
-  );
-
-  const [state, setState] = useState(
-    "Maharashtra"
-  );
-
-  const [pincode, setPincode] = useState(
-    "411045"
-  );
-
-  const [country, setCountry] = useState(
-    "India"
-  );
-
+  const [streetAddress, setStreetAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [country, setCountry] = useState("");
 
   /* ================= DESCRIPTION ================= */
 
-  const [description, setDescription] = useState(
-    "ABC Technologies Pvt. Ltd. is a leading IT solutions and services company delivering innovative digital solutions to clients worldwide. We specialize in web development, mobile applications, cloud solutions, and IT consulting. Our mission is to empower businesses through technology and innovation. We believe in building strong relationships with communities through internship and training opportunities."
-  );
-
+  const [description, setDescription] = useState("");
 
   /* ================= LOGO ================= */
 
-  const [companyLogo, setCompanyLogo] = useState(abcLogo);
-
+  const [companyLogo, setCompanyLogo] = useState(null);
   const fileInputRef = useRef(null);
-
 
   /* ================= POPUP ================= */
 
@@ -128,11 +82,9 @@ export default function CompanyProfile() {
     type: "success"
   });
 
-
   /* ================= SHOW POPUP ================= */
 
   const showPopup = (message, type = "success") => {
-
     setPopup({
       show: true,
       message,
@@ -146,22 +98,58 @@ export default function CompanyProfile() {
         type: "success"
       });
     }, 2500);
-
   };
 
+  /* ================= LOAD COMPANY PROFILE ================= */
+
+  useEffect(() => {
+    const loadCompanyProfile = async () => {
+      try {
+        const response = await api.get("/companies/me");
+        console.log("COMPANY DATA FROM DATABASE:", response);
+
+        if (response.data?.success && response.data.company) {
+          const company = response.data.company;
+          setCompanyName(company.companyName || "");
+          setYearOfEstablishment(company.yearOfEstablishment || "");
+          setRegistrationNumber(company.registrationNumber || "");
+          setCompanySize(company.companySize || "");
+          setIndustry(company.industry || "");
+          setHeadOffice(company.headOffice || "");
+          setWebsite(company.website || "");
+          setContactPerson(company.contactPerson || "");
+          setAlternateEmail(company.alternateEmail || "");
+          setEmail(company.email || "");
+          setMobileNumber(company.mobileNumber || "");
+          setPhoneNumber(company.phoneNumber || "");
+          setStreetAddress(company.street || "");
+          setCity(company.city || "");
+          setState(company.state || "");
+          setPincode(company.zipCode || "");
+          setCountry(company.country || "");
+          setDescription(company.description || "");
+          setCompanyLogo(getLogoUrl(company.logoUrl));
+        }
+      } catch (error) {
+        console.error("Error loading company profile:", error);
+        showPopup(error.message || "Failed to load company profile.", "error");
+      }
+    };
+    loadCompanyProfile();
+  }, []);
 
   /* ================= CHANGE LOGO ================= */
 
   const handleChangeLogo = () => {
+    if (!isEditing) return;
 
     fileInputRef.current?.click();
-
   };
-
 
   /* ================= SELECT NEW LOGO ================= */
 
-  const handleLogoChange = (event) => {
+  const handleLogoChange = async (event) => {
+    if (!isEditing) return;
 
     const file = event.target.files[0];
 
@@ -169,44 +157,112 @@ export default function CompanyProfile() {
       return;
     }
 
-    if (!file.type.startsWith("image/")) {
+    const allowedTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/jpg",
+      "image/webp",
+    ];
 
+    if (!allowedTypes.includes(file.type)) {
       showPopup(
-        "Please select a valid image file.",
+        "Only JPG, JPEG, PNG and WEBP images are allowed.",
         "error"
       );
 
+      event.target.value = "";
       return;
     }
 
-    const imageURL = URL.createObjectURL(file);
+    if (file.size > 2 * 1024 * 1024) {
+      showPopup(
+        "Logo size must be less than 2 MB.",
+        "error"
+      );
 
-    setCompanyLogo(imageURL);
+      event.target.value = "";
+      return;
+    }
 
-    showPopup(
-      "Logo changed successfully!"
-    );
+    try {
+      const token = localStorage.getItem("token");
 
+      const formData = new FormData();
+      formData.append("logo", file);
+
+      const response = await fetch(
+        "http://localhost:5000/api/companies/me/logo",
+        {
+          method: "POST",
+          headers: {
+            ...(token
+              ? { Authorization: `Bearer ${token}` }
+              : {}),
+          },
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.message || "Failed to upload company logo."
+        );
+      }
+
+      setCompanyLogo(data.logoUrl || null);
+
+      showPopup("Logo uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading company logo:", error);
+
+      showPopup(
+        error.message || "Failed to upload company logo.",
+        "error"
+      );
+    } finally {
+      event.target.value = "";
+    }
   };
-
 
   /* ================= REMOVE LOGO ================= */
 
-  const handleRemoveLogo = () => {
+  const handleRemoveLogo = async () => {
+    if (!isEditing) return;
 
-    setCompanyLogo(null);
+    try {
+      const response = await api.put("/companies/me", {
+        logoUrl: "",
+      });
 
-    showPopup(
-      "Company logo removed.",
-      "success"
-    );
+      if (!response.data?.success) {
+        throw new Error(
+          response.data?.message || "Failed to remove company logo."
+        );
+      }
 
+      setCompanyLogo(null);
+
+      showPopup(
+        "Company logo removed.",
+        "success"
+      );
+    } catch (error) {
+      console.error("Error removing company logo:", error);
+
+      showPopup(
+        error.message || "Failed to remove company logo.",
+        "error"
+      );
+    }
   };
-
 
   /* ================= EDIT PROFILE ================= */
 
   const handleEditProfile = () => {
+    setIsCreating(false);
+    setIsEditing(true);
 
     showPopup(
       "You can now edit your company profile."
@@ -216,135 +272,142 @@ export default function CompanyProfile() {
       top: 0,
       behavior: "smooth"
     });
-
   };
 
+  /* ================= ADD NEW PROFILE ================= */
+
+  const handleAddNewProfile = () => {
+    setIsCreating(false);
+    setIsEditing(true);
+    showPopup("You already have a company profile. You can edit the existing profile.");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   /* ================= SAVE CHANGES ================= */
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
+    if (!isEditing) return;
 
-    console.log("Company Profile Saved:", {
-      companyName,
-      yearOfEstablishment,
-      registrationNumber,
-      companySize,
-      industry,
-      headOffice,
-      website,
-      contactPerson,
-      alternateEmail,
-      email,
-      mobileNumber,
-      phoneNumber,
-      streetAddress,
-      city,
-      state,
-      pincode,
-      country,
-      description,
-      companyLogo
-    });
+    try {
+      const companyData = {
+        companyName, yearOfEstablishment, registrationNumber, companySize,
+        industry, headOffice, website, contactPerson, alternateEmail, email,
+        mobileNumber, phoneNumber, street: streetAddress, city, state,
+        zipCode: pincode, country, description
+      };
 
-    showPopup(
-      "Company profile saved successfully!"
-    );
+      console.log("DATA BEING SENT TO MONGODB:", companyData);
 
+      const response = await api.put("/companies/me", companyData);
+      console.log("DATABASE RESPONSE:", response);
+
+      if (!response.data?.success) {
+        throw new Error(response.data?.message || "Failed to save company profile.");
+      }
+
+      const company = response.data.company;
+      if (company) {
+        setCompanyName(company.companyName || "");
+        setYearOfEstablishment(company.yearOfEstablishment || "");
+        setRegistrationNumber(company.registrationNumber || "");
+        setCompanySize(company.companySize || "");
+        setIndustry(company.industry || "");
+        setHeadOffice(company.headOffice || "");
+        setWebsite(company.website || "");
+        setContactPerson(company.contactPerson || "");
+        setAlternateEmail(company.alternateEmail || "");
+        setEmail(company.email || "");
+        setMobileNumber(company.mobileNumber || "");
+        setPhoneNumber(company.phoneNumber || "");
+        setStreetAddress(company.street || "");
+        setCity(company.city || "");
+        setState(company.state || "");
+        setPincode(company.zipCode || "");
+        setCountry(company.country || "");
+        setDescription(company.description || "");
+        setCompanyLogo(getLogoUrl(company.logoUrl));
+      }
+
+      setIsCreating(false);
+      setIsEditing(false);
+      showPopup("Company profile updated successfully!");
+    } catch (error) {
+      console.error("Error saving company profile:", error);
+      showPopup(error.message || "Failed to save company profile.", "error");
+    }
   };
-
 
   /* ================= CANCEL CHANGES ================= */
 
-  const handleCancelChanges = () => {
+  const handleCancelChanges = async () => {
+    try {
+      const response = await api.get("/companies/me");
 
-    setCompanyName("ABC Technologies Pvt. Ltd.");
+      if (response.data?.success && response.data.company) {
+        const company = response.data.company;
+        setCompanyName(company.companyName || "");
+        setYearOfEstablishment(company.yearOfEstablishment || "");
+        setRegistrationNumber(company.registrationNumber || "");
+        setCompanySize(company.companySize || "");
+        setIndustry(company.industry || "");
+        setHeadOffice(company.headOffice || "");
+        setWebsite(company.website || "");
+        setContactPerson(company.contactPerson || "");
+        setAlternateEmail(company.alternateEmail || "");
+        setEmail(company.email || "");
+        setMobileNumber(company.mobileNumber || "");
+        setPhoneNumber(company.phoneNumber || "");
+        setStreetAddress(company.street || "");
+        setCity(company.city || "");
+        setState(company.state || "");
+        setPincode(company.zipCode || "");
+        setCountry(company.country || "");
+        setDescription(company.description || "");
+        setCompanyLogo(getLogoUrl(company.logoUrl));
+      }
 
-    setYearOfEstablishment("2018");
-
-    setRegistrationNumber("ABC/Tech/2018/558");
-
-    setCompanySize("51 - 200 Employees");
-
-    setIndustry("Information Technology");
-
-    setHeadOffice("Pune, Maharashtra, India");
-
-    setWebsite("www.abctechnologies.com");
-
-    setContactPerson("Rahul Sharma");
-
-    setAlternateEmail(
-      "recruitment@abctechnologies.com"
-    );
-
-    setEmail(
-      "hr@abctechnologies.com"
-    );
-
-    setMobileNumber(
-      "+91 87654 32109"
-    );
-
-    setPhoneNumber(
-      "+91 98765 43210"
-    );
-
-    setStreetAddress(
-      "ABC Tower, 2nd Floor, Baner Road"
-    );
-
-    setCity("Pune");
-
-    setState("Maharashtra");
-
-    setPincode("411045");
-
-    setCountry("India");
-
-    setDescription(
-      "ABC Technologies Pvt. Ltd. is a leading IT solutions and services company delivering innovative digital solutions to clients worldwide. We specialize in web development, mobile applications, cloud solutions, and IT consulting. Our mission is to empower businesses through technology and innovation. We believe in building strong relationships with communities through internship and training opportunities."
-    );
-
-    setCompanyLogo(abcLogo);
-
-    showPopup(
-      "Changes cancelled."
-    );
-
+      setIsCreating(false);
+      setIsEditing(false);
+      showPopup("Changes cancelled.");
+    } catch (error) {
+      console.error("Error cancelling changes:", error);
+      setIsCreating(false);
+      setIsEditing(false);
+      showPopup(error.message || "Failed to restore company profile.", "error");
+    }
   };
-
 
   /* ================= SOCIAL LINKS ================= */
 
   const socialLinks = [
     {
       icon: FaLinkedin,
-      value: "https://www.linkedin.com/company/abc-technologies"
+      value:
+        "https://www.linkedin.com/company/abc-technologies"
     },
     {
       icon: Globe,
-      value: "https://www.abctechnologies.com"
+      value:
+        "https://www.abctechnologies.com"
     },
     {
       icon: FaFacebook,
-      value: "https://www.facebook.com/abctechnologies"
+      value:
+        "https://www.facebook.com/abctechnologies"
     },
     {
       icon: FaTwitter,
-      value: "https://twitter.com/abctechnologies"
+      value:
+        "https://twitter.com/abctechnologies"
     }
   ];
 
-
   return (
-
     <div className="flex min-h-screen w-full bg-[#F8FAFC]">
-
 
       {/* ================= POPUP ================= */}
 
       {popup.show && (
-
         <div
           className="
             fixed
@@ -365,7 +428,6 @@ export default function CompanyProfile() {
             gap-3
           "
         >
-
           <div
             className={`
               w-9
@@ -382,14 +444,10 @@ export default function CompanyProfile() {
               }
             `}
           >
-
             <CheckCircle2 size={20} />
-
           </div>
 
-
           <div>
-
             <p className="text-[13px] font-semibold text-[#111827]">
               {popup.type === "error"
                 ? "Error"
@@ -399,33 +457,25 @@ export default function CompanyProfile() {
             <p className="text-[12px] text-[#6B7280] mt-0.5">
               {popup.message}
             </p>
-
           </div>
-
         </div>
-
       )}
-
 
       {/* ================= SIDEBAR ================= */}
 
       <CompanySidebar />
 
-
       {/* ================= RIGHT SIDE ================= */}
 
       <div className="flex-1 min-w-0 flex flex-col">
-
 
         {/* HEADER */}
 
         <CompanyHeader />
 
-
         {/* ================= MAIN ================= */}
 
         <main className="flex-1 px-8 py-8">
-
 
           {/* ================= PAGE HEADER ================= */}
 
@@ -455,49 +505,75 @@ export default function CompanyProfile() {
 
             </div>
 
+            {/* ================= PROFILE ACTIONS ================= */}
 
-            {/* ================= EDIT PROFILE ================= */}
+            <div className="flex items-center gap-3">
 
-            <button
-              onClick={handleEditProfile}
-              className="
-                w-[140px]
-                h-[48px]
-                rounded-[12px]
-                bg-[#1E5EFF]
-                text-white
-                text-[16px]
-                font-medium
-                flex
-                items-center
-                justify-center
-                gap-2
-                hover:bg-[#174dcc]
-                transition-colors
-              "
-            >
+              <button
+                onClick={handleAddNewProfile}
+                className="
+                  w-[170px]
+                  h-[48px]
+                  rounded-[12px]
+                  border
+                  border-[#1E5EFF]
+                  text-[#1E5EFF]
+                  bg-white
+                  text-[16px]
+                  font-medium
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  hover:bg-blue-50
+                  transition-colors
+                "
+              >
+                <Building2
+                  size={17}
+                  strokeWidth={2}
+                />
 
-              <Pencil
-                size={17}
-                strokeWidth={2}
-              />
+                Add New Profile
+              </button>
 
-              Edit Profile
+              <button
+                onClick={handleEditProfile}
+                className="
+                  w-[140px]
+                  h-[48px]
+                  rounded-[12px]
+                  bg-[#1E5EFF]
+                  text-white
+                  text-[16px]
+                  font-medium
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                  hover:bg-[#174dcc]
+                  transition-colors
+                "
+              >
+                <Pencil
+                  size={17}
+                  strokeWidth={2}
+                />
 
-            </button>
+                Edit Profile
+              </button>
+
+            </div>
 
           </div>
-
 
           {/* ================= TWO COLUMN LAYOUT ================= */}
 
           <div className="flex gap-6 items-start">
 
-
             {/* ================= LEFT COLUMN ================= */}
 
             <div className="w-[68%] flex flex-col gap-6">
-
 
               {/* ================= BASIC INFORMATION ================= */}
 
@@ -524,30 +600,28 @@ export default function CompanyProfile() {
 
                 </div>
 
-
                 <div className="grid grid-cols-2 gap-x-5 gap-y-5">
-
 
                   <FormField
                     label="Company Name"
                     value={companyName}
                     onChange={setCompanyName}
+                    disabled={!isEditing}
                   />
-
 
                   <FormField
                     label="Year of Establishment"
                     value={yearOfEstablishment}
                     onChange={setYearOfEstablishment}
+                    disabled={!isEditing}
                   />
-
 
                   <FormField
                     label="Registration Number"
                     value={registrationNumber}
                     onChange={setRegistrationNumber}
+                    disabled={!isEditing}
                   />
-
 
                   {/* DO NOT TOUCH THIS DROPDOWN */}
 
@@ -562,8 +636,8 @@ export default function CompanyProfile() {
                       "201 - 500 Employees",
                       "500+ Employees"
                     ]}
+                    disabled={!isEditing}
                   />
-
 
                   {/* DO NOT TOUCH THIS DROPDOWN */}
 
@@ -578,27 +652,27 @@ export default function CompanyProfile() {
                       "Healthcare",
                       "Education"
                     ]}
+                    disabled={!isEditing}
                   />
-
 
                   <FormField
                     label="Head Office Location"
                     value={headOffice}
                     onChange={setHeadOffice}
+                    disabled={!isEditing}
                   />
-
 
                   <FormField
                     label="Company Website"
                     value={website}
                     onChange={setWebsite}
                     full
+                    disabled={!isEditing}
                   />
 
                 </div>
 
               </section>
-
 
               {/* ================= CONTACT INFORMATION ================= */}
 
@@ -625,19 +699,20 @@ export default function CompanyProfile() {
 
                 </div>
 
-
                 <div className="grid grid-cols-2 gap-x-5 gap-y-5">
 
                   <FormField
                     label="HR / Contact Person"
                     value={contactPerson}
                     onChange={setContactPerson}
+                    disabled={!isEditing}
                   />
 
                   <FormField
                     label="Alternate Email (Optional)"
                     value={alternateEmail}
                     onChange={setAlternateEmail}
+                    disabled={!isEditing}
                   />
 
                   <FormField
@@ -645,6 +720,7 @@ export default function CompanyProfile() {
                     value={email}
                     onChange={setEmail}
                     type="email"
+                    disabled={!isEditing}
                   />
 
                   <FormField
@@ -652,6 +728,7 @@ export default function CompanyProfile() {
                     value={mobileNumber}
                     onChange={setMobileNumber}
                     type="tel"
+                    disabled={!isEditing}
                   />
 
                   <FormField
@@ -660,12 +737,12 @@ export default function CompanyProfile() {
                     onChange={setPhoneNumber}
                     type="tel"
                     full
+                    disabled={!isEditing}
                   />
 
                 </div>
 
               </section>
-
 
               {/* ================= ADDRESS INFORMATION ================= */}
 
@@ -693,7 +770,6 @@ export default function CompanyProfile() {
 
                 </div>
 
-
                 <div className="grid grid-cols-3 gap-x-5 gap-y-5">
 
                   <FormField
@@ -701,8 +777,8 @@ export default function CompanyProfile() {
                     value={streetAddress}
                     onChange={setStreetAddress}
                     full
+                    disabled={!isEditing}
                   />
-
 
                   {/* DO NOT TOUCH THIS DROPDOWN */}
 
@@ -717,8 +793,8 @@ export default function CompanyProfile() {
                       "Nagpur",
                       "Aurangabad"
                     ]}
+                    disabled={!isEditing}
                   />
-
 
                   {/* DO NOT TOUCH THIS DROPDOWN */}
 
@@ -733,15 +809,15 @@ export default function CompanyProfile() {
                       "Delhi",
                       "Tamil Nadu"
                     ]}
+                    disabled={!isEditing}
                   />
-
 
                   <FormField
                     label="Pincode"
                     value={pincode}
                     onChange={setPincode}
+                    disabled={!isEditing}
                   />
-
 
                   {/* DO NOT TOUCH THIS DROPDOWN */}
 
@@ -756,6 +832,7 @@ export default function CompanyProfile() {
                       "Canada",
                       "Australia"
                     ]}
+                    disabled={!isEditing}
                   />
 
                 </div>
@@ -764,11 +841,9 @@ export default function CompanyProfile() {
 
             </div>
 
-
             {/* ================= RIGHT COLUMN ================= */}
 
             <div className="w-[32%] flex flex-col gap-6">
-
 
               {/* ================= COMPANY LOGO ================= */}
 
@@ -795,9 +870,7 @@ export default function CompanyProfile() {
 
                 </div>
 
-
                 <div className="flex items-center gap-5">
-
 
                   {/* LOGO PREVIEW */}
 
@@ -820,8 +893,8 @@ export default function CompanyProfile() {
                     {companyLogo ? (
 
                       <img
-                        src={companyLogo}
-                        alt="ABC Technologies Logo"
+                        src={getLogoUrl(companyLogo)}
+                        alt="Company Logo"
                         className="
                           w-[105px]
                           h-[105px]
@@ -848,11 +921,9 @@ export default function CompanyProfile() {
 
                   </div>
 
-
                   {/* LOGO BUTTONS */}
 
                   <div className="flex flex-col gap-3 flex-1">
-
 
                     {/* HIDDEN FILE INPUT */}
 
@@ -861,14 +932,15 @@ export default function CompanyProfile() {
                       type="file"
                       accept="image/*"
                       onChange={handleLogoChange}
+                      disabled={!isEditing}
                       className="hidden"
                     />
-
 
                     {/* CHANGE LOGO */}
 
                     <button
                       onClick={handleChangeLogo}
+                      disabled={!isEditing}
                       className="
                         w-full
                         h-[42px]
@@ -893,11 +965,11 @@ export default function CompanyProfile() {
 
                     </button>
 
-
                     {/* REMOVE LOGO */}
 
                     <button
                       onClick={handleRemoveLogo}
+                      disabled={!isEditing}
                       className="
                         w-full
                         h-[42px]
@@ -926,13 +998,11 @@ export default function CompanyProfile() {
 
                 </div>
 
-
                 <p className="text-[11px] text-[#9CA3AF] mt-3">
                   Recommended size: 200 × 200 px
                 </p>
 
               </section>
-
 
               {/* ================= COMPANY DESCRIPTION ================= */}
 
@@ -960,9 +1030,9 @@ export default function CompanyProfile() {
 
                 </div>
 
-
                 <textarea
                   value={description}
+                  disabled={!isEditing}
                   onChange={(e) =>
                     setDescription(
                       e.target.value.slice(0, 500)
@@ -985,7 +1055,6 @@ export default function CompanyProfile() {
                     focus:ring-blue-100
                   "
                 />
-
 
                 <div className="flex items-center justify-between mt-2">
 
@@ -1014,7 +1083,6 @@ export default function CompanyProfile() {
 
               </section>
 
-
               {/* ================= SOCIAL LINKS ================= */}
 
               <section
@@ -1039,7 +1107,6 @@ export default function CompanyProfile() {
                   </h2>
 
                 </div>
-
 
                 <div className="flex flex-col gap-3">
 
@@ -1085,7 +1152,6 @@ export default function CompanyProfile() {
 
           </div>
 
-
           {/* ================= BOTTOM ACTIONS ================= */}
 
           <div className="mt-6">
@@ -1098,7 +1164,6 @@ export default function CompanyProfile() {
           </div>
 
         </main>
-
 
         {/* ================= FOOTER ================= */}
 

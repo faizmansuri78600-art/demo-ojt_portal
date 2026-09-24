@@ -7,28 +7,19 @@ const {
   addStudent,
   updateStudent,
   deleteStudent,
+  getMyProfile,
 } = require("../controllers/studentController");
+
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-
-// Get all students
+router.get("/me", protect, getMyProfile);
 router.get("/", getAllStudents);
-
-// Get verified students
 router.get("/verified", getVerifiedStudents);
-
-// Get student by ID
 router.get("/:id", getStudentById);
-
-// Add student
 router.post("/", addStudent);
-
-// Update student
 router.put("/:id", updateStudent);
-
-// Delete student
 router.delete("/:id", deleteStudent);
-
 
 module.exports = router;

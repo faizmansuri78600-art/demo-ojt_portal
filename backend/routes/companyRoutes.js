@@ -1,16 +1,37 @@
 const express = require("express");
+const {protect} = require("../middleware/authMiddleware");
+const { authorizeRoles } = require("../middleware/roleMiddleware");
 
 const {
   getAllCompanies,
   getVerifiedCompanies,
+  getApplications,
+  updateApplicationStatus,
 } = require("../controllers/companyController");
+
+// const protect = require("../middleware/authMiddleware");
+
+const { logoUpload } = require("../config/multer");
 
 const router = express.Router();
 
-// Get all companies
+// Public company directory
 router.get("/", getAllCompanies);
-
-// Get only verified companies
 router.get("/verified", getVerifiedCompanies);
+
+// Protected company application routes - FIX: real role name is "CompanyCoordinator"
+router.get(
+  "/applications",
+  protect,
+  authorizeRoles("CompanyCoordinator"),
+  getApplications
+);
+
+router.put(
+  "/applications/:id",
+  protect,
+  authorizeRoles("CompanyCoordinator"),
+  updateApplicationStatus
+);
 
 module.exports = router;

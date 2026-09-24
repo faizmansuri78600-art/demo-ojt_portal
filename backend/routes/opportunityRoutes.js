@@ -1,17 +1,9 @@
 const express = require("express");
-
-const {
-  getAllOpportunities,
-  getOpenOpportunities,
-  getTopCompanies,
-} = require("../controllers/opportunityController");
-
 const router = express.Router();
 
-router.get("/", getAllOpportunities);
+const { getOpenOpportunities } = require("../controllers/opportunityController");
 
+// Get all open OJT opportunities (public — used by students browsing)
 router.get("/open", getOpenOpportunities);
-
-router.get("/top-companies", getTopCompanies);
 
 module.exports = router;

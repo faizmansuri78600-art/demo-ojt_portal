@@ -1,267 +1,335 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 import Header from "../../components/common/SHeader";
 import Sidebar from "../../components/common/SSidebar";
-
-import tcsLogo from "../../assets/logos/tcslogo.png";
-import infosysLogo from "../../assets/logos/Infosyslogo.png";
-import wiproLogo from "../../assets/logos/WiproLogo.png";
-import cognizantLogo from "../../assets/logos/cognizantlogo.png";
 
 import {
   Search,
   MapPin,
   Clock,
   IndianRupee,
-  Bookmark,
-  BookmarkCheck,
   Eye,
   CheckCircle,
   X,
-  Building2,
   Calendar,
-  Briefcase,
 } from "lucide-react";
 
-// ===============================
-// OJT OPPORTUNITIES DATA
-// ===============================
+const API_BASE = "http://localhost:5000/api";
 
-const opportunities = [
-  {
-    id: 1,
-    logo: tcsLogo,
-    title: "Python Developer Intern",
-    company: "Tata Consultancy Services",
-    location: "Pune, Maharashtra",
-    duration: "3 Months",
-    stipend: "5,000",
-    postedOn: "17 May 2025",
-    category: "Development",
-    skills: ["Python", "Django", "SQL", "REST API"],
-    description:
-      "Work on Python-based applications, REST APIs and backend development under experienced developers.",
-    requirements: [
-      "Basic knowledge of Python",
-      "Understanding of SQL",
-      "Knowledge of REST APIs",
-      "Good problem-solving skills",
-    ],
-    isNew: true,
-  },
+// Your login flow stores the token and user separately:
+//   localStorage: { token: "<jwt>", user: '{"id":"U...","email":"...","role":"Student"}' }
+const getToken = () => localStorage.getItem("token");
+const getStoredUser = () => JSON.parse(localStorage.getItem("user") || "null");
+const getAuth = () => {
+  const token = getToken();
+  if (!token) return null;
+  return { token, user: getStoredUser() };
+};
 
-  {
-    id: 2,
-    logo: infosysLogo,
-    title: "Web Development Intern",
-    company: "Infosys Limited",
-    location: "Bangalore, Karnataka",
-    duration: "4 Months",
-    stipend: "12,000",
-    postedOn: "16 May 2025",
-    category: "Development",
-    skills: ["HTML", "CSS", "JavaScript"],
-    description:
-      "Develop responsive web applications and work with modern frontend technologies.",
-    requirements: [
-      "HTML and CSS knowledge",
-      "JavaScript basics",
-      "Understanding of responsive design",
-      "Good communication skills",
-    ],
-    isNew: true,
-  },
+// Decodes a JWT's payload without verifying the signature — just to pull
+// an id out when the login response doesn't store a full student object
+// under "ojtUser". Returns null if the token is missing/malformed.
+const decodeToken = (token) => {
+  if (!token) return null;
 
-  {
-    id: 3,
-    logo: wiproLogo,
-    title: "Data Analytics Intern",
-    company: "Wipro Technologies",
-    location: "Hyderabad, Telangana",
-    duration: "3 Months",
-    stipend: "14,000",
-    postedOn: "16 May 2025",
-    category: "Data Analytics",
-    skills: ["Python", "Excel", "Power BI"],
-    description:
-      "Analyze business data, prepare reports and create dashboards using data analytics tools.",
-    requirements: [
-      "Basic Python knowledge",
-      "Excel knowledge",
-      "Understanding of data analysis",
-      "Basic Power BI knowledge",
-    ],
-    isNew: true,
-  },
+  try {
+    const base64Payload = token.split(".")[1];
+    const json = atob(base64Payload.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(json);
+  } catch (error) {
+    return null;
+  }
+};
 
-  {
-    id: 4,
-    logo: cognizantLogo,
-    title: "Software Engineering Intern",
-    company: "Cognizant Technology Solutions",
-    location: "Chennai, Tamil Nadu",
-    duration: "6 Months",
-    stipend: "16,000",
-    postedOn: "14 May 2025",
-    category: "Development",
-    skills: ["Java", "Spring Boot", "MySQL", "Git"],
-    description:
-      "Work with the software engineering team to develop and maintain enterprise applications.",
-    requirements: [
-      "Java programming knowledge",
-      "Basic MySQL knowledge",
-      "Understanding of Git",
-      "Knowledge of OOP concepts",
-    ],
-    isNew: false,
-  },
-];
+// Your Student documents look like:
+// { _id: "S2345", userId: "U2345", rollNumber, name, department, cgpa, ... }
+// Application references Student via studentId (e.g. "S2345") — so this is
+// the exact value we need. The auth token most likely encodes the User's id
+// ("U2345"), NOT the Student's id, so a JWT decode alone usually can't give
+// us studentId. This tries, in order:
+//   1. A student object already stored under "ojtUser" (auth.student / auth.user)
+//   2. The stored object itself, if it already looks like a Student record
+//   3. Fetching the student's own profile from the backend using the token
+// ASSUMPTION: step 3 calls GET /students/me. Change STUDENT_ME_ENDPOINT
+// below if your backend exposes this under a different path.
+const STUDENT_ME_ENDPOINT = `${API_BASE}/students/me`;
+
+const fetchLoggedInStudent = async () => {
+  const auth = getAuth();
+  if (!auth) return null;
+
+  if (auth.student?._id) return auth.student;
+  if (auth.user?._id) return auth.user;
+  if (auth._id) return auth;
+
+  try {
+    const res = await axios.get(STUDENT_ME_ENDPOINT, {
+      headers: { Authorization: `Bearer ${auth.token}` },
+    });
+
+    return res.data.student || res.data;
+  } catch (error) {
+    console.error("Failed to load student profile:", error);
+  }
+
+  // Last resort: decode the token in case it does carry a usable id.
+  const payload = decodeToken(auth.token);
+  const idFromToken =
+    payload?.studentId || payload?._id || payload?.id || payload?.sub;
+
+  return idFromToken ? { _id: idFromToken } : null;
+};
+
+// Normalizes a "skills" value into a clean array no matter what shape the
+// backend sends it as: a real array, a comma-separated string, or nothing.
+// Your Opportunity documents store this as skillsRequired, a comma-separated
+// string (e.g. "Manual Testing, Selenium, SQL, HTML").
+const toSkillsArray = (skills) => {
+  if (Array.isArray(skills)) return skills.filter(Boolean);
+
+  if (typeof skills === "string") {
+    return skills
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  return [];
+};
+
+// Normalizes the company display name. Your Opportunity documents store a
+// direct "companyId" reference (e.g. "C001") to the Company collection.
+// For the name to show up here, the backend's GET /opportunities/open route
+// needs to .populate("companyId") so companyId arrives as a full object
+// ({ _id, companyName, ... }) instead of a bare string. This also covers a
+// few other shapes in case your backend sends the name differently.
+const getCompanyName = (o) => {
+  if (
+    o.companyId &&
+    typeof o.companyId === "object" &&
+    o.companyId.companyName
+  ) {
+    return o.companyId.companyName;
+  }
+
+  if (typeof o.company === "string" && o.company.trim()) return o.company;
+
+  if (o.company && typeof o.company === "object" && o.company.companyName) {
+    return o.company.companyName;
+  }
+
+  if (o.companyName) return o.companyName;
+
+  const nestedName = o.companyCoordinator?.company?.companyName;
+  if (nestedName) return nestedName;
+
+  return "Company name unavailable";
+};
 
 // ===============================
 // MAIN PAGE
 // ===============================
 
 export default function BrowseOjt() {
-  const [bookmarked, setBookmarked] = useState([]);
-  const [applied, setApplied] = useState([]);
+  const [opportunities, setOpportunities] = useState([]);
+  const [myApplications, setMyApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedOJT, setSelectedOJT] = useState(null);
+  const [student, setStudent] = useState(null);
+
+  // id of the opportunity currently being applied to (for button loading state)
+  const [applyingId, setApplyingId] = useState(null);
 
   // Search and filter states
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("All Categories");
+  const [company, setCompany] = useState("All Companies");
   const [location, setLocation] = useState("All Locations");
   const [duration, setDuration] = useState("All Durations");
   const [sort, setSort] = useState("Newest");
 
   // ===============================
-  // BOOKMARK
+  // FETCH STUDENT PROFILE + OPEN OPPORTUNITIES + MY APPLICATIONS
   // ===============================
 
-  const toggleBookmark = (id) => {
-    setBookmarked((prev) =>
-      prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [...prev, id]
-    );
+  const loadStudent = async () => {
+    const s = await fetchLoggedInStudent();
+    setStudent(s);
   };
 
+  const fetchOpportunities = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/opportunities/open`);
+
+      const normalized = (res.data.opportunities || []).map((o) => ({
+        ...o,
+        skills: toSkillsArray(
+          o.skills || o.requiredSkills || o.skillsRequired
+        ),
+        company: getCompanyName(o),
+      }));
+
+      setOpportunities(normalized);
+    } catch (error) {
+      console.error("Failed to load opportunities:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchMyApplications = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/applications/mine`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
+
+      setMyApplications(
+        (res.data.applications || []).map((a) => a.opportunityId)
+      );
+    } catch (error) {
+      // if this fails (e.g. not logged in as a student)
+      // we just show everything as "not applied"
+      console.error("Failed to load your applications:", error);
+    }
+  };
+
+  useEffect(() => {
+    loadStudent();
+    fetchOpportunities();
+    fetchMyApplications();
+  }, []);
+
   // ===============================
-  // APPLY OJT
+  // APPLY DIRECTLY (no confirmation form)
   // ===============================
 
-  const handleApply = (opportunity) => {
-    if (applied.includes(opportunity.id)) {
+  const handleApply = async (opportunity) => {
+    const opportunityId = opportunity._id || opportunity.id;
+
+    if (myApplications.includes(opportunityId)) {
       alert("You have already applied for this OJT. ✅");
       return;
     }
 
-    setApplied((prev) => [...prev, opportunity.id]);
+    if (!student?._id) {
+      alert("Could not find your student profile. Please log in again.");
+      return;
+    }
 
-    alert(
-      `Application submitted successfully! 🎉\n\nRole: ${opportunity.title}\nCompany: ${opportunity.company}`
-    );
+    setApplyingId(opportunityId);
 
-    setSelectedOJT(null);
+    try {
+      await axios.post(
+        `${API_BASE}/applications/apply`,
+        {
+          studentId: student._id,
+          opportunityId,
+          status: "Pending",
+          appliedOn: new Date().toISOString().split("T")[0],
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        }
+      );
+
+      setMyApplications((prev) => [...prev, opportunityId]);
+
+      alert(
+        `Application submitted successfully! 🎉\n\nRole: ${opportunity.title}\nCompany: ${opportunity.company}`
+      );
+
+      setSelectedOJT(null);
+    } catch (error) {
+      const message =
+        error.response?.data?.message || "Failed to submit application";
+
+      alert(message);
+      console.error("Apply failed:", error);
+    } finally {
+      setApplyingId(null);
+    }
   };
 
-  // ===============================
-  // FILTER OJT
-  // ===============================
+  const companyOptions = [
+    "All Companies",
+    ...new Set(opportunities.map((o) => o.company).filter(Boolean)),
+  ];
 
   const filteredOpportunities = opportunities
     .filter((item) => {
       const searchText = search.toLowerCase();
 
       const matchesSearch =
-        item.title.toLowerCase().includes(searchText) ||
-        item.company.toLowerCase().includes(searchText) ||
-        item.location.toLowerCase().includes(searchText) ||
-        item.skills.some((skill) =>
+        (item.title || "").toLowerCase().includes(searchText) ||
+        (item.company || "").toLowerCase().includes(searchText) ||
+        toSkillsArray(item.skills).some((skill) =>
           skill.toLowerCase().includes(searchText)
         );
 
-      const matchesCategory =
-        category === "All Categories" ||
-        item.category === category;
+      const matchesCompany =
+        company === "All Companies" || item.company === company;
 
       const matchesLocation =
         location === "All Locations" ||
-        item.location.toLowerCase().includes(location.toLowerCase());
+        (item.location || "").toLowerCase().includes(location.toLowerCase());
 
       const matchesDuration =
-        duration === "All Durations" ||
-        item.duration === duration;
+        duration === "All Durations" || item.duration === duration;
 
-      return (
-        matchesSearch &&
-        matchesCategory &&
-        matchesLocation &&
-        matchesDuration
-      );
+      return matchesSearch && matchesCompany && matchesLocation && matchesDuration;
     })
     .sort((a, b) => {
       if (sort === "Oldest") {
-        return a.id - b.id;
+        return new Date(a.postedOn) - new Date(b.postedOn);
       }
 
-      return b.id - a.id;
+      return new Date(b.postedOn) - new Date(a.postedOn);
     });
-
-  // ===============================
-  // RESET FILTERS
-  // ===============================
 
   const resetFilters = () => {
     setSearch("");
-    setCategory("All Categories");
+    setCompany("All Companies");
     setLocation("All Locations");
     setDuration("All Durations");
     setSort("Newest");
   };
+
+  if (loading) {
+    return <p className="p-6 text-gray-500">Loading opportunities...</p>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
 
       <div className="flex pt-16">
-       <Sidebar activePage="Browse OJT Opportunities" />
+        <Sidebar activePage="Browse OJT Opportunities" />
 
         <main className="ml-64 flex-1 p-6">
-          {/* ================= BREADCRUMB ================= */}
-
+          {/* HEADER */}
           <div className="text-sm text-gray-500 mb-3">
             Dashboard
             <span className="mx-2">›</span>
-            <span className="text-gray-700">
-              Browse OJT Opportunities
-            </span>
+            <span className="text-gray-700">Browse OJT Opportunities</span>
           </div>
-
-          {/* ================= PAGE HEADING ================= */}
 
           <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-800">
               Browse OJT Opportunities
             </h1>
-
             <p className="text-sm text-gray-500 mt-1">
-              Explore and apply for the best OJT opportunities
-              that match your skills and interests.
+              Explore and apply for the best OJT opportunities that match
+              your skills and interests.
             </p>
           </div>
 
-          {/* ================= SEARCH BAR ================= */}
-
+          {/* SEARCH */}
           <div className="bg-white border border-gray-200 rounded-lg p-4 mb-5">
             <div className="flex flex-wrap gap-3">
-              {/* Search */}
-
               <div className="flex-1 min-w-[220px] border border-gray-200 rounded-md flex items-center px-3">
-                <Search
-                  size={17}
-                  className="text-gray-400 mr-2"
-                />
-
+                <Search size={17} className="text-gray-400 mr-2" />
                 <input
                   type="text"
                   value={search}
@@ -271,20 +339,15 @@ export default function BrowseOjt() {
                 />
               </div>
 
-              {/* Category */}
-
               <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                value={company}
+                onChange={(e) => setCompany(e.target.value)}
                 className="border border-gray-200 rounded-md px-4 py-2 text-sm text-gray-600"
               >
-                <option>All Categories</option>
-                <option>Development</option>
-                <option>Data Analytics</option>
-                <option>Design</option>
+                {companyOptions.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
               </select>
-
-              {/* Location */}
 
               <select
                 value={location}
@@ -299,20 +362,16 @@ export default function BrowseOjt() {
                 <option>Chennai</option>
               </select>
 
-              {/* Duration */}
-
               <select
                 value={duration}
                 onChange={(e) => setDuration(e.target.value)}
                 className="border border-gray-200 rounded-md px-4 py-2 text-sm text-gray-600"
               >
                 <option>All Durations</option>
-                <option>3 Months</option>
-                <option>4 Months</option>
-                <option>6 Months</option>
+                <option>3 months</option>
+                <option>4 months</option>
+                <option>6 months</option>
               </select>
-
-              {/* Sort */}
 
               <select
                 value={sort}
@@ -324,8 +383,6 @@ export default function BrowseOjt() {
               </select>
             </div>
 
-            {/* Total */}
-
             <div className="mt-4 text-sm text-gray-500">
               Total{" "}
               <span className="font-semibold text-gray-700">
@@ -335,401 +392,117 @@ export default function BrowseOjt() {
             </div>
           </div>
 
-          {/* ================= PAGE GRID ================= */}
-
-          <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-5">
-            {/* ================= OPPORTUNITY LIST ================= */}
-
+          {/* GRID */}
+          <div className="grid grid-cols-1 gap-5">
             <div className="space-y-4">
               {filteredOpportunities.length === 0 ? (
                 <div className="bg-white border border-gray-200 rounded-lg p-10 text-center">
-                  <Search
-                    size={35}
-                    className="mx-auto text-gray-300 mb-3"
-                  />
-
+                  <Search size={35} className="mx-auto text-gray-300 mb-3" />
                   <h3 className="text-sm font-semibold text-gray-700">
                     No opportunities found
                   </h3>
-
                   <p className="text-xs text-gray-400 mt-1">
                     Try changing your search or filters.
                   </p>
                 </div>
               ) : (
-                filteredOpportunities.map((opportunity) => (
-                  <div
-                    key={opportunity.id}
-                    className="bg-white border border-gray-200 rounded-lg p-5"
-                  >
-                    {/* Card Header */}
+                filteredOpportunities.map((opportunity) => {
+                  const opportunityId = opportunity._id || opportunity.id;
+                  const applied = myApplications.includes(opportunityId);
+                  const isApplying = applyingId === opportunityId;
+                  const rowKey = opportunityId || opportunity.title;
+                  const skills = toSkillsArray(opportunity.skills);
 
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex items-start gap-4">
-                        {/* Logo */}
-
-                        <div className="w-14 h-14 rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-                          <img
-                            src={opportunity.logo}
-                            alt={opportunity.company}
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-
-                        {/* Title */}
-
+                  return (
+                    <div
+                      key={rowKey}
+                      className="bg-white border border-gray-200 rounded-lg p-5"
+                    >
+                      <div className="flex items-start justify-between gap-4">
                         <div>
                           <div className="flex items-center gap-2 flex-wrap">
                             <h2 className="text-base font-semibold text-gray-800">
                               {opportunity.title}
                             </h2>
 
-                            {opportunity.isNew && (
-                              <span className="text-[10px] font-medium text-green-600 bg-green-50 border border-green-200 rounded px-1.5 py-0.5">
-                                New
-                              </span>
-                            )}
-
-                            {applied.includes(opportunity.id) && (
+                            {applied && (
                               <span className="text-[10px] font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded px-1.5 py-0.5">
                                 Applied
                               </span>
                             )}
                           </div>
 
-                          <p className="text-sm text-gray-600 mt-1">
-                            {opportunity.company}
-                          </p>
+                          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-xs text-gray-500">
+                            <span className="flex items-center gap-1.5">
+                              <MapPin size={14} />
+                              {opportunity.location}
+                            </span>
+
+                            <span className="flex items-center gap-1.5">
+                              <Clock size={14} />
+                              {opportunity.duration}
+                            </span>
+
+                            <span className="flex items-center gap-1.5">
+                              <IndianRupee size={14} />
+                              {opportunity.isPaid ? "Paid" : "Unpaid"}
+                            </span>
+
+                            {opportunity.postedOn && (
+                              <span className="flex items-center gap-1.5">
+                                <Calendar size={14} />
+                                Posted {opportunity.postedOn}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex flex-wrap gap-2 mt-4">
+                            {skills.map((skill, i) => (
+                              <span
+                                key={`${rowKey}-skill-${i}-${skill}`}
+                                className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       </div>
 
-                      {/* Bookmark */}
-
-                      <button
-                        onClick={() =>
-                          toggleBookmark(opportunity.id)
-                        }
-                        className="text-gray-400 hover:text-blue-600"
-                        title="Bookmark"
-                      >
-                        {bookmarked.includes(opportunity.id) ? (
-                          <BookmarkCheck
-                            size={20}
-                            className="text-blue-600"
-                          />
-                        ) : (
-                          <Bookmark size={20} />
-                        )}
-                      </button>
-                    </div>
-
-                    {/* Details */}
-
-                    <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-xs text-gray-500">
-                      <span className="flex items-center gap-1.5">
-                        <MapPin size={14} />
-                        {opportunity.location}
-                      </span>
-
-                      <span className="flex items-center gap-1.5">
-                        <Clock size={14} />
-                        {opportunity.duration}
-                      </span>
-
-                      <span className="flex items-center gap-1.5">
-                        <IndianRupee size={14} />
-                        ₹{opportunity.stipend} / month
-                      </span>
-
-                      <span className="flex items-center gap-1.5">
-                        <Calendar size={14} />
-                        Posted {opportunity.postedOn}
-                      </span>
-                    </div>
-
-                    {/* Skills */}
-
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      {opportunity.skills.map((skill) => (
-                        <span
-                          key={skill}
-                          className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Buttons */}
-
-                    <div className="flex items-center justify-between mt-5 pt-4 border-t border-gray-100">
-                      <span className="text-xs text-gray-400">
-                        {opportunity.category}
-                      </span>
-
-                      <div className="flex gap-2">
-                        {/* View Details */}
-
+                      <div className="flex items-center justify-end mt-5 pt-4 border-t border-gray-100 gap-2">
                         <button
-                          onClick={() =>
-                            setSelectedOJT(opportunity)
-                          }
+                          onClick={() => setSelectedOJT(opportunity)}
                           className="flex items-center gap-1.5 border border-gray-200 text-gray-600 px-4 py-2 rounded-md text-xs font-medium hover:bg-gray-50"
                         >
                           <Eye size={14} />
                           View Details
                         </button>
 
-                        {/* Apply */}
-
                         <button
-                          onClick={() =>
-                            handleApply(opportunity)
-                          }
-                          disabled={applied.includes(
-                            opportunity.id
-                          )}
+                          onClick={() => handleApply(opportunity)}
+                          disabled={applied || isApplying}
                           className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium ${
-                            applied.includes(opportunity.id)
+                            applied
                               ? "bg-green-100 text-green-700 cursor-not-allowed"
-                              : "bg-blue-600 text-white hover:bg-blue-700"
+                              : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
                           }`}
                         >
-                          {applied.includes(opportunity.id) ? (
+                          {applied ? (
                             <>
                               <CheckCircle size={14} />
                               Applied
                             </>
+                          ) : isApplying ? (
+                            "Submitting..."
                           ) : (
                             "Apply Now"
                           )}
                         </button>
                       </div>
                     </div>
-                  </div>
-                ))
+                  );
+                })
               )}
-
-              {/* Pagination */}
-
-              <div className="flex justify-center items-center gap-2 pt-4">
-                <button className="px-3 py-2 border border-gray-200 rounded-md text-sm text-gray-400">
-                  ‹
-                </button>
-
-                <button className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm">
-                  1
-                </button>
-
-                <button className="px-3 py-2 border border-gray-200 rounded-md text-sm">
-                  2
-                </button>
-
-                <button className="px-3 py-2 border border-gray-200 rounded-md text-sm">
-                  3
-                </button>
-
-                <span className="px-2 text-gray-400">
-                  ...
-                </span>
-
-                <button className="px-3 py-2 border border-gray-200 rounded-md text-sm">
-                  6
-                </button>
-
-                <button className="px-3 py-2 border border-gray-200 rounded-md text-sm">
-                  ›
-                </button>
-              </div>
-            </div>
-
-            {/* ================= FILTER PANEL ================= */}
-
-            <div className="bg-white border border-gray-200 rounded-lg p-5 h-fit">
-              <div className="flex justify-between items-center mb-5">
-                <h2 className="font-semibold text-gray-800">
-                  Filters
-                </h2>
-
-                <button
-                  onClick={resetFilters}
-                  className="text-sm text-blue-600 hover:text-blue-700"
-                >
-                  ↻ Reset All
-                </button>
-              </div>
-
-              {/* Keyword */}
-
-              <label className="text-sm font-medium text-gray-700">
-                Keyword
-              </label>
-
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search by role, skills..."
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm mt-2 mb-4 outline-none focus:border-blue-400"
-              />
-
-              {/* Category */}
-
-              <label className="text-sm font-medium text-gray-700">
-                Category
-              </label>
-
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm mt-2 mb-4"
-              >
-                <option>All Categories</option>
-                <option>Development</option>
-                <option>Data Analytics</option>
-                <option>Design</option>
-              </select>
-
-              {/* Location */}
-
-              <label className="text-sm font-medium text-gray-700">
-                Location
-              </label>
-
-              <select
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm mt-2 mb-4"
-              >
-                <option>All Locations</option>
-                <option>Pune</option>
-                <option>Mumbai</option>
-                <option>Bangalore</option>
-                <option>Hyderabad</option>
-                <option>Chennai</option>
-              </select>
-
-              {/* Duration */}
-
-              <label className="text-sm font-medium text-gray-700">
-                Duration
-              </label>
-
-              <select
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm mt-2 mb-4"
-              >
-                <option>All Durations</option>
-                <option>3 Months</option>
-                <option>4 Months</option>
-                <option>6 Months</option>
-              </select>
-
-              {/* Stipend */}
-
-              <label className="text-sm font-medium text-gray-700">
-                Stipend Range
-              </label>
-
-              <input
-                type="range"
-                min="0"
-                max="30000"
-                className="w-full mt-3"
-              />
-
-              <div className="flex justify-between text-xs text-gray-500 mb-5">
-                <span>₹0</span>
-                <span>₹30,000+</span>
-              </div>
-
-              {/* Skills */}
-
-              <label className="text-sm font-medium text-gray-700">
-                Skills
-              </label>
-
-              <select className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm mt-2 mb-4">
-                <option>Select Skills</option>
-                <option>HTML</option>
-                <option>CSS</option>
-                <option>React.js</option>
-                <option>JavaScript</option>
-                <option>Python</option>
-                <option>Java</option>
-              </select>
-
-              {/* Posted Date */}
-
-              <label className="text-sm font-medium text-gray-700">
-                Posted Date
-              </label>
-
-              <select className="w-full border border-gray-200 rounded-md px-3 py-2 text-sm mt-2 mb-4">
-                <option>Any Time</option>
-                <option>Today</option>
-                <option>This Week</option>
-                <option>This Month</option>
-              </select>
-
-              {/* Apply Filter */}
-
-              <button
-                onClick={() =>
-                  alert("Filters applied successfully! 🔍")
-                }
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-md text-sm font-medium"
-              >
-                Apply Filters
-              </button>
-            </div>
-          </div>
-
-          {/* ================= BOTTOM INFORMATION CARDS ================= */}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="font-semibold text-sm text-gray-800">
-                Find the Best Opportunities
-              </h3>
-
-              <p className="text-xs text-gray-500 mt-2">
-                Discover top OJT opportunities from leading
-                companies.
-              </p>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="font-semibold text-sm text-gray-800">
-                Secure & Trusted
-              </h3>
-
-              <p className="text-xs text-gray-500 mt-2">
-                All companies are verified for safety and trust.
-              </p>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="font-semibold text-sm text-gray-800">
-                Easy Application
-              </h3>
-
-              <p className="text-xs text-gray-500 mt-2">
-                Apply in a few simple steps and track your
-                application.
-              </p>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-lg p-4">
-              <h3 className="font-semibold text-sm text-gray-800">
-                Grow Your Career
-              </h3>
-
-              <p className="text-xs text-gray-500 mt-2">
-                Gain real-world experience and enhance your
-                skills.
-              </p>
             </div>
           </div>
         </main>
@@ -738,167 +511,92 @@ export default function BrowseOjt() {
       {/* =====================================================
           OJT DETAILS MODAL
       ===================================================== */}
-
       {selectedOJT && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            {/* Modal Header */}
-
             <div className="flex items-start justify-between p-5 border-b border-gray-100">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-lg border border-gray-100 flex items-center justify-center overflow-hidden">
-                  <img
-                    src={selectedOJT.logo}
-                    alt={selectedOJT.company}
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-
-                <div>
-                  <h2 className="text-lg font-bold text-gray-800">
-                    {selectedOJT.title}
-                  </h2>
-
-                  <p className="text-sm text-gray-500 mt-1">
-                    {selectedOJT.company}
-                  </p>
-                </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-800">
+                  {selectedOJT.title}
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  {selectedOJT.company}
+                </p>
               </div>
 
               <button
                 onClick={() => setSelectedOJT(null)}
-                className="text-gray-400 hover:text-gray-700"
+                className="text-gray-400 hover:text-gray-600"
               >
                 <X size={20} />
               </button>
             </div>
 
-            {/* Modal Body */}
-
             <div className="p-5">
-              {/* Basic Details */}
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <MapPin
-                    size={16}
-                    className="text-blue-600 mb-2"
-                  />
-
-                  <p className="text-[10px] text-gray-400">
-                    Location
-                  </p>
-
+                  <MapPin size={16} className="text-blue-600 mb-2" />
+                  <p className="text-[10px] text-gray-400">Location</p>
                   <p className="text-xs font-medium text-gray-700 mt-1">
                     {selectedOJT.location}
                   </p>
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <Clock
-                    size={16}
-                    className="text-blue-600 mb-2"
-                  />
-
-                  <p className="text-[10px] text-gray-400">
-                    Duration
-                  </p>
-
+                  <Clock size={16} className="text-blue-600 mb-2" />
+                  <p className="text-[10px] text-gray-400">Duration</p>
                   <p className="text-xs font-medium text-gray-700 mt-1">
                     {selectedOJT.duration}
                   </p>
                 </div>
 
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <IndianRupee
-                    size={16}
-                    className="text-blue-600 mb-2"
-                  />
-
-                  <p className="text-[10px] text-gray-400">
-                    Stipend
-                  </p>
-
+                  <IndianRupee size={16} className="text-blue-600 mb-2" />
+                  <p className="text-[10px] text-gray-400">Stipend</p>
                   <p className="text-xs font-medium text-gray-700 mt-1">
-                    ₹{selectedOJT.stipend}
-                  </p>
-                </div>
-
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <Calendar
-                    size={16}
-                    className="text-blue-600 mb-2"
-                  />
-
-                  <p className="text-[10px] text-gray-400">
-                    Posted
-                  </p>
-
-                  <p className="text-xs font-medium text-gray-700 mt-1">
-                    {selectedOJT.postedOn}
+                    {selectedOJT.isPaid ? "Paid" : "Unpaid"}
                   </p>
                 </div>
               </div>
-
-              {/* Description */}
 
               <div className="mb-5">
                 <h3 className="text-sm font-semibold text-gray-800 mb-2">
                   About the Opportunity
                 </h3>
-
-                <p className="text-sm text-gray-500 leading-relaxed">
-                  {selectedOJT.description}
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  {selectedOJT.description || "No description provided."}
                 </p>
               </div>
 
-              {/* Skills */}
-
-              <div className="mb-5">
+              <div>
                 <h3 className="text-sm font-semibold text-gray-800 mb-2">
                   Required Skills
                 </h3>
 
                 <div className="flex flex-wrap gap-2">
-                  {selectedOJT.skills.map((skill) => (
-                    <span
-                      key={skill}
-                      className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-full"
-                    >
-                      {skill}
-                    </span>
-                  ))}
+                  {(() => {
+                    const detailSkills = toSkillsArray(selectedOJT.skills);
+
+                    if (detailSkills.length === 0) {
+                      return (
+                        <p className="text-xs text-gray-400">
+                          No skills listed for this opportunity.
+                        </p>
+                      );
+                    }
+
+                    return detailSkills.map((skill, i) => (
+                      <span
+                        key={`${selectedOJT._id || selectedOJT.id}-detail-skill-${i}-${skill}`}
+                        className="text-xs bg-blue-50 text-blue-600 border border-blue-100 px-3 py-1.5 rounded-full"
+                      >
+                        {skill}
+                      </span>
+                    ));
+                  })()}
                 </div>
               </div>
-
-              {/* Requirements */}
-
-              <div>
-                <h3 className="text-sm font-semibold text-gray-800 mb-2">
-                  Requirements
-                </h3>
-
-                <ul className="space-y-2">
-                  {selectedOJT.requirements.map(
-                    (requirement, index) => (
-                      <li
-                        key={index}
-                        className="flex items-start gap-2 text-sm text-gray-500"
-                      >
-                        <CheckCircle
-                          size={15}
-                          className="text-green-500 mt-0.5 shrink-0"
-                        />
-
-                        {requirement}
-                      </li>
-                    )
-                  )}
-                </ul>
-              </div>
             </div>
-
-            {/* Modal Footer */}
 
             <div className="flex justify-end gap-3 p-5 border-t border-gray-100">
               <button
@@ -910,15 +608,20 @@ export default function BrowseOjt() {
 
               <button
                 onClick={() => handleApply(selectedOJT)}
-                disabled={applied.includes(selectedOJT.id)}
+                disabled={
+                  myApplications.includes(selectedOJT._id || selectedOJT.id) ||
+                  applyingId === (selectedOJT._id || selectedOJT.id)
+                }
                 className={`px-5 py-2.5 rounded-md text-sm font-medium ${
-                  applied.includes(selectedOJT.id)
+                  myApplications.includes(selectedOJT._id || selectedOJT.id)
                     ? "bg-green-100 text-green-700 cursor-not-allowed"
-                    : "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-60"
                 }`}
               >
-                {applied.includes(selectedOJT.id)
+                {myApplications.includes(selectedOJT._id || selectedOJT.id)
                   ? "Already Applied ✓"
+                  : applyingId === (selectedOJT._id || selectedOJT.id)
+                  ? "Submitting..."
                   : "Apply Now"}
               </button>
             </div>
