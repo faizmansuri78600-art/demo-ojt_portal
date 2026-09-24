@@ -69,11 +69,11 @@ function ProtectedRoute({ allowedRole }) {
 
   if (!token || !user) {
     return (
-      <Navigate
+      <Navigate  
         to="/login"
         replace
         state={{ from: location }}
-      />
+      /> 
     );
   }
 
@@ -158,7 +158,7 @@ function ProtectedRoute({ allowedRole }) {
   // 6. AUTHENTICATED + CORRECT ROLE
   // =====================================================
 
-  return <Outlet />;
+  return <Outlet />;  
 }
 
 export default ProtectedRoute;
