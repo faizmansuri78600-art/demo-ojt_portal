@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -10,7 +11,6 @@ import {
   ChevronLeft,
 } from "lucide-react";
 
-import { useNavigate } from "react-router-dom";
 
 const menuItems = [
   {

@@ -187,7 +187,6 @@ app.use("/api/company-coordinators", companyCoordinatorRoutes);
 const collegeCoordinatorRoutes = require("./routes/collegeCoordinatorRoutes");
 app.use("/api/college-coordinators", collegeCoordinatorRoutes);
 
-
 // ======================================
 // Test Route
 // ======================================
