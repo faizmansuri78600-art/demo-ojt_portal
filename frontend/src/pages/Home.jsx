@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"; 
+import Navbar from '../components/common/Navbar';
 import { 
   ArrowRight, 
   BarChart3, 
@@ -110,7 +111,7 @@ function WhyItem({ icon, title, text }) {
 function Home() { 
   return ( 
     <div className="overflow-hidden"> 
- 
+ <Navbar />
       {/* ========================================================= 
           HERO 
       ========================================================= */} 

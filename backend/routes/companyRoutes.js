@@ -9,7 +9,7 @@ const {
   updateApplicationStatus,
 } = require("../controllers/companyController");
 
-const protect = require("../middleware/authMiddleware");
+// const protect = require("../middleware/authMiddleware");
 
 const { logoUpload } = require("../config/multer");
 

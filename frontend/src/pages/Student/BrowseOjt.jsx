@@ -252,7 +252,6 @@ export default function BrowseOjt() {
     }
   };
 
-
   const companyOptions = [
     "All Companies",
     ...new Set(opportunities.map((o) => o.company).filter(Boolean)),
@@ -274,19 +273,12 @@ export default function BrowseOjt() {
 
       const matchesLocation =
         location === "All Locations" ||
-        (item.location || "")
-          .toLowerCase()
-          .includes(location.toLowerCase());
+        (item.location || "").toLowerCase().includes(location.toLowerCase());
 
       const matchesDuration =
         duration === "All Durations" || item.duration === duration;
 
-      return (
-        matchesSearch &&
-        matchesCompany &&
-        matchesLocation &&
-        matchesDuration
-      );
+      return matchesSearch && matchesCompany && matchesLocation && matchesDuration;
     })
     .sort((a, b) => {
       if (sort === "Oldest") {
@@ -297,86 +289,54 @@ export default function BrowseOjt() {
     });
 
   const resetFilters = () => {
-
     setSearch("");
     setCompany("All Companies");
     setLocation("All Locations");
     setDuration("All Durations");
     setSort("Newest");
-
   };
 
   if (loading) {
-    return (
-      <p className="p-6 text-gray-500">
-        Loading opportunities...
-      </p>
-    );
+    return <p className="p-6 text-gray-500">Loading opportunities...</p>;
   }
 
   return (
-
     <div className="min-h-screen bg-gray-50">
-
       <Header />
-
 
       <div className="flex pt-16">
         <Sidebar activePage="Browse OJT Opportunities" />
 
         <main className="ml-64 flex-1 p-6">
-
           {/* HEADER */}
-
           <div className="text-sm text-gray-500 mb-3">
-
             Dashboard
-
-            <span className="mx-2">
-              ›
-            </span>
-
-            <span className="text-gray-700">
-              Browse OJT Opportunities
-            </span>
-
+            <span className="mx-2">›</span>
+            <span className="text-gray-700">Browse OJT Opportunities</span>
           </div>
 
-
           <div className="mb-6">
-
             <h1 className="text-2xl font-bold text-gray-800">
               Browse OJT Opportunities
             </h1>
-
             <p className="text-sm text-gray-500 mt-1">
-              Explore and apply for the best OJT opportunities that
-              match your skills and interests.
+              Explore and apply for the best OJT opportunities that match
+              your skills and interests.
             </p>
-
           </div>
 
-
           {/* SEARCH */}
-
           <div className="bg-white border border-gray-200 rounded-lg p-4 mb-5">
-
             <div className="flex flex-wrap gap-3">
               <div className="flex-1 min-w-[220px] border border-gray-200 rounded-md flex items-center px-3">
                 <Search size={17} className="text-gray-400 mr-2" />
-
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) =>
-                    setSearch(
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by role, company, skills..."
                   className="w-full py-2 outline-none text-sm"
                 />
-
               </div>
 
               <select
@@ -391,47 +351,20 @@ export default function BrowseOjt() {
 
               <select
                 value={location}
-                onChange={(e) =>
-                  setLocation(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setLocation(e.target.value)}
                 className="border border-gray-200 rounded-md px-4 py-2 text-sm text-gray-600"
               >
-
-                <option>
-                  All Locations
-                </option>
-
-                <option>
-                  Pune
-                </option>
-
-                <option>
-                  Mumbai
-                </option>
-
-                <option>
-                  Bangalore
-                </option>
-
-                <option>
-                  Hyderabad
-                </option>
-
-                <option>
-                  Chennai
-                </option>
-
+                <option>All Locations</option>
+                <option>Pune</option>
+                <option>Mumbai</option>
+                <option>Bangalore</option>
+                <option>Hyderabad</option>
+                <option>Chennai</option>
               </select>
 
               <select
                 value={duration}
-                onChange={(e) =>
-                  setDuration(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setDuration(e.target.value)}
                 className="border border-gray-200 rounded-md px-4 py-2 text-sm text-gray-600"
               >
                 <option>All Durations</option>
@@ -442,73 +375,42 @@ export default function BrowseOjt() {
 
               <select
                 value={sort}
-                onChange={(e) =>
-                  setSort(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setSort(e.target.value)}
                 className="border border-gray-200 rounded-md px-4 py-2 text-sm text-gray-600"
               >
-
-                <option value="Newest">
-                  Sort By: Newest
-                </option>
-
-                <option value="Oldest">
-                  Oldest
-                </option>
-
+                <option value="Newest">Sort By: Newest</option>
+                <option value="Oldest">Oldest</option>
               </select>
-
             </div>
 
             <div className="mt-4 text-sm text-gray-500">
-
               Total{" "}
-
               <span className="font-semibold text-gray-700">
                 {filteredOpportunities.length}
               </span>{" "}
-
               Opportunities Found
-
             </div>
-
           </div>
 
-
           {/* GRID */}
-
           <div className="grid grid-cols-1 gap-5">
             <div className="space-y-4">
-
               {filteredOpportunities.length === 0 ? (
-
                 <div className="bg-white border border-gray-200 rounded-lg p-10 text-center">
-
-                  <Search
-                    size={35}
-                    className="mx-auto text-gray-300 mb-3"
-                  />
-
+                  <Search size={35} className="mx-auto text-gray-300 mb-3" />
                   <h3 className="text-sm font-semibold text-gray-700">
                     No opportunities found
                   </h3>
-
                   <p className="text-xs text-gray-400 mt-1">
                     Try changing your search or filters.
                   </p>
-
                 </div>
-
               ) : (
                 filteredOpportunities.map((opportunity) => {
                   const opportunityId = opportunity._id || opportunity.id;
                   const applied = myApplications.includes(opportunityId);
                   const isApplying = applyingId === opportunityId;
-
                   const rowKey = opportunityId || opportunity.title;
-
                   const skills = toSkillsArray(opportunity.skills);
 
                   return (
@@ -528,50 +430,48 @@ export default function BrowseOjt() {
                                 Applied
                               </span>
                             )}
-
                           </div>
 
+                          <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-xs text-gray-500">
+                            <span className="flex items-center gap-1.5">
+                              <MapPin size={14} />
+                              {opportunity.location}
+                            </span>
 
-                      <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 text-xs text-gray-500">
-                        <span className="flex items-center gap-1.5">
-                          <MapPin size={14} />
-                          {opportunity.location}
-                        </span>
+                            <span className="flex items-center gap-1.5">
+                              <Clock size={14} />
+                              {opportunity.duration}
+                            </span>
 
-                        <span className="flex items-center gap-1.5">
-                          <Clock size={14} />
-                          {opportunity.duration}
-                        </span>
+                            <span className="flex items-center gap-1.5">
+                              <IndianRupee size={14} />
+                              {opportunity.isPaid ? "Paid" : "Unpaid"}
+                            </span>
 
-                        <span className="flex items-center gap-1.5">
-                          <IndianRupee size={14} />
-                          {opportunity.isPaid ? "Paid" : "Unpaid"}
-                        </span>
+                            {opportunity.postedOn && (
+                              <span className="flex items-center gap-1.5">
+                                <Calendar size={14} />
+                                Posted {opportunity.postedOn}
+                              </span>
+                            )}
+                          </div>
 
-                        {opportunity.postedOn && (
-                          <span className="flex items-center gap-1.5">
-                            <Calendar size={14} />
-                            Posted {opportunity.postedOn}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 mt-4">
-                        {skills.map((skill, i) => (
-                          <span
-                            key={`${rowKey}-skill-${i}-${skill}`}
-                            className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"
-                          >
-                            {skill}
-                          </span>
-                        ))}
+                          <div className="flex flex-wrap gap-2 mt-4">
+                            {skills.map((skill, i) => (
+                              <span
+                                key={`${rowKey}-skill-${i}-${skill}`}
+                                className="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full"
+                              >
+                                {skill}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-end mt-5 pt-4 border-t border-gray-100 gap-2">
                         <button
-                          onClick={() =>
-                            setSelectedOJT(opportunity)
-                          }
+                          onClick={() => setSelectedOJT(opportunity)}
                           className="flex items-center gap-1.5 border border-gray-200 text-gray-600 px-4 py-2 rounded-md text-xs font-medium hover:bg-gray-50"
                         >
                           <Eye size={14} />
@@ -595,13 +495,9 @@ export default function BrowseOjt() {
                           ) : isApplying ? (
                             "Submitting..."
                           ) : (
-
-                            <Bookmark size={20} />
-
+                            "Apply Now"
                           )}
-
                         </button>
-
                       </div>
                     </div>
                   );
@@ -615,7 +511,6 @@ export default function BrowseOjt() {
       {/* =====================================================
           OJT DETAILS MODAL
       ===================================================== */}
-
       {selectedOJT && (
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -624,44 +519,40 @@ export default function BrowseOjt() {
                 <h2 className="text-lg font-bold text-gray-800">
                   {selectedOJT.title}
                 </h2>
-
                 <p className="text-sm text-gray-500 mt-1">
                   {selectedOJT.company}
                 </p>
               </div>
 
+              <button
+                onClick={() => setSelectedOJT(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X size={20} />
+              </button>
+            </div>
 
             <div className="p-5">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
                 <div className="bg-gray-50 rounded-lg p-3">
-                  <MapPin
-                    size={16}
-                    className="text-blue-600 mb-2"
-                  />
+                  <MapPin size={16} className="text-blue-600 mb-2" />
+                  <p className="text-[10px] text-gray-400">Location</p>
+                  <p className="text-xs font-medium text-gray-700 mt-1">
+                    {selectedOJT.location}
+                  </p>
+                </div>
 
-                      <MapPin
-                        size={16}
-                        className="text-blue-600 mb-2"
-                      />
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <Clock size={16} className="text-blue-600 mb-2" />
+                  <p className="text-[10px] text-gray-400">Duration</p>
+                  <p className="text-xs font-medium text-gray-700 mt-1">
+                    {selectedOJT.duration}
+                  </p>
+                </div>
 
-                      <p className="text-[10px] text-gray-400">
-                        Location
-                      </p>
-
-                      <p className="text-xs font-medium text-gray-700 mt-1">
-                        {selectedOJT.location}
-                      </p>
-
-                    </div>
-
-
-                    <div className="bg-gray-50 rounded-lg p-3">
-
-                      <Clock
-                        size={16}
-                        className="text-blue-600 mb-2"
-                      />
-
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <IndianRupee size={16} className="text-blue-600 mb-2" />
+                  <p className="text-[10px] text-gray-400">Stipend</p>
                   <p className="text-xs font-medium text-gray-700 mt-1">
                     {selectedOJT.isPaid ? "Paid" : "Unpaid"}
                   </p>
@@ -672,10 +563,10 @@ export default function BrowseOjt() {
                 <h3 className="text-sm font-semibold text-gray-800 mb-2">
                   About the Opportunity
                 </h3>
-
-                      <p className="text-[10px] text-gray-400">
-                        Stipend
-                      </p>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  {selectedOJT.description || "No description provided."}
+                </p>
+              </div>
 
               <div>
                 <h3 className="text-sm font-semibold text-gray-800 mb-2">
@@ -684,9 +575,7 @@ export default function BrowseOjt() {
 
                 <div className="flex flex-wrap gap-2">
                   {(() => {
-                    const detailSkills = toSkillsArray(
-                      selectedOJT.skills
-                    );
+                    const detailSkills = toSkillsArray(selectedOJT.skills);
 
                     if (detailSkills.length === 0) {
                       return (
@@ -707,7 +596,6 @@ export default function BrowseOjt() {
                   })()}
                 </div>
               </div>
-
             </div>
 
             <div className="flex justify-end gap-3 p-5 border-t border-gray-100">
@@ -741,6 +629,5 @@ export default function BrowseOjt() {
         </div>
       )}
     </div>
-
   );
 }
