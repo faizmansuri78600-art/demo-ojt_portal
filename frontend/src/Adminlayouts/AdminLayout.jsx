@@ -15,11 +15,11 @@ function AdminLayout() {
       <div className="ml-64">
 
         {/* Navbar */}
-        <Navbar />
+        <Navbar />   
 
         {/* Page Content */}
         <main className="p-6">
-          <Outlet />
+          <Outlet />  
         </main>
 
       </div>
