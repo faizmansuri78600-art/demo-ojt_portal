@@ -2,22 +2,36 @@ const API_BASE_URL = "http://localhost:5000/api";
 
 function authHeaders() {
   const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  return token ? { Authorization: `Bearer ${token}` } : {};
+    typeof window !== "undefined"
+      ? localStorage.getItem("token")
+      : null;
+
+  return token
+    ? {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      }
+    : {
+        "Content-Type": "application/json",
+      };
 }
 
 export const api = {
   baseURL: API_BASE_URL,
 
+  // GET
   async get(endpoint) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        ...authHeaders(),
-      },
+      method: "GET",
+      headers: authHeaders(),
     });
 
+    const data = await response.json();
+
     if (!response.ok) {
-      throw new Error(data.message || "Something went wrong");
+      throw new Error(
+        data.message || "Something went wrong"
+      );
     }
 
     return {
@@ -25,10 +39,11 @@ export const api = {
     };
   },
 
+  // POST
   async post(endpoint, data) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "POST",
-      headers: getHeaders(),
+      headers: authHeaders(),
       body: JSON.stringify(data),
     });
 
@@ -45,10 +60,11 @@ export const api = {
     };
   },
 
+  // PUT
   async put(endpoint, data) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "PUT",
-      headers: getHeaders(),
+      headers: authHeaders(),
       body: JSON.stringify(data),
     });
 
@@ -65,10 +81,11 @@ export const api = {
     };
   },
 
+  // DELETE
   async delete(endpoint) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: "DELETE",
-      headers: getHeaders(),
+      headers: authHeaders(),
     });
 
     const responseData = await response.json();
@@ -84,52 +101,60 @@ export const api = {
     };
   },
 
-  async put(endpoint, data) {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        ...authHeaders(),
-      },
-      body: JSON.stringify(data),
-    });
+  // DOWNLOAD FILE
+  async downloadFile(
+    endpoint,
+    fallbackFilename = "download"
+  ) {
+    const response = await fetch(
+      `${API_BASE_URL}${endpoint}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization:
+            localStorage.getItem("token")
+              ? `Bearer ${localStorage.getItem("token")}`
+              : "",
+        },
+      }
+    );
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({}));
+      const body = await response
+        .json()
+        .catch(() => null);
 
-      throw new Error(error.message || "Something went wrong");
+      throw new Error(
+        body?.message || "Download failed"
+      );
     }
 
-    return response.json();
-  },
+    const disposition =
+      response.headers.get("Content-Disposition") || "";
 
-  // Downloads a file from an authenticated endpoint (the browser can't
-  // attach an Authorization header to a plain <a href>, so we fetch the
-  // bytes ourselves and save them via a temporary object URL).
-  async downloadFile(endpoint, fallbackFilename = "download") {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        ...authHeaders(),
-      },
-    });
+    const match = disposition.match(
+      /filename="?([^"]+)"?/
+    );
 
-    if (!response.ok) {
-      const body = await response.json().catch(() => null);
-      throw new Error(body?.message || "Download failed");
-    }
-
-    const disposition = response.headers.get("Content-Disposition") || "";
-    const match = disposition.match(/filename="?([^"]+)"?/);
-    const filename = match ? match[1] : fallbackFilename;
+    const filename = match
+      ? match[1]
+      : fallbackFilename;
 
     const blob = await response.blob();
+
     const url = window.URL.createObjectURL(blob);
+
     const link = document.createElement("a");
+
     link.href = url;
     link.download = filename;
+
     document.body.appendChild(link);
+
     link.click();
+
     link.remove();
+
     window.URL.revokeObjectURL(url);
   },
 };

@@ -2,7 +2,6 @@ const express = require("express");
 
 const {
   createApplication,
-  getRecentApplications,
   getApplicationStats,
   applyToOpportunity,
   getMyApplications,
@@ -15,7 +14,7 @@ const router = express.Router();
 // ======================================
 // Recent Applications
 // ======================================
-router.get("/recent", getRecentApplications);
+
 
 // ======================================
 // Application Statistics

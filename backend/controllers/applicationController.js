@@ -90,7 +90,6 @@ const getMyApplications = async (req, res) => {
 
 module.exports = {
   createApplication,
-  getRecentApplications,
   getApplicationStats,
   applyToOpportunity,
   getMyApplications,
