@@ -1,56 +1,37 @@
 const express = require("express");
+const {protect} = require("../middleware/authMiddleware");
+const { authorizeRoles } = require("../middleware/roleMiddleware");
 
 const {
   getAllCompanies,
   getVerifiedCompanies,
-  getCompanyById,
-  createCompany,
-  updateCompany,
-  getCompanyDashboardApplications,
-  getCompanyDashboardStats,
-  getCompanyDashboardApplicationTrend,
-  getCompanyDashboardDepartmentStats,
+  getApplications,
+  updateApplicationStatus,
 } = require("../controllers/companyController");
+
+// const protect = require("../middleware/authMiddleware");
+
+const { logoUpload } = require("../config/multer");
 
 const router = express.Router();
 
-// Get all companies
+// Public company directory
 router.get("/", getAllCompanies);
-
-// Get verified companies
 router.get("/verified", getVerifiedCompanies);
 
-// Company Dashboard - Recent Applications
+// Protected company application routes - FIX: real role name is "CompanyCoordinator"
 router.get(
-  "/:id/dashboard/applications",
-  getCompanyDashboardApplications
+  "/applications",
+  protect,
+  authorizeRoles("CompanyCoordinator"),
+  getApplications
 );
 
-// Company Dashboard - Statistics
-router.get(
-  "/:id/dashboard/stats",
-  getCompanyDashboardStats
+router.put(
+  "/applications/:id",
+  protect,
+  authorizeRoles("CompanyCoordinator"),
+  updateApplicationStatus
 );
-
-// Company Dashboard - Application Trend
-router.get(
-  "/:id/dashboard/application-trend",
-  getCompanyDashboardApplicationTrend
-);
-
-// Company Dashboard - Department Statistics
-router.get(
-  "/:id/dashboard/department-stats",
-  getCompanyDashboardDepartmentStats
-);
-
-// Get one company by ID
-router.get("/:id", getCompanyById);
-
-// Create new company
-router.post("/", createCompany);
-
-// Update company
-router.put("/:id", updateCompany);
 
 module.exports = router;

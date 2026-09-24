@@ -7,46 +7,14 @@ const {
   addStudent,
   updateStudent,
   deleteStudent,
-  getDashboard,
-  getProfile,
-  updateProfile,
-  uploadResume,
-  uploadDocument,
-    getMyApplications
+  getMyProfile,
 } = require("../controllers/studentController");
 
-const protect = require("../middleware/authMiddleware");
-const { upload, documentUpload } = require("../config/multer");
+const { protect } = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-// Student Profile
-
-router.get("/dashboard", protect, getDashboard);
-router.get("/profile", protect, getProfile);
-router.put("/profile", protect, updateProfile);
-
-router.get(
-  "/applications",
-  protect,
-  getMyApplications
-);
-
-//Resume routs
-router.post(
-  "/profile/resume",
-  protect,
-  upload.single("resume"),
-  uploadResume
-);
-
-router.post(
-  "/profile/documents/:type",
-  protect,
-  documentUpload.single("document"),
-  uploadDocument
-);
-
-// Student CRUD
+router.get("/me", protect, getMyProfile);
 router.get("/", getAllStudents);
 router.get("/verified", getVerifiedStudents);
 router.get("/:id", getStudentById);

@@ -161,7 +161,7 @@ function CoordinatorWorkspace() {
               boxSizing: "border-box",
             }}
           >
-            <Outlet />
+            <Outlet />   
           </div>
         </main>
 

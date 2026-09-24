@@ -5,6 +5,7 @@ export const getDashboard = async () => {
   const response = await api.get("/students/dashboard");
   return response.data.dashboard;
 };
+
 // Get Student Profile
 export const getProfile = async () => {
   const response = await api.get("/students/profile");
@@ -17,6 +18,7 @@ export const updateProfile = async (updates) => {
   return response.data;
 };
 
+// Upload Resume
 export const uploadResume = async (formData) => {
   const token = localStorage.getItem("token");
 
@@ -38,23 +40,34 @@ export const uploadResume = async (formData) => {
   }
 
   return data;
-  
 };
+
+// Get Student Task
 export const getStudentTask = async () => {
   const response = await api.get("/tasks/student");
   return response.data;
 };
 
+// Complete Student Task
 export const completeTask = async (taskId) => {
   const response = await api.put(`/tasks/${taskId}/complete`, {});
   return response.data;
 };
+
+// Get Student Notifications
 export const getStudentNotifications = async () => {
   const response = await api.get("/notifications/student");
   return response.data;
 };
 
+// Get My Applications
 export const getMyApplications = async () => {
   const response = await api.get("/students/applications");
+  return response.data;
+};
+
+// Get All Opportunities
+export const getAllOpportunities = async () => {
+  const response = await api.get("/opportunities");
   return response.data;
 };

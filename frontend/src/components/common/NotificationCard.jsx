@@ -7,32 +7,43 @@ import {
   X
 } from 'lucide-react';
 
-const userId = 'U004';
+
 
 export default function NotificationCard() {
   const [notifications, setNotifications] = useState([]);
   const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/notifications/user/${userId}`
-        );
+  const fetchNotifications = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
 
-        const data = await response.json();
-
-        if (data.success) {
-          setNotifications(data.notifications);
-        }
-      } catch (error) {
-        console.error('Failed to fetch notifications:', error);
+      if (!user || !user.id) {
+        console.error("Logged-in user not found");
+        return;
       }
-    };
 
-    fetchNotifications();
-  }, []);
+      const response = await fetch(
+        `http://localhost:5000/api/notifications/user/${user.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
 
+      const data = await response.json();
+
+      if (data.success) {
+        setNotifications(data.notifications);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notifications:", error);
+    }
+  };
+
+  fetchNotifications();
+}, []);
   const getNotificationStyle = (index) => {
     const styles = [
       {

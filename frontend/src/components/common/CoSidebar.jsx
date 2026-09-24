@@ -11,6 +11,8 @@ import {
   ChevronLeft,
 } from "lucide-react";
 
+import { useNavigate } from "react-router-dom";
+
 const menuItems = [
   {
     label: "Dashboard",
@@ -87,18 +89,14 @@ export default function CoSidebar({
         transition: "width 250ms ease",
       }}
     >
-      {/* =====================================================
-          BRAND HEADER
-      ====================================================== */}
+      {/* BRAND HEADER */}
       <div
         style={{
           height: "84px",
           minHeight: "84px",
           display: "flex",
           alignItems: "center",
-          justifyContent: collapsed
-            ? "center"
-            : "space-between",
+          justifyContent: collapsed ? "center" : "space-between",
           padding: collapsed ? "0 10px" : "0 16px",
           borderBottom: "1px solid #eef2f7",
           boxSizing: "border-box",
@@ -167,9 +165,7 @@ export default function CoSidebar({
           type="button"
           onClick={onCollapse}
           aria-label={
-            collapsed
-              ? "Expand sidebar"
-              : "Collapse sidebar"
+            collapsed ? "Expand sidebar" : "Collapse sidebar"
           }
           style={{
             width: "34px",
@@ -199,9 +195,7 @@ export default function CoSidebar({
         </button>
       </div>
 
-      {/* =====================================================
-          NAVIGATION
-      ====================================================== */}
+      {/* NAVIGATION */}
       <nav
         style={{
           flex: 1,
@@ -239,18 +233,13 @@ export default function CoSidebar({
           {menuItems.map((item) => {
             const Icon = item.icon;
 
-            const isActive =
-              activePath === item.path;
+            const isActive = activePath === item.path;
 
             return (
               <button
                 key={item.path}
                 type="button"
-                title={
-                  collapsed
-                    ? item.label
-                    : undefined
-                }
+                title={collapsed ? item.label : undefined}
                 onClick={() => {
                   if (onNavigate) {
                     onNavigate(item.path);
@@ -266,9 +255,7 @@ export default function CoSidebar({
                     ? "center"
                     : "flex-start",
                   gap: "13px",
-                  padding: collapsed
-                    ? "0"
-                    : "0 13px",
+                  padding: collapsed ? "0" : "0 13px",
                   border: "none",
                   borderRadius: "10px",
                   backgroundColor: isActive
@@ -278,9 +265,7 @@ export default function CoSidebar({
                     ? "#ffffff"
                     : "#475569",
                   fontSize: "13px",
-                  fontWeight: isActive
-                    ? 700
-                    : 600,
+                  fontWeight: isActive ? 700 : 600,
                   textAlign: "left",
                   cursor: "pointer",
                   boxSizing: "border-box",
@@ -293,9 +278,7 @@ export default function CoSidebar({
               >
                 <Icon
                   size={19}
-                  strokeWidth={
-                    isActive ? 2.4 : 2
-                  }
+                  strokeWidth={isActive ? 2.4 : 2}
                   style={{
                     flexShrink: 0,
                   }}
@@ -319,9 +302,7 @@ export default function CoSidebar({
         </div>
       </nav>
 
-      {/* =====================================================
-          USER AREA
-      ====================================================== */}
+      {/* USER AREA */}
       <div
         style={{
           flexShrink: 0,
@@ -397,18 +378,14 @@ export default function CoSidebar({
           style={{
             width: "100%",
             height: "42px",
-            marginTop: collapsed
-              ? "0"
-              : "7px",
+            marginTop: collapsed ? "0" : "7px",
             display: "flex",
             alignItems: "center",
             justifyContent: collapsed
               ? "center"
               : "flex-start",
             gap: "11px",
-            padding: collapsed
-              ? "0"
-              : "0 12px",
+            padding: collapsed ? "0" : "0 12px",
             border: "none",
             borderRadius: "9px",
             backgroundColor: "transparent",
@@ -424,9 +401,7 @@ export default function CoSidebar({
             strokeWidth={2}
           />
 
-          {!collapsed && (
-            <span>Logout</span>
-          )}
+          {!collapsed && <span>Logout</span>}
         </button>
       </div>
     </aside>

@@ -1,59 +1,107 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import {
   PieChart,
   Pie,
   Cell,
-  Tooltip
-} from 'recharts';
+  Tooltip,
+} from "recharts";
 
-const companyId = 'C001';
+import { api } from "../../services/api";
 
+// Colors are only for displaying the chart.
+// They are not hardcoded department data.
 const COLORS = [
-  '#1E5EFF',
-  '#22C55E',
-  '#F59E0B',
-  '#A855F7',
-  '#94A3B8'
+  "#1E5EFF",
+  "#22C55E",
+  "#F59E0B",
+  "#A855F7",
+  "#94A3B8",
 ];
 
 export default function DepartmentChart() {
   const [data, setData] = useState([]);
 
+  // =====================================================
+  // GET DEPARTMENT STATISTICS
+  // =====================================================
+
   useEffect(() => {
     const fetchDepartmentStats = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:5000/api/companies/${companyId}/dashboard/department-stats`
+        // Get the currently logged-in company
+        const companyResponse = await api.get(
+          "/companies/me"
         );
 
-        const result = await response.json();
+        console.log(
+          "LOGGED-IN COMPANY FOR DEPARTMENT CHART:",
+          companyResponse
+        );
 
-        if (result.success) {
-          const formattedData = result.departments.map(
-            (department, index) => ({
-              name: department.name,
-              value: department.value,
-              color: COLORS[index % COLORS.length]
-            })
+        if (
+          !companyResponse.data?.success ||
+          !companyResponse.data.company
+        ) {
+          throw new Error(
+            companyResponse.data?.message ||
+              "Company profile not found."
           );
+        }
+
+        const company =
+          companyResponse.data.company;
+
+        // Get department statistics for this company
+        const response = await api.get(
+          `/companies/${company._id}/dashboard/department-stats`
+        );
+
+        console.log(
+          "DEPARTMENT STATISTICS:",
+          response
+        );
+
+        const result = response.data;
+
+        if (result?.success) {
+          const formattedData =
+            result.departments.map(
+              (department, index) => ({
+                name: department.name,
+                value: department.value,
+                color:
+                  COLORS[index % COLORS.length],
+              })
+            );
 
           setData(formattedData);
         }
       } catch (error) {
         console.error(
-          'Failed to fetch department statistics:',
+          "Failed to fetch department statistics:",
           error
         );
+
+        setData([]);
       }
     };
 
     fetchDepartmentStats();
   }, []);
 
+  // =====================================================
+  // TOTAL APPLICATIONS
+  // =====================================================
+
   const total = data.reduce(
-    (sum, department) => sum + department.value,
+    (sum, department) =>
+      sum + department.value,
     0
   );
+
+  // =====================================================
+  // UI
+  // =====================================================
 
   return (
     <div className="bg-white rounded-2xl p-4 shadow-sm">
@@ -64,7 +112,10 @@ export default function DepartmentChart() {
 
       <div className="relative flex justify-center">
 
-        <PieChart width={190} height={190}>
+        <PieChart
+          width={190}
+          height={190}
+        >
           <Pie
             data={data}
             dataKey="value"
@@ -95,6 +146,7 @@ export default function DepartmentChart() {
 
       </div>
 
+      {/* LEGEND */}
       <ul className="mt-1 text-[10px]">
         {data.map((d) => (
           <li
@@ -103,13 +155,18 @@ export default function DepartmentChart() {
           >
             <span
               className="w-2 h-2 rounded-full shrink-0"
-              style={{ background: d.color }}
+              style={{
+                background: d.color,
+              }}
             />
 
             {d.name} (
             {total > 0
-              ? ((d.value / total) * 100).toFixed(1)
-              : '0.0'}
+              ? (
+                  (d.value / total) *
+                  100
+                ).toFixed(1)
+              : "0.0"}
             %)
           </li>
         ))}

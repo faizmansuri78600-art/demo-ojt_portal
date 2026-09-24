@@ -1,528 +1,107 @@
 const Company = require("../models/Company");
 const Application = require("../models/Application");
 const Opportunity = require("../models/Opportunity");
+const CompanyCoordinator = require("../models/CompanyCoordinator");
 const Student = require("../models/Student");
-
-// =====================================================
-// Get all companies
-// =====================================================
+const User = require("../models/User");
 
 const getAllCompanies = async (req, res) => {
   try {
-    const companies = await Company.find();
-
-    res.status(200).json({
-      success: true,
-      companies,
-    });
+    const companies = await Company.find({});
+    res.status(200).json({ success: true, count: companies.length, companies });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch companies",
-      error: error.message,
-    });
+    console.error("Get All Companies Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch companies" });
   }
 };
-
-// =====================================================
-// Get verified companies
-// =====================================================
 
 const getVerifiedCompanies = async (req, res) => {
   try {
     const companies = await Company.find({ isVerified: true });
-
-    res.status(200).json({
-      success: true,
-      companies,
-    });
+    res.status(200).json({ success: true, count: companies.length, companies });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch verified companies",
-      error: error.message,
-    });
+    console.error("Get Verified Companies Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch verified companies" });
   }
 };
 
-// =====================================================
-// Get one company by ID
-// =====================================================
-
-const getCompanyById = async (req, res) => {
+const getApplications = async (req, res) => {
   try {
-    const company = await Company.findById(req.params.id);
-
-    if (!company) {
+    // 1. Find the company this logged-in coordinator represents
+    const coordinator = await CompanyCoordinator.findOne({ userId: req.user._id });
+    if (!coordinator) {
       return res.status(404).json({
         success: false,
-        message: "Company not found",
+        message: "No company profile is linked to this account yet",
       });
     }
 
-    res.status(200).json({
-      success: true,
-      company,
+    // 2. Opportunities posted by that company
+    const opportunities = await Opportunity.find({ companyId: coordinator.companyId });
+    const opportunityIds = opportunities.map((o) => o._id);
+    const titleMap = Object.fromEntries(opportunities.map((o) => [o._id, o.title]));
+
+    // 3. Applications against those opportunities
+    const applications = await Application.find({
+      opportunityId: { $in: opportunityIds },
+    }).sort({ appliedOn: -1 });
+
+    // 4. Student + user details (Application has no name/email/skills itself)
+    const studentIds = [...new Set(applications.map((a) => a.studentId))];
+    const students = await Student.find({ _id: { $in: studentIds } });
+    const studentMap = Object.fromEntries(students.map((s) => [s._id, s]));
+
+    const userIds = students.map((s) => s.userId).filter(Boolean);
+    const users = await User.find({ _id: { $in: userIds } });
+    const userMap = Object.fromEntries(users.map((u) => [u._id, u]));
+
+    const getInitials = (name = "") =>
+      name.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2);
+
+    const shaped = applications.map((a) => {
+      const student = studentMap[a.studentId] || {};
+      const user = userMap[student.userId] || {};
+      return {
+        id: a._id,
+        name: student.name || "",
+        initials: getInitials(student.name),
+        email: user.email || "",
+        college: student.department || "", // no separate "college" field yet — known gap
+        department: student.department || "",
+        skills: [], // Student schema has no skills field yet — known gap
+        opportunity: titleMap[a.opportunityId] || "",
+        status: a.status,
+        appliedOn: a.appliedOn,
+      };
     });
+
+    res.status(200).json({ success: true, count: shaped.length, applications: shaped });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch company",
-      error: error.message,
-    });
+    console.error("Get Applications Error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch applications" });
   }
 };
 
-// =====================================================
-// Create new company profile
-// =====================================================
-
-const createCompany = async (req, res) => {
+const updateApplicationStatus = async (req, res) => {
   try {
-    const allowedFields = [
-      "companyName",
-      "yearOfEstablishment",
-      "registrationNumber",
-      "companySize",
-      "industry",
-      "headOffice",
-      "street",
-      "city",
-      "state",
-      "zipCode",
-      "country",
-      "website",
-      "contactPerson",
-      "alternateEmail",
-      "email",
-      "mobileNumber",
-      "phoneNumber",
-      "description",
-      "logoUrl",
-    ];
+    const { id } = req.params;
+    const { status } = req.body;
 
-    const companyData = {};
-
-    allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        companyData[field] = req.body[field];
-      }
-    });
-
-    // Find the latest company ID
-    const companies = await Company.find(
-      {
-        _id: /^company_\d+$/,
-      },
-      {
-        _id: 1,
-      }
+    const application = await Application.findByIdAndUpdate(
+      id,
+      { status, reviewedOn: new Date().toISOString().split("T")[0] },
+      { new: true, runValidators: true }
     );
 
-    let nextNumber = 1;
-
-    companies.forEach((company) => {
-      const number = parseInt(
-        company._id.replace("company_", ""),
-        10
-      );
-
-      if (!isNaN(number) && number >= nextNumber) {
-        nextNumber = number + 1;
-      }
-    });
-
-    const newCompanyId = `company_${String(
-      nextNumber
-    ).padStart(3, "0")}`;
-
-    const company = await Company.create({
-      _id: newCompanyId,
-      ...companyData,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "New company profile created successfully",
-      company,
-    });
-  } catch (error) {
-    console.error("Error creating company:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to create company profile",
-      error: error.message,
-    });
-  }
-};
-
-// =====================================================
-// Update existing company profile
-// =====================================================
-
-const updateCompany = async (req, res) => {
-  try {
-    const allowedFields = [
-      "companyName",
-      "yearOfEstablishment",
-      "registrationNumber",
-      "companySize",
-      "industry",
-      "headOffice",
-      "street",
-      "city",
-      "state",
-      "zipCode",
-      "country",
-      "website",
-      "contactPerson",
-      "alternateEmail",
-      "email",
-      "mobileNumber",
-      "phoneNumber",
-      "description",
-      "logoUrl",
-    ];
-
-    const updates = {};
-
-    allowedFields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        updates[field] = req.body[field];
-      }
-    });
-
-    const company = await Company.findByIdAndUpdate(
-      req.params.id,
-      { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-      }
-    );
-
-    if (!company) {
-      return res.status(404).json({
-        success: false,
-        message: "Company not found",
-      });
+    if (!application) {
+      return res.status(404).json({ success: false, message: "Application not found" });
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Company profile updated successfully",
-      company,
-    });
+    res.status(200).json({ success: true, message: "Application status updated successfully", application });
   } catch (error) {
-    console.error("Error updating company:", error);
-
-    res.status(500).json({
-      success: false,
-      message: "Failed to update company profile",
-      error: error.message,
-    });
+    console.error("Update Application Status Error:", error);
+    res.status(500).json({ success: false, message: "Failed to update application status" });
   }
 };
 
-// =====================================================
-// COMPANY DASHBOARD - RECENT APPLICATIONS
-// =====================================================
-
-const getCompanyDashboardApplications = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Find opportunities belonging to this company
-    const opportunities = await Opportunity.find({
-      companyId: id,
-    });
-
-    const opportunityIds = opportunities.map(
-      (opportunity) => opportunity._id
-    );
-
-    // Find applications for those opportunities
-    const applications = await Application.find({
-      opportunityId: { $in: opportunityIds },
-    })
-      .sort({ appliedOn: -1 })
-      .limit(5);
-
-    const formattedApplications = await Promise.all(
-      applications.map(async (application) => {
-        const student = await Student.findById(
-          application.studentId
-        );
-
-        const opportunity = opportunities.find(
-          (item) => item._id === application.opportunityId
-        );
-
-        return {
-          applicationId: application._id,
-          studentId: application.studentId,
-          studentName:
-            student?.name || "Unknown Student",
-          opportunityId: application.opportunityId,
-          opportunityTitle:
-            opportunity?.title || "Unknown Opportunity",
-          companyId: id,
-          location:
-            opportunity?.location || "—",
-          status: application.status,
-          appliedOn: application.appliedOn,
-          reviewedOn: application.reviewedOn,
-        };
-      })
-    );
-
-    res.status(200).json({
-      success: true,
-      companyId: id,
-      count: formattedApplications.length,
-      applications: formattedApplications,
-    });
-  } catch (error) {
-    console.error(
-      "Company Dashboard Applications Error:",
-      error
-    );
-
-    res.status(500).json({
-      success: false,
-      message:
-        "Failed to fetch company dashboard applications",
-      error: error.message,
-    });
-  }
-};
-
-// =====================================================
-// COMPANY DASHBOARD - STATISTICS
-// =====================================================
-
-const getCompanyDashboardStats = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // Find all opportunities belonging to this company
-    const opportunities = await Opportunity.find({
-      companyId: id,
-    });
-
-    const opportunityIds = opportunities.map(
-      (opportunity) => opportunity._id
-    );
-
-    // Total opportunities
-    const totalOpportunities =
-      opportunities.length;
-
-    // Open opportunities
-    const activeOpportunities =
-      opportunities.filter(
-        (opportunity) =>
-          opportunity.status === "Open"
-      ).length;
-
-    // Find applications belonging to this company
-    const applications = await Application.find({
-      opportunityId: { $in: opportunityIds },
-    });
-
-    // Total applications
-    const totalApplications =
-      applications.length;
-
-    // Selected students
-    const selectedStudents =
-      applications.filter(
-        (application) =>
-          application.status === "Selected"
-      ).length;
-
-    res.status(200).json({
-      success: true,
-      companyId: id,
-      stats: {
-        totalOpportunities,
-        activeOpportunities,
-        totalApplications,
-        selectedStudents,
-      },
-    });
-  } catch (error) {
-    console.error(
-      "Company Dashboard Stats Error:",
-      error
-    );
-
-    res.status(500).json({
-      success: false,
-      message:
-        "Failed to fetch company dashboard statistics",
-      error: error.message,
-    });
-  }
-};
-
-// =====================================================
-// COMPANY DASHBOARD - APPLICATION TREND
-// =====================================================
-
-const getCompanyDashboardApplicationTrend = async (
-  req,
-  res
-) => {
-  try {
-    const { id } = req.params;
-    const { month } = req.query;
-
-    // Find opportunities belonging to this company
-    const opportunities = await Opportunity.find({
-      companyId: id,
-    });
-
-    const opportunityIds = opportunities.map(
-      (opportunity) => opportunity._id
-    );
-
-    // Find applications for those opportunities
-    const applications = await Application.find({
-      opportunityId: { $in: opportunityIds },
-    });
-
-    // Optional month filter
-    // Example: ?month=2026-09
-    const filteredApplications = month
-      ? applications.filter((application) =>
-          application.appliedOn?.startsWith(month)
-        )
-      : applications;
-
-    // Count applications by date
-    const applicationCounts = {};
-
-    filteredApplications.forEach((application) => {
-      const date = application.appliedOn;
-
-      if (!date) return;
-
-      applicationCounts[date] =
-        (applicationCounts[date] || 0) + 1;
-    });
-
-    // Convert into chart format
-    const trend = Object.entries(applicationCounts)
-      .sort(([dateA], [dateB]) =>
-        dateA.localeCompare(dateB)
-      )
-      .map(([date, applications]) => ({
-        date,
-        applications,
-      }));
-
-    res.status(200).json({
-      success: true,
-      companyId: id,
-      trend,
-    });
-  } catch (error) {
-    console.error(
-      "Company Dashboard Application Trend Error:",
-      error
-    );
-
-    res.status(500).json({
-      success: false,
-      message:
-        "Failed to fetch application trend",
-      error: error.message,
-    });
-  }
-};
-
-// =====================================================
-// COMPANY DASHBOARD - DEPARTMENT STATS
-// =====================================================
-
-const getCompanyDashboardDepartmentStats = async (
-  req,
-  res
-) => {
-  try {
-    const { id } = req.params;
-
-    // Find opportunities belonging to this company
-    const opportunities = await Opportunity.find({
-      companyId: id,
-    });
-
-    const opportunityIds = opportunities.map(
-      (opportunity) => opportunity._id
-    );
-
-    // Find applications for this company's opportunities
-    const applications = await Application.find({
-      opportunityId: { $in: opportunityIds },
-    });
-
-    const departmentCounts = {};
-
-    // Find the department of every applicant
-    for (const application of applications) {
-      const student = await Student.findById(
-        application.studentId
-      );
-
-      const department =
-        student?.department || "Other";
-
-      departmentCounts[department] =
-        (departmentCounts[department] || 0) + 1;
-    }
-
-    // Convert into chart format
-    const departments = Object.entries(
-      departmentCounts
-    ).map(([name, value]) => ({
-      name,
-      value,
-    }));
-
-    res.status(200).json({
-      success: true,
-      companyId: id,
-      departments,
-    });
-  } catch (error) {
-    console.error(
-      "Company Dashboard Department Stats Error:",
-      error
-    );
-
-    res.status(500).json({
-      success: false,
-      message:
-        "Failed to fetch department statistics",
-      error: error.message,
-    });
-  }
-};
-
-// =====================================================
-// Export
-// =====================================================
-
-module.exports = {
-  getAllCompanies,
-  getVerifiedCompanies,
-  getCompanyById,
-  createCompany,
-  updateCompany,
-  getCompanyDashboardApplications,
-  getCompanyDashboardStats,
-  getCompanyDashboardApplicationTrend,
-  getCompanyDashboardDepartmentStats,
-};
+module.exports = { getAllCompanies, getVerifiedCompanies, getApplications, updateApplicationStatus };
