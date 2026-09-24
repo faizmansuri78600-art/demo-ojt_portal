@@ -8,7 +8,7 @@ function PublicLayout() {
       <Navbar />
 
       <main className="flex-1">
-        <Outlet />
+        <Outlet />    
       </main>
 
       <Footer />

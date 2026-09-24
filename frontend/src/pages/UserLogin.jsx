@@ -1256,7 +1256,7 @@ function Login() {
                 </h1>
 
                 <p className="mt-3 text-sm text-gray-600">
-                  Enter your credentials to access your account
+                  Enter your credentials to access your account 
                 </p>
 
               </div>
