@@ -126,14 +126,13 @@ app.use(
 );
 
 // ======================================
-// Task routes
+// Task Routes
 // ======================================
 
 app.use(
   "/api/tasks",
   taskRoutes
 );
-
 
 // ======================================
 // Attendance Routes
@@ -163,10 +162,6 @@ app.use(
 // Certificate Routes
 // ======================================
 
-// ======================================
-// Certificate Routes
-// ======================================
-
 const certificateRoutes =
   require("./routes/certificateRoutes");
 
@@ -191,21 +186,12 @@ app.use(
 // Assigned OJT Routes
 // ======================================
 
-// ======================================
-// Assigned OJT Routes
-// ======================================
-
 const assignedOjtRoutes =
   require("./routes/assignedOjtRoutes");
 
 app.use(
   "/api/assigned-ojt",
   assignedOjtRoutes
-);
-
-app.use(
-  "/api/evaluations",
-  evaluationRoutes
 );
 
 // ======================================
@@ -220,7 +206,6 @@ app.use(
   evaluationRoutes
 );
 
-
 // ======================================
 // Faculty Routes
 // ======================================
@@ -232,7 +217,6 @@ app.use(
   "/api/faculty",
   facultyRoutes
 );
-
 
 // ======================================
 // Company Coordinator Routes
@@ -247,10 +231,6 @@ app.use(
 );
 
 // ======================================
-// Company Coordinator Routes
-// ======================================
-
-// ======================================
 // College Coordinator Routes
 // ======================================
 
@@ -262,6 +242,10 @@ app.use(
   collegeCoordinatorRoutes
 );
 
+// ======================================
+// Mentor Assignment Routes
+// ======================================
+
 const mentorAssignmentRoutes =
   require("./routes/mentorAssignmentRoutes");
 
@@ -271,30 +255,17 @@ app.use(
 );
 
 // ======================================
-// COLLEGE COORDINATOR ROUTES
-// ======================================
-// Keep this AFTER mentor assignment routes.
-// collegeCoordinatorRoutes contains:
-//
-// router.get("/:id", getCollegeCoordinatorById);
-//
-// Therefore this must come after more specific
-// routes such as /mentor-assignment.
+// Settings Routes
 // ======================================
 
-const collegeCoordinatorRoutes =
-  require("./routes/collegeCoordinatorRoutes");
-
-app.use(
-  "/api/college-coordinators",
-  collegeCoordinatorRoutes
-);
-const settingsRoutes = require("./routes/settingsRoutes");
+const settingsRoutes =
+  require("./routes/settingsRoutes");
 
 app.use(
   "/api/settings",
   settingsRoutes
 );
+
 // ======================================
 // Test Route
 // ======================================
